@@ -32,7 +32,7 @@ export function Backdrop() {
           zIndex: 0,
           pointerEvents: 'none',
           background:
-            'radial-gradient(58% 44% at 18% 8%, rgba(232,150,60,0.2) 0%, rgba(232,150,60,0) 70%), radial-gradient(50% 40% at 88% 22%, rgba(232,150,60,0.15) 0%, rgba(232,150,60,0) 72%), radial-gradient(64% 50% at 62% 96%, rgba(232,150,60,0.09) 0%, rgba(232,150,60,0) 74%), linear-gradient(180deg,#232120 0%, #1C1B1A 100%)',
+            'radial-gradient(58% 44% at 18% 8%, rgba(133, 152, 87,0.16) 0%, rgba(133, 152, 87,0) 70%), radial-gradient(50% 40% at 88% 22%, rgba(133, 152, 87,0.12) 0%, rgba(133, 152, 87,0) 72%), radial-gradient(64% 50% at 62% 96%, rgba(133, 152, 87,0.08) 0%, rgba(133, 152, 87,0) 74%), linear-gradient(180deg,#262f37 0%, #1b222a 100%)',
         }}
       />
 

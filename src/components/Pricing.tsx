@@ -54,7 +54,7 @@ export function Pricing() {
             style={{
               position: 'relative',
               border: `1px solid ${t.featured ? color.accent : color.rule}`,
-              background: t.featured ? '#303030' : color.inkRaised,
+              background: t.featured ? '#2f373e' : color.inkRaised,
               padding: 30,
               display: 'flex',
               flexDirection: 'column',
@@ -109,7 +109,7 @@ export function Pricing() {
                 fontSize: 14,
                 ...(t.featured
                   ? { background: color.accent, color: color.accentInk, fontWeight: 600 }
-                  : { border: '1px solid #565656', color: color.textBody }),
+                  : { border: '1px solid #5d686f', color: color.textBody }),
               }}
             >
               {t.cta}

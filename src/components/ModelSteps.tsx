@@ -1,13 +1,15 @@
+import { useState } from 'react';
+
 import { bleedDark, color, eyebrow, font } from '../theme';
 import { useStepCarousel } from '../hooks/useStepCarousel';
 
-const STEPS = [
+const INSTANT = [
   {
     n: '01',
     rowTitle: 'Send the table as-is',
     heading: (
       <>
-        Send the table <span style={{ color: color.accentSoft, whiteSpace: 'nowrap' }}>as-is</span>
+        Send the table <span style={{ color: color.accent, whiteSpace: 'nowrap' }}>as-is</span>
       </>
     ),
     body: 'CSV, Parquet, a Snowflake query, or a DataFrame. Schema inference handles types, nulls and categoricals — nothing to declare.',
@@ -17,7 +19,7 @@ const STEPS = [
         width="104"
         height="104"
         fill="none"
-        stroke="#C4C4C4"
+        stroke="#c2c4c3"
         strokeWidth="1.4"
       >
         <ellipse cx="60" cy="32" rx="32" ry="10" />
@@ -35,7 +37,7 @@ const STEPS = [
     rowTitle: 'One forward pass',
     heading: (
       <>
-        One <span style={{ color: color.accentSoft }}>forward pass</span>
+        One <span style={{ color: color.accent }}>forward pass</span>
       </>
     ),
     body: 'Rows become context. The model conditions on your data at inference time — no gradient step, no artifact to store or version.',
@@ -45,7 +47,7 @@ const STEPS = [
         width="104"
         height="104"
         fill="none"
-        stroke="#C4C4C4"
+        stroke="#c2c4c3"
         strokeWidth="1.4"
       >
         <path
@@ -76,7 +78,7 @@ const STEPS = [
     rowTitle: 'Calibrated output',
     heading: (
       <>
-        Calibrated <span style={{ color: color.accentSoft }}>output</span>
+        Calibrated <span style={{ color: color.accent }}>output</span>
       </>
     ),
     body: 'Probabilities you can threshold, plus per-row uncertainty and feature attributions for the rows that matter.',
@@ -86,7 +88,7 @@ const STEPS = [
         width="104"
         height="104"
         fill="none"
-        stroke="#C4C4C4"
+        stroke="#c2c4c3"
         strokeWidth="1.4"
       >
         <path d="M18 40 H104 M18 60 H104 M18 80 H104" opacity="0.25" />
@@ -115,35 +117,133 @@ const STEPS = [
   },
 ];
 
+const CUSTOM = [
+  {
+    n: '01',
+    rowTitle: 'Get the best prior for your data',
+    heading: (
+      <>
+        Fit the <span style={{ color: color.accent, whiteSpace: 'nowrap' }}>prior</span>
+      </>
+    ),
+    body: 'We search a space of generators for the one whose synthetic tables behave like yours — measured by running learners on both, not by comparing summary statistics.',
+    art: (
+      <svg viewBox="0 0 120 120" width="104" height="104" fill="none" stroke={color.textBody} strokeWidth="1.4">
+        <circle cx="52" cy="52" r="26" />
+        <path d="M71 71 L98 98" strokeWidth="2.4" />
+        <circle cx="52" cy="52" r="11" stroke={color.accent} strokeWidth="1.8" style={{ animation: 'omPulse 2.6s ease-in-out infinite' }} />
+        <path d="M30 34 L38 30 M66 30 L74 34 M30 70 L38 74" opacity="0.45" />
+      </svg>
+    ),
+  },
+  {
+    n: '02',
+    rowTitle: 'Train on that prior',
+    heading: (
+      <>
+        Train on <span style={{ color: color.accent }}>synthetic draws</span>
+      </>
+    ),
+    body: 'A small model is pretrained from scratch on tables drawn from that fitted generator. Millions of them, none of which are yours — your rows are never in the training set.',
+    art: (
+      <svg viewBox="0 0 120 120" width="104" height="104" fill="none" stroke={color.textBody} strokeWidth="1.4">
+        <path d="M20 96 V28 M20 96 H100" />
+        <polyline points="26,88 44,66 62,50 80,40 98,34" stroke={color.accent} strokeWidth="2"
+          style={{ strokeDasharray: 150, animation: 'omDash 3.2s linear infinite' }} />
+        <path d="M32 26 H44 M32 34 H40 M52 26 H64 M52 34 H60" opacity="0.4" />
+        <circle cx="98" cy="34" r="2.8" fill={color.accent} stroke="none" style={{ animation: 'omPulse 2.2s ease-in-out infinite' }} />
+      </svg>
+    ),
+  },
+  {
+    n: '03',
+    rowTitle: 'Calibrated output',
+    heading: (
+      <>
+        A model that <span style={{ color: color.accent }}>fits your domain</span>
+      </>
+    ),
+    body: 'The same calibrated predictive distribution as Instant — now from a model whose assumptions were fitted to your data rather than averaged over everyone’s.',
+    art: (
+      <svg viewBox="0 0 120 120" width="104" height="104" fill="none" stroke={color.textBody} strokeWidth="1.4">
+        <path d="M18 88 H104 M18 22 V88" />
+        <path d="M26 84 C 44 84, 44 34, 62 34 C 80 34, 80 84, 98 84" stroke={color.accent} strokeWidth="2" />
+        <path d="M44 84 V60 M62 84 V40 M80 84 V60" opacity="0.35" />
+        <circle cx="62" cy="34" r="3" fill={color.accent} stroke="none" style={{ animation: 'omPulse 2.4s ease-in-out infinite' }} />
+      </svg>
+    ),
+  },
+];
+
+const TRACKS = {
+  instant: { label: 'Vallix Instant', title: 'Vallix Instant', steps: INSTANT },
+  custom: { label: 'Vallix Custom', title: 'Vallix Custom', steps: CUSTOM },
+} as const;
+
+type TrackId = keyof typeof TRACKS;
+
 export function ModelSteps() {
-  const { step, select, registerBar, wrapRef, hoverHandlers } = useStepCarousel(STEPS.length);
+  const [track, setTrack] = useState<TrackId>('instant');
+  const steps = TRACKS[track].steps;
+  const { step, select, registerBar, wrapRef, hoverHandlers } = useStepCarousel(steps.length);
 
   return (
     <section id="model" style={{ ...bleedDark, padding: '90px 48px 140px' }}>
       <div
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 14,
-          maxWidth: '56ch',
-          marginBottom: 70,
+          display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end',
+          justifyContent: 'space-between', gap: 24, marginBottom: 70,
         }}
       >
-        <div style={eyebrow}>How it works</div>
-        <h2
-          style={{
-            margin: 0,
-            fontSize: 'clamp(34px,4.4vw,58px)',
-            lineHeight: 1.04,
-            color: color.textBright,
-            fontWeight: 600,
-            letterSpacing: '-0.02em',
-          }}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: '56ch' }}>
+          <div style={eyebrow}>How it works</div>
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 'clamp(34px,4.4vw,58px)',
+              lineHeight: 1.04,
+              color: color.textBright,
+              fontWeight: 600,
+              letterSpacing: '-0.02em',
+            }}
+          >
+            {TRACKS[track].title}<span style={{ color: color.textFaint }}>.</span>
+          </h2>
+        </div>
+
+        {/* Two products, one shape: the same three-beat explanation either way, so
+            they share the carousel rather than being two sections a reader has to
+            compare across. */}
+        <div
+          role="tablist"
+          aria-label="How it works"
+          style={{ display: 'flex', gap: 1, background: color.rule, width: 'fit-content' }}
         >
-          Three steps,
-          <br />
-          one request<span style={{ color: color.textFaint }}>.</span>
-        </h2>
+          {(Object.keys(TRACKS) as TrackId[]).map((id) => {
+            const on = track === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={on}
+                // Reset from the event that caused it, rather than from an effect
+                // watching the track: leaving the carousel on index 2 of the track
+                // that just went away is how you get a blank panel.
+                onClick={() => { setTrack(id); select(0); }}
+                className={on ? undefined : 'wb-ghost-btn'}
+                style={{
+                  all: 'unset', cursor: 'pointer', padding: '11px 20px', fontFamily: font.sans,
+                  fontSize: 14, fontWeight: on ? 600 : 400,
+                  background: on ? color.accent : color.inkRaised,
+                  color: on ? color.accentInk : color.textMuted,
+                }}
+              >
+                {TRACKS[id].label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div
@@ -157,7 +257,7 @@ export function ModelSteps() {
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {STEPS.map((s, i) => {
+          {steps.map((s, i) => {
             const on = i === step;
             return (
               <button
@@ -218,7 +318,7 @@ export function ModelSteps() {
         </div>
 
         <div style={{ position: 'relative', perspective: '1200px' }}>
-          {STEPS.map((s, i) => {
+          {steps.map((s, i) => {
             const on = i === step;
             return (
               // Two nested elements because two things want to drive `transform`:
@@ -274,7 +374,7 @@ export function ModelSteps() {
                         lineHeight: 0.86,
                         fontWeight: 600,
                         color: 'transparent',
-                        WebkitTextStroke: '1px #3A3A3A',
+                        WebkitTextStroke: '1px #39424a',
                       }}
                     >
                       {s.n}

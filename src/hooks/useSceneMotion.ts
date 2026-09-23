@@ -126,27 +126,27 @@ export function useSceneMotion({ roughness, lineBoil, parallax }: SceneProps) {
       if (disp) disp.setAttribute('scale', String(propsRef.current.roughness * (1 - g)));
 
       svg.setAttribute('stroke-width', (2.6 - 1.2 * g).toFixed(2));
-      const inkColor = mixHex('#252525', '#C4C4C4', cp);
+      const inkColor = mixHex('#212930', '#c2c4c3', cp);
       svg.setAttribute('stroke', inkColor);
 
       svg.querySelectorAll<SVGElement>('[data-morph]').forEach((el) => {
         const role = el.getAttribute('data-morph');
         if (el.hasAttribute('data-d0')) lerpPath(el, g);
-        if (role === 'fill-paper') el.setAttribute('fill', mixHex('#E3E3E3', '#2E2E2E', cp));
-        else if (role === 'accent-fill') el.setAttribute('fill', mixHex('#8A8A8A', '#E8963C', cp));
+        if (role === 'fill-paper') el.setAttribute('fill', mixHex('#ebece9', '#293138', cp));
+        else if (role === 'accent-fill') el.setAttribute('fill', mixHex('#475625', '#859857', cp));
         else if (role === 'fill-soft') {
-          el.setAttribute('fill', mixHex('#B4B4B4', '#3A3A3A', cp));
+          el.setAttribute('fill', mixHex('#a7acaa', '#39424a', cp));
           el.setAttribute('opacity', String(0.55 + cp * 0.45));
         } else if (role === 'stroke-accent')
-          el.setAttribute('stroke', mixHex('#4A4A4A', '#E8963C', cp));
+          el.setAttribute('stroke', mixHex('#475625', '#859857', cp));
         else if (role === 'stroke-dim') el.setAttribute('opacity', String(0.7 - cp * 0.25));
         else if (role === 'stroke-ghost')
           el.setAttribute('opacity', String(0.34 * (1 - cp * 0.55)));
         else if (role === 'node-accent') {
-          el.setAttribute('fill', mixHex('#E3E3E3', '#E8963C', cp));
+          el.setAttribute('fill', mixHex('#475625', '#859857', cp));
           el.setAttribute('stroke', inkColor);
         } else if (role === 'node') {
-          el.setAttribute('fill', mixHex('#E3E3E3', '#2E2E2E', cp));
+          el.setAttribute('fill', mixHex('#ebece9', '#293138', cp));
           el.setAttribute('stroke', inkColor);
         }
       });

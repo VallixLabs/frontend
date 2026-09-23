@@ -4,21 +4,21 @@ import { Par } from './HeroDecor';
 const PROBLEMS = [
   {
     par: 0.06,
-    title: 'Data that fights back',
-    body: 'Nulls, mixed types, high-cardinality IDs, free-text columns. Every dataset needs its own bespoke cleanup.',
+    title: 'A model for your data',
+    body: 'Not a general-purpose model asked to cope with your table. We fit a model to your table specifically, so its assumptions are the ones your data actually rewards.',
     art: (
       <>
         <path d="M16 26 H104 V98 H16 Z" />
         <path d="M16 50 H104 M16 74 H104 M45 26 V98 M75 26 V98" strokeWidth="2" />
-        <path d="M24 34 L38 46 M38 34 L24 46 M84 58 L96 68 M96 58 L84 68" stroke="#3F3F3F" strokeWidth="3" />
-        <path d="M54 82 C 54 76, 66 76, 66 82 C 66 86, 60 86, 60 90" stroke="#3F3F3F" strokeWidth="2.6" />
+        <path d="M24 34 L38 46 M38 34 L24 46 M84 58 L96 68 M96 58 L84 68" stroke="#485259" strokeWidth="3" />
+        <path d="M54 82 C 54 76, 66 76, 66 82 C 66 86, 60 86, 60 90" stroke="#485259" strokeWidth="2.6" />
       </>
     ),
   },
   {
     par: 0.14,
-    title: 'Pipelines that rot',
-    body: 'Encoders, imputers, folds, a scheduler. Six moving parts to retrain the moment the schema shifts.',
+    title: 'Prediction at speed of light',
+    body: 'Fitting happens once, before your rows arrive. Predicting is a single forward pass — milliseconds a row, no retraining when the data moves.',
     art: (
       <>
         <circle cx="60" cy="60" r="24" />
@@ -29,8 +29,8 @@ const PROBLEMS = [
   },
   {
     par: 0.22,
-    title: 'Tuning for a tie',
-    body: 'Days of search to maybe edge past a gradient-boosted baseline you could have shipped on Monday.',
+    title: 'Best accuracy overall',
+    body: 'Measured on the proper scoring rule, not just on how often it guesses right — and reported against tuned gradient boosting rather than an untuned strawman.',
     art: (
       <>
         <path d="M18 22 V100 H104" />
@@ -68,7 +68,7 @@ export function Problem() {
             color: color.sketchLabel,
           }}
         >
-          The state of tabular ML
+          Why you need us?
         </div>
         <h2
           style={{

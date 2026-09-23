@@ -52,7 +52,7 @@ export function Cta() {
           data-rot="-14"
           style={{ position: 'absolute', right: '14%', top: '9%', pointerEvents: 'none' }}
         >
-          <svg viewBox="0 0 40 40" width="18" height="18" fill="none" stroke="#6E6E6E" strokeWidth="1.4">
+          <svg viewBox="0 0 40 40" width="18" height="18" fill="none" stroke="#767f85" strokeWidth="1.4">
             <path d="M20 4 L23 17 L36 20 L23 23 L20 36 L17 23 L4 20 L17 17 Z" />
           </svg>
         </div>
@@ -81,7 +81,7 @@ export function Cta() {
               textWrap: 'balance',
             }}
           >
-            Bring the messiest table <span style={{ color: color.accentSoft }}>you have.</span>
+            Bring the messiest table <span style={{ color: color.accent }}>you have.</span>
           </h2>
           <p style={{ margin: 0, maxWidth: '46ch', fontSize: 17, lineHeight: 1.6, color: color.textMuted }}>
             We'll score it zero-shot against your current model and send you the comparison. No

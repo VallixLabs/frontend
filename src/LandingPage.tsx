@@ -1,5 +1,6 @@
 import { color, font } from './theme';
 import { useSceneMotion } from './hooks/useSceneMotion';
+import { useSmoothScroll } from './hooks/useSmoothScroll';
 import { useSurfaceFx } from './hooks/useSurfaceFx';
 
 import { RoughFilters } from './components/RoughFilters';
@@ -43,6 +44,7 @@ export default function LandingPage({
   parallax = 1,
   showPricing = true,
 }: LandingPageProps) {
+  useSmoothScroll();
   useSceneMotion({ roughness, lineBoil, parallax });
   useSurfaceFx();
 
@@ -50,7 +52,10 @@ export default function LandingPage({
     <div
       style={{
         position: 'relative',
-        background: '#0E1013',
+        // The brand navy, not a darker near-black: the paper ground fades straight
+        // into the dark half, so anything darker sitting behind it reads as a black
+        // flash partway through the transition.
+        background: color.ink,
         fontFamily: font.sans,
         overflowX: 'hidden',
       }}

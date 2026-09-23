@@ -1,155 +1,111 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
-import { sans, wb } from './theme';
+import { glass, mono, sans, wb } from './theme';
 import { useRun } from './useRun';
 import { useCanvasGrid } from './useCanvasGrid';
 import { Backdrop } from './Backdrop';
-import { Rail, RunHistoryDrawer, TopBar } from './Shell';
-import { Banner, BusyOverlay, EmptyState, Offline } from './stages/Empty';
-import { StageTable } from './stages/StageTable';
-import { StageDisclosure } from './stages/StageDisclosure';
-import { StageFingerprint } from './stages/StageFingerprint';
-import { StageRecipe } from './stages/StageRecipe';
-import { StageTrain } from './stages/StageTrain';
-import { StageResults } from './stages/StageResults';
-import { StageExport } from './stages/StageExport';
-
-const RUNG_SYMBOLS = ['Σ₁', 'Σ₂', 'Σ₃', 'Σ∞'];
+import { HistorySidebar, TopBar } from './Shell';
+import { TableInput } from './panels/TableInput';
+import { DataTable } from './panels/DataTable';
+import { CompatibilityDialog } from './panels/CompatibilityDialog';
+import { ResultsPanel } from './panels/ResultsPanel';
 
 /**
- * The PriorFM workbench: one table carried through seven stages.
+ * The workbench, inference-only.
  *
- * Every number on screen is computed by the API from the table actually loaded.
- * Stage state lives here because almost every stage reads something another stage
- * produced — the rail shows the rung and the arm count, the export card quotes the
- * rung and the selected recipe's fingerprint distance.
+ * One served model, fitted before any table arrives. A run is a table in, one
+ * inference pass, and the scores and exports that come out — all on this page,
+ * because there is no longer a sequence of stages to walk. The left rail is the
+ * run history, so any earlier table is one click away.
  */
 export default function WorkbenchPage() {
   const R = useRun();
-  const [stage, setStage] = useState(1);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [arms, setArms] = useState<Record<string, boolean>>({ generic: true, mismatched: true, gbt: true, knn: true });
-  const [fairOpen, setFairOpen] = useState(true);
-
+  const [compatOpen, setCompatOpen] = useState(false);
   const canvasRef = useRef<HTMLDivElement | null>(null);
-  useCanvasGrid(canvasRef, `${stage}-${R.run?.id ?? 'none'}-${drawerOpen}`);
+  useCanvasGrid(canvasRef, `${R.run?.id ?? 'none'}-${R.run?.state ?? ''}`);
 
-  // Each stage pulls what it needs the first time it is opened, and not before:
-  // the fingerprint battery and the candidate search both cost real seconds.
-  useEffect(() => {
-    if (!R.run?.compatible) return;
-    if (stage === 2 && !R.disclosure) void R.pickRung(R.run.rung);
-    if (stage === 3 && !R.fp) void R.computeFingerprint();
-    if (stage === 4 && R.fp && !R.search) void R.fitRecipes(16);
-  }, [stage, R.run, R.disclosure, R.fp, R.search]); // eslint-disable-line
-
-  const empty = !R.run;
-  const failing = !!R.run && !R.run.compatible;
-
-  const runState = empty
-    ? { label: 'idle', color: wb.dim }
-    : failing
-      ? { label: 'aborted', color: wb.bad }
-      : R.phase === 'busy'
-        ? { label: 'running', color: wb.acc }
-        : R.results
-          ? { label: 'complete', color: wb.good }
-          : { label: 'ready', color: wb.good };
-
-  const armCount = 1 + Object.entries(arms).filter(([k, v]) => v && k !== 'knn').length;
+  const modelReady = R.model?.status === 'ready';
 
   return (
     <div
       className="wb-root"
       style={{
-        position: 'relative',
-        minHeight: '100vh',
-        background: wb.bg,
-        color: wb.fg,
-        fontFamily: sans,
-        display: 'flex',
-        flexDirection: 'column',
+        position: 'relative', minHeight: '100vh', background: wb.bg, color: wb.fg,
+        fontFamily: sans, display: 'flex', flexDirection: 'column',
       }}
     >
       <Backdrop />
 
       <TopBar
-        runName={R.run?.name ?? 'no run'}
-        state={runState}
-        elapsed={R.run?.elapsed ?? '—'}
-        historyCount={R.history.length}
-        onToggleDrawer={() => { setDrawerOpen((d) => !d); void R.refreshHistory(); }}
+        model={R.model}
+        runName={R.run?.id ?? ''}
+        elapsed={R.run?.result ? `${R.run.result.seconds}s` : ''}
+        onNew={R.clear}
       />
 
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'stretch', flex: 1, minHeight: 0 }}>
-        <Rail
-          stage={stage}
-          statuses={R.run?.stages ?? Array(7).fill('idle')}
-          onGo={setStage}
-          summary={{
-            rung: RUNG_SYMBOLS[(R.disclosure?.rung ?? R.run?.rung ?? 3) - 1],
-            arms: String(armCount),
-            table: R.run?.filename.replace('.csv', '') ?? '—',
-          }}
-        />
+        <HistorySidebar history={R.history} currentId={R.run?.id ?? null} onOpen={R.openRun} />
 
-        <div ref={canvasRef} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', position: 'relative' }}>
-          {R.offline && <Offline />}
-          {R.error && <Banner text={R.error} onClose={R.clearError} />}
-          {R.phase === 'busy' && <BusyOverlay label={R.busyLabel} />}
-
-          {empty ? (
-            <EmptyState demos={R.demos} caps={R.caps} onDemo={R.loadDemo} onFile={R.loadFile} />
-          ) : (
-            <>
-              {stage === 1 && (
-                <StageTable
-                  run={R.run!}
-                  onNext={() => setStage(2)}
-                  onClear={() => window.location.reload()}
-                  onDemo={() => R.loadDemo(R.demos[0]?.id ?? 'wine')}
-                  onTarget={R.setTarget}
-                />
-              )}
-              {stage === 2 && (
-                <StageDisclosure disclosure={R.disclosure} onPick={R.pickRung} onNext={() => setStage(3)} />
-              )}
-              {stage === 3 && (
-                <StageFingerprint fp={R.fp} neighbours={R.search?.neighbours ?? []} onNext={() => setStage(4)} />
-              )}
-              {stage === 4 && (
-                <StageRecipe
-                  search={R.search}
-                  recipe={R.recipe}
-                  onPickCandidate={R.pickCandidate}
-                  onRefit={() => R.fitRecipes(16)}
-                  onNext={() => setStage(5)}
-                />
-              )}
-              {stage === 5 && (
-                <StageTrain
-                  arms={arms}
-                  onToggleArm={(k) => setArms((s) => ({ ...s, [k]: !s[k] }))}
-                  fairOpen={fairOpen}
-                  onToggleFair={() => setFairOpen((f) => !f)}
-                  train={R.train}
-                  caps={R.caps}
-                  busy={R.phase === 'busy'}
-                  onRun={() => R.runTraining(arms)}
-                  onNext={() => setStage(6)}
-                />
-              )}
-              {stage === 6 && (
-                <StageResults results={R.results} onPickContext={R.pickContext} onNext={() => setStage(7)} />
-              )}
-              {stage === 7 && <StageExport run={R.run!} recipe={R.recipe} disclosure={R.disclosure} />}
-            </>
+        <div ref={canvasRef} style={{ flex: 1, minWidth: 0, position: 'relative', overflowY: 'auto' }}>
+          {R.offline && (
+            <div style={{ ...glass, margin: '20px 40px 0', padding: '14px 18px', display: 'flex', gap: 12, borderLeft: `2px solid ${wb.bad}` }}>
+              <span style={{ fontFamily: mono, fontSize: 12, color: wb.bad }}>offline</span>
+              <span style={{ fontSize: 13, color: wb.muted }}>
+                The API is not answering on <code style={{ fontFamily: mono }}>:8000</code>. Start it with{' '}
+                <code style={{ fontFamily: mono, color: wb.fg }}>./backend/run.sh</code>.
+              </span>
+            </div>
           )}
-        </div>
 
-        {drawerOpen && <RunHistoryDrawer history={R.history} onClose={() => setDrawerOpen(false)} />}
+          {R.error && (
+            <div style={{ ...glass, margin: '20px 40px 0', padding: '14px 18px', display: 'flex', gap: 12, alignItems: 'center', borderLeft: `2px solid ${wb.bad}` }}>
+              <span style={{ fontFamily: mono, fontSize: 12, color: wb.bad }}>error</span>
+              <span style={{ flex: 1, fontSize: 13, color: wb.fg }}>{R.error}</span>
+              <button type="button" onClick={R.clearError} className="wb-close"
+                style={{ all: 'unset', cursor: 'pointer', fontFamily: mono, fontSize: 13, color: wb.dim }}>✕</button>
+            </div>
+          )}
+
+          {R.busy && (
+            <div style={{ position: 'sticky', top: 0, zIndex: 8, display: 'flex', justifyContent: 'center', padding: '16px 0 0' }}>
+              <div style={{ ...glass, padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ width: 8, height: 8, background: wb.acc, animation: 'wbPulse 1.2s ease-in-out infinite' }} />
+                <span style={{ fontFamily: mono, fontSize: 13, color: wb.fg }}>{R.busy}…</span>
+              </div>
+            </div>
+          )}
+
+          <div style={{ padding: '30px 40px 80px', display: 'flex', flexDirection: 'column', gap: 26 }}>
+            <TableInput
+              run={R.run}
+              demos={R.demos}
+              busy={R.busy}
+              onFile={R.loadFile}
+              onPaste={R.loadPaste}
+              onDemo={R.loadDemo}
+            />
+
+            {R.run && (
+              <DataTable
+                run={R.run}
+                busy={R.busy}
+                modelReady={modelReady}
+                onTarget={R.setTarget}
+                onShowCompatibility={() => setCompatOpen(true)}
+                // A run on an unservable table is refused here rather than at the
+                // API, so the reason is in front of the person who pressed it.
+                onRun={() => (R.run?.compatible ? R.infer() : setCompatOpen(true))}
+              />
+            )}
+
+            {R.run?.result && <ResultsPanel run={R.run} />}
+          </div>
+        </div>
       </div>
+
+      {compatOpen && R.run && (
+        <CompatibilityDialog checks={R.run.checks} onClose={() => setCompatOpen(false)} />
+      )}
     </div>
   );
 }
-

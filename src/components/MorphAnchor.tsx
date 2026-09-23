@@ -62,7 +62,7 @@ export function MorphAnchor() {
           pointerEvents: 'none',
           zIndex: -1,
           background:
-            'linear-gradient(to bottom, rgba(37,37,37,0) 0%, rgba(37,37,37,0.55) 55%, #252525 100%)',
+            'linear-gradient(to bottom, rgba(33,41,48,0) 0%, rgba(33,41,48,0.55) 55%, #212930 100%)',
         }}
       />
 
@@ -84,7 +84,7 @@ export function MorphAnchor() {
         </h2>
         <h2
           id="om-morph-doodle-light"
-          style={{ ...headlineStyle, position: 'absolute', inset: 0, color: color.textBody }}
+          style={{ ...headlineStyle, position: 'absolute', inset: 0, color: color.textBright }}
         >
           {HEADLINE.map((line, i) => (
             <span
@@ -146,14 +146,14 @@ export function MorphAnchor() {
           viewBox="0 0 1120 600"
           style={{ width: '100%', maxWidth: 1120, display: 'block' }}
           fill="none"
-          stroke="#252525"
+          stroke="#212930"
           strokeWidth="2.6"
           strokeLinecap="round"
           strokeLinejoin="round"
           filter="url(#om-morph)"
         >
-          <path data-morph="fill-paper" fill="#E3E3E3" stroke="none" d="M28 74 H400 V462 H28 Z" />
-          <path data-morph="accent-fill" fill="#8A8A8A" stroke="none" d="M28 74 H400 V126 H28 Z" />
+          <path data-morph="fill-paper" fill="#ebece9" stroke="none" d="M28 74 H400 V462 H28 Z" />
+          <path data-morph="accent-fill" fill="#777c7e" stroke="none" d="M28 74 H400 V126 H28 Z" />
           <path data-morph="stroke" d="M28 74 H400 V462 H28 Z" />
           <path data-morph="stroke" d="M28 126 H400 M28 182 H400 M28 238 H400 M28 294 H400 M28 350 H400 M28 406 H400 M152 74 V462 M276 74 V462" />
           <path data-morph="stroke-dim" d="M44 100 H120 M168 100 H252 M292 100 H384" strokeWidth="3.4" />
@@ -164,10 +164,10 @@ export function MorphAnchor() {
           <path data-morph="stroke-accent" d="M448 330 C 488 378, 524 282, 556 330" data-d0="M448 330 C 488 378, 524 282, 556 330" data-d1="M448 330 C 484 330, 520 330, 556 330" />
           <path data-morph="stroke-accent" d="M556 330 L541 318 M556 330 L545 344" data-d0="M556 330 L541 318 M556 330 L545 344" data-d1="M556 330 L544 324 M556 330 L544 336" />
 
-          <path data-morph="fill-soft" d="M590 118 C 562 112, 570 74, 596 76 C 602 38, 660 32, 670 66 C 712 38, 750 76, 728 116 C 690 126, 630 128, 590 118 Z" data-d0="M590 118 C 562 112, 570 74, 596 76 C 602 38, 660 32, 670 66 C 712 38, 750 76, 728 116 C 690 126, 630 128, 590 118 Z" data-d1="M590 118 C 636 118, 682 118, 728 118 C 728 90, 728 62, 728 34 C 682 34, 636 34, 590 34 C 590 62, 590 90, 590 118 Z" stroke="none" fill="#B4B4B4" />
+          <path data-morph="fill-soft" d="M590 118 C 562 112, 570 74, 596 76 C 602 38, 660 32, 670 66 C 712 38, 750 76, 728 116 C 690 126, 630 128, 590 118 Z" data-d0="M590 118 C 562 112, 570 74, 596 76 C 602 38, 660 32, 670 66 C 712 38, 750 76, 728 116 C 690 126, 630 128, 590 118 Z" data-d1="M590 118 C 636 118, 682 118, 728 118 C 728 90, 728 62, 728 34 C 682 34, 636 34, 590 34 C 590 62, 590 90, 590 118 Z" stroke="none" fill="#a7acaa" />
           <path data-morph="stroke" d="M590 118 C 562 112, 570 74, 596 76 C 602 38, 660 32, 670 66 C 712 38, 750 76, 728 116 C 690 126, 630 128, 590 118 Z" data-d0="M590 118 C 562 112, 570 74, 596 76 C 602 38, 660 32, 670 66 C 712 38, 750 76, 728 116 C 690 126, 630 128, 590 118 Z" data-d1="M590 118 C 636 118, 682 118, 728 118 C 728 90, 728 62, 728 34 C 682 34, 636 34, 590 34 C 590 62, 590 90, 590 118 Z" />
 
-          <path data-morph="fill-soft" d="M776 128 C 872 96, 1026 150, 1052 128 C 1084 232, 1030 330, 1052 434 C 950 466, 856 402, 776 434 C 744 330, 800 232, 776 128 Z" data-d0="M776 128 C 872 96, 1026 150, 1052 128 C 1084 232, 1030 330, 1052 434 C 950 466, 856 402, 776 434 C 744 330, 800 232, 776 128 Z" data-d1="M776 128 C 868 128, 960 128, 1052 128 C 1052 230, 1052 332, 1052 434 C 960 434, 868 434, 776 434 C 776 332, 776 230, 776 128 Z" stroke="none" fill="#B4B4B4" />
+          <path data-morph="fill-soft" d="M776 128 C 872 96, 1026 150, 1052 128 C 1084 232, 1030 330, 1052 434 C 950 466, 856 402, 776 434 C 744 330, 800 232, 776 128 Z" data-d0="M776 128 C 872 96, 1026 150, 1052 128 C 1084 232, 1030 330, 1052 434 C 950 466, 856 402, 776 434 C 744 330, 800 232, 776 128 Z" data-d1="M776 128 C 868 128, 960 128, 1052 128 C 1052 230, 1052 332, 1052 434 C 960 434, 868 434, 776 434 C 776 332, 776 230, 776 128 Z" stroke="none" fill="#a7acaa" />
           <path data-morph="stroke" d="M776 128 C 872 96, 1026 150, 1052 128 C 1084 232, 1030 330, 1052 434 C 950 466, 856 402, 776 434 C 744 330, 800 232, 776 128 Z" data-d0="M776 128 C 872 96, 1026 150, 1052 128 C 1084 232, 1030 330, 1052 434 C 950 466, 856 402, 776 434 C 744 330, 800 232, 776 128 Z" data-d1="M776 128 C 868 128, 960 128, 1052 128 C 1052 230, 1052 332, 1052 434 C 960 434, 868 434, 776 434 C 776 332, 776 230, 776 128 Z" />
 
           <circle data-morph="node" cx="838" cy="196" r="11" />

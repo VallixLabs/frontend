@@ -1,11 +1,10 @@
 import { Link } from 'react-router-dom';
 
 import { color, font } from '../theme';
+import { Logo } from '../brand/Logo';
 
 const NAV = [
-  { href: '#model', label: 'Model' },
   { href: '#benchmarks', label: 'Benchmarks' },
-  { href: '#api', label: 'API' },
   { href: '#pricing', label: 'Pricing' },
 ];
 
@@ -44,32 +43,10 @@ export function Header() {
             alignItems: 'flex-start',
           }}
         >
-          <span
-            style={{
-              fontFamily: font.hand,
-              fontSize: 36,
-              fontWeight: 700,
-              color: color.ink,
-              lineHeight: 1,
-            }}
-          >
-            Vallix Labs
-          </span>
-          {/* a scribbled underline, drawn twice so it reads as a real pen stroke */}
-          <svg
-            viewBox="0 0 90 12"
-            width="88"
-            height="11"
-            fill="none"
-            stroke={color.sketchSoft}
-            strokeWidth="3"
-            strokeLinecap="round"
-            filter="url(#rough)"
-            style={{ marginTop: -4 }}
-          >
-            <path d="M3 7 C 24 2, 58 11, 86 4" />
-            <path d="M10 10 C 30 6, 52 12, 74 8" opacity="0.5" strokeWidth="2" />
-          </svg>
+          {/* The scribbled underline that used to sit here was decoration for a text
+              wordmark. The logo carries its own grid rule, so it now reads as an
+              artifact rather than a flourish. */}
+          <Logo tone="onLight" height={60} />
         </div>
 
         <nav style={{ display: 'flex', alignItems: 'center', gap: 26, fontSize: 15 }}>
@@ -121,7 +98,7 @@ export function Header() {
         preserveAspectRatio="none"
         style={{ width: '100%', height: 7, marginTop: 14, display: 'block' }}
         fill="none"
-        stroke="#9B9B9B"
+        stroke="#8b9599"
         strokeWidth="1.8"
         strokeLinecap="round"
         filter="url(#rough)"

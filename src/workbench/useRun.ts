@@ -1,167 +1,121 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import {
-  api,
-  type Capabilities,
-  type Disclosure,
-  type Fingerprint,
-  type HistoryRow,
-  type RecipeDetail,
-  type Results,
-  type RunState,
-  type SearchResult,
-  type TrainResult,
-} from './api';
-
-export type Phase = 'idle' | 'busy' | 'error';
+import { api, type Demo, type HistoryRow, type ModelStatus, type Run } from './api';
 
 /**
- * All workbench state, and the calls that fill it.
+ * All workbench state.
  *
- * Each stage's data is fetched once and cached until something upstream
- * invalidates it — a new table clears everything, a new recipe clears the
- * results — so moving back and forth through the rail is free, and only work that
- * genuinely has to be redone is redone.
+ * The shape is flat because the product is now flat: one table, one inference pass,
+ * one set of results. Loading a run from history simply swaps `run` — a scored run
+ * carries its own result, so revisiting it costs nothing.
  */
 export function useRun() {
-  const [run, setRun] = useState<RunState | null>(null);
-  const [demos, setDemos] = useState<{ id: string; label: string; note: string }[]>([]);
-  const [caps, setCaps] = useState<Capabilities | null>(null);
+  const [run, setRun] = useState<Run | null>(null);
   const [history, setHistory] = useState<HistoryRow[]>([]);
+  const [demos, setDemos] = useState<Demo[]>([]);
+  const [model, setModel] = useState<ModelStatus | null>(null);
   const [offline, setOffline] = useState(false);
 
-  const [disclosure, setDisclosure] = useState<Disclosure | null>(null);
-  const [fp, setFp] = useState<Fingerprint | null>(null);
-  const [search, setSearch] = useState<SearchResult | null>(null);
-  const [recipe, setRecipe] = useState<RecipeDetail | null>(null);
-  const [train, setTrain] = useState<TrainResult | null>(null);
-  const [results, setResults] = useState<Results | null>(null);
-
-  const [phase, setPhase] = useState<Phase>('idle');
-  const [busyLabel, setBusyLabel] = useState('');
+  const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const guard = useCallback(async <T,>(label: string, fn: () => Promise<T>): Promise<T | null> => {
-    setPhase('busy');
-    setBusyLabel(label);
+    setBusy(label);
     setError(null);
     try {
       return await fn();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
-      setPhase('error');
       return null;
     } finally {
-      setPhase((p) => (p === 'error' ? p : 'idle'));
-      setBusyLabel('');
+      setBusy(null);
     }
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const [h, d] = await Promise.all([api.health(), api.demos()]);
-        setCaps(h.capabilities);
-        setDemos(d.demos);
-      } catch {
-        setOffline(true);
-      }
-    })();
   }, []);
 
   const refreshHistory = useCallback(async () => {
     try {
       setHistory((await api.history()).history);
     } catch {
-      /* history is a convenience; its absence must not block a run */
+      /* the history sidebar is a convenience; its absence must not block a run */
     }
   }, []);
 
-  /** A new table invalidates every derived stage. */
-  const adopt = useCallback((r: RunState) => {
+  // The model fits itself on first start, so poll until it is ready rather than
+  // asking the user to reload.
+  const pollRef = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    let alive = true;
+
+    const tick = async () => {
+      try {
+        const m = await api.model();
+        if (!alive) return;
+        setModel(m);
+        setOffline(false);
+        if (m.status === 'ready' || m.status === 'error') window.clearInterval(pollRef.current);
+      } catch {
+        if (alive) setOffline(true);
+      }
+    };
+
+    // One async kick-off so the model state, the demo list and the history are on
+    // screen immediately rather than an interval later. Everything it sets happens
+    // after an await, so no state is set synchronously during the effect.
+    const init = async () => {
+      await tick();
+      try {
+        const d = await api.demos();
+        if (alive) setDemos(d.demos);
+      } catch {
+        /* the demo list is optional */
+      }
+      if (alive) await refreshHistory();
+    };
+
+    void init();
+    pollRef.current = window.setInterval(tick, 1500);
+
+    return () => {
+      alive = false;
+      window.clearInterval(pollRef.current);
+    };
+  }, [refreshHistory]);
+
+  const adopt = useCallback((r: Run) => {
     setRun(r);
-    setDisclosure(null);
-    setFp(null);
-    setSearch(null);
-    setRecipe(null);
-    setTrain(null);
-    setResults(null);
     void refreshHistory();
   }, [refreshHistory]);
 
-  const loadDemo = useCallback(
-    (id: string) => guard(`loading ${id}`, async () => adopt(await api.createFromDemo(id))),
-    [adopt, guard],
-  );
+  const loadFile = useCallback((f: File) =>
+    guard(`reading ${f.name}`, async () => adopt(await api.fromFile(f))), [adopt, guard]);
 
-  const loadFile = useCallback(
-    (file: File) => guard(`reading ${file.name}`, async () => adopt(await api.createFromFile(file))),
-    [adopt, guard],
-  );
+  const loadPaste = useCallback((text: string) =>
+    guard('parsing the pasted table', async () => adopt(await api.fromPaste(text))), [adopt, guard]);
 
-  const setTarget = useCallback(
-    (target: string) => run && guard('re-screening', async () => adopt(await api.setTarget(run.id, target))),
-    [adopt, guard, run],
-  );
+  const loadDemo = useCallback((id: string) =>
+    guard(`loading ${id}`, async () => adopt(await api.fromDemo(id))), [adopt, guard]);
 
-  const pickRung = useCallback(
-    (rung: number) =>
-      run && guard('building the payload', async () => setDisclosure(await api.disclosure(run.id, rung))),
-    [guard, run],
-  );
+  const openRun = useCallback((id: string) =>
+    guard('opening run', async () => setRun(await api.run(id))), [guard]);
 
-  const computeFingerprint = useCallback(
-    () => run && guard('running the learner battery', async () => setFp(await api.fingerprint(run.id))),
-    [guard, run],
-  );
+  const setTarget = useCallback((t: string) =>
+    run && guard('re-screening', async () => adopt(await api.setTarget(run.id, t))), [adopt, guard, run]);
 
-  const fitRecipes = useCallback(
-    (n = 16) =>
-      run &&
-      guard('compiling and ranking candidates', async () => {
-        const s = await api.recipes(run.id, n);
-        setSearch(s);
-        if (s.candidates.length) setRecipe(await api.recipe(run.id, 0));
-        setTrain(null);
-        setResults(null);
-      }),
-    [guard, run],
-  );
+  const infer = useCallback(() =>
+    run && guard('running inference', async () => {
+      await api.infer(run.id);
+      setRun(await api.run(run.id));
+      void refreshHistory();
+    }), [guard, refreshHistory, run]);
 
-  const pickCandidate = useCallback(
-    (i: number) =>
-      run &&
-      guard('sampling from the recipe', async () => {
-        setRecipe(await api.recipe(run.id, i));
-        // a different recipe means the trained arms no longer describe this run
-        setTrain(null);
-        setResults(null);
-      }),
-    [guard, run],
-  );
-
-  const runTraining = useCallback(
-    (arms: Record<string, boolean>) =>
-      run &&
-      guard('selecting a bias under each prior', async () => {
-        setTrain(await api.train(run.id, arms));
-        setResults(await api.results(run.id, 8));
-        setRun(await api.run(run.id));
-        void refreshHistory();
-      }),
-    [guard, refreshHistory, run],
-  );
-
-  const pickContext = useCallback(
-    (ctx: number) => run && guard('rescoring', async () => setResults(await api.results(run.id, ctx))),
-    [guard, run],
-  );
+  const clear = useCallback(() => {
+    setRun(null);
+    setError(null);
+  }, []);
 
   return {
-    run, demos, caps, history, offline,
-    disclosure, fp, search, recipe, train, results,
-    phase, busyLabel, error, clearError: () => { setError(null); setPhase('idle'); },
-    loadDemo, loadFile, setTarget, pickRung, computeFingerprint,
-    fitRecipes, pickCandidate, runTraining, pickContext, refreshHistory,
+    run, history, demos, model, offline, busy, error,
+    clearError: () => setError(null),
+    loadFile, loadPaste, loadDemo, openRun, setTarget, infer, clear, refreshHistory,
   };
 }

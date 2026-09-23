@@ -2,23 +2,46 @@ html {
   scroll-behavior: smooth;
 }
 
-body {
-  margin: 0;
-  background: #252525;
+/* Lenis smooths the real scroll position, so native smooth scrolling has to stand
+   down while it is running or the two fight over the same value. Lenis marks the
+   root itself, which is what makes this safe to leave in place. */
+html.lenis,
+html.lenis body {
+  height: auto;
 }
 
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  background: #212930;
+}
+
+/* The bare link colour serves the light paper half, where the dark sections all
+   set their own. On paper, emphasis is darker — so hover moves toward the navy,
+   not away from it. */
 a {
-  color: #c2712b;
+  color: #475625;
   text-decoration: none;
 }
 
 a:hover {
-  color: #8a8a8a;
+  color: #212930;
 }
 
 ::selection {
-  background: #252525;
-  color: #e3e3e3;
+  background: #212930;
+  color: #ebece9;
 }
 
 @keyframes omDash {
@@ -43,13 +66,14 @@ a:hover {
 /* The design file expresses hover with a `style-hover` attribute, which is a
    canvas-editor affordance rather than real HTML. These are its translations. */
 .v-navlink:hover {
-  color: #252525;
-  text-decoration: underline wavy #8a8a8a 2px;
+  color: #212930;
+  text-decoration: underline wavy #777c7e 2px;
   text-underline-offset: 6px;
 }
 
+/* The footer sits on navy, where the direction flips: hover brightens. */
 .v-footlink:hover {
-  color: #c4c4c4;
+  color: #e0e1dd;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -78,12 +102,13 @@ a:hover {
 
 .wb-root * {
   scrollbar-width: thin;
-  scrollbar-color: #4a4a4a #252525;
+  scrollbar-color: #485259 #212930;
 }
 
-/* Roboto is proportional, so its default figures are too. Every number in the
-   workbench sits in a column that has to line up — metric tables, the candidate
-   list, the reproducibility card — so ask Roboto for its tabular figures. */
+/* Be Vietnam Pro is proportional, so its default figures are too. Every number in
+   the workbench sits in a column that has to line up — metric tables, the candidate
+   list, the reproducibility card — so ask for tabular figures where they exist, and
+   right-align the columns so they hold even where they do not. */
 .wb-root,
 table {
   font-variant-numeric: tabular-nums;
@@ -93,14 +118,14 @@ table {
 .wb-ghost-btn:hover,
 .wb-link:hover,
 .wb-close:hover {
-  color: #e8963c;
+  color: #859857;
 }
 
 .wb-rail-btn:hover,
 .wb-rung:hover,
 .wb-cand:hover,
 .wb-arm:hover {
-  background: #333333;
+  background: #2f373e;
 }
 
 .wb-fpblock:hover {
@@ -108,5 +133,47 @@ table {
 }
 
 .wb-ctx:hover {
-  background: #3a3a3a;
+  background: #39424a;
+}
+
+.v-pagelink:hover {
+  color: #e0e1dd;
+}
+
+
+/* ------------------------------------------------------------- scrollbars */
+
+/* Firefox takes two keywords; WebKit needs the pseudo-elements below. Both are
+   given so the bar matches the ground it sits on rather than defaulting to the
+   platform's own light chrome. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #485259 transparent;
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1b222a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #485259;
+  border: 3px solid #1b222a;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5d686f;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #859857;
+}
+
+::-webkit-scrollbar-corner {
+  background: #1b222a;
 }

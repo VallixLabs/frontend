@@ -1,49 +1,74 @@
 /**
  * Design tokens for the Vallix Labs landing page.
  *
- * The page runs a scroll-driven transition from a light "paper" ground to a dark
- * "typeset" ground, so most colours come in a paper value and an ink value. The
- * morph in `lib/morph.ts` interpolates between the two, which is why the pairs
- * live together here rather than in two separate palettes.
+ * ## The brand palette
+ *
+ * Three anchors, taken from the logo:
+ *
+ *   #e0e1dd  light grey   the logo mark
+ *   #485259  azure grey   the logo's grid lines
+ *   #212930  navy         the logo ground
+ *
+ * Every other tone here is an interpolation between two of those, so nothing in
+ * the UI is off-brand by construction. The page runs a scroll-driven transition
+ * from a light "paper" ground to the dark navy, which is why most roles come in a
+ * paper value and an ink value — `lib/morph.ts` interpolates between the pairs.
+ *
+ * ## The olive accent
+ *
+ * The three logo tones are all but monochrome, which leaves nothing to carry
+ * emphasis. The olive supplies it, and it is not a foreign colour: #e0e1dd sits at
+ * hue 75, already the yellow-green family, so the olive is that same hue saturated
+ * up and darkened.
+ *
+ * It needs two values, because no single olive clears 4.5:1 against both grounds:
+ *
+ *   on navy   `accent`     #859857   4.7:1
+ *   on paper  `accentDeep` #475625   6.1:1
+ *
+ * Primary actions take an olive fill with a navy label.
  */
 
 export const color = {
   // grounds
-  paper: '#CFCFCF',
-  ink: '#252525',
-  inkRaised: '#2E2E2E',
-  inkCard: '#2A2A2A',
-  inkWell: '#1E1E1E',
+  paper: '#e0e1dd',        // brand light
+  ink: '#212930',          // brand navy
+  inkRaised: '#293138',
+  inkCard: '#262e35',
+  inkWell: '#191f24',
 
-  // hand-drawn half
-  sketchLine: '#252525',
-  sketchSoft: '#8A8A8A',
-  sketchFaint: '#9B9B9B',
-  sketchFill: '#E3E3E3',
-  sketchMuted: '#545454',
-  sketchLabel: '#7D7D7D',
+  // hand-drawn half — strokes darken against the paper ground
+  sketchLine: '#212930',
+  sketchSoft: '#777c7e',
+  sketchFaint: '#8a8e8f',
+  sketchFill: '#ebece9',
+  sketchMuted: '#485259',  // brand azure: body copy on paper
+  sketchLabel: '#5a6064',
 
-  // typeset half
-  textBright: '#CFCFCF',
-  textBody: '#C4C4C4',
-  textMuted: '#A0A0A0',
-  textFaint: '#7D7D7D',
-  rule: '#3F3F3F',
-  ruleSoft: '#343434',
+  // typeset half — text lightens against the navy ground
+  textBright: '#e0e1dd',
+  textBody: '#c2c4c3',
+  textMuted: '#a3a8a8',
+  textFaint: '#858b8e',
+  rule: '#485259',         // brand azure
+  ruleSoft: '#38424a',
 
-  // accent
-  accent: '#E8963C',
-  accentSoft: '#D98F52',
-  accentDeep: '#C2712B',
-  accentInk: '#1E1508',
+  // Emphasis: an olive, which is the brand light's own hue (#e0e1dd sits at hue
+  // 75) saturated up. One value per ground, because a single olive cannot carry
+  // 4.5:1 against both the navy and the paper.
+  accent: '#859857',       // on navy — 4.7:1
+  accentSoft: '#859857',   // the same olive: the palette carries only one
+  accentDeep: '#475625',   // on paper — 6.1:1
+  accentInk: '#212930',    // label colour on an olive fill
 } as const;
 
 export const font = {
-  /** The doodled half of the brand. The only face that is not Roboto. */
+  /** The doodled half of the brand. The only face that is not Be Vietnam Pro. */
   hand: "Caveat, cursive",
-  sans: "Roboto, system-ui, sans-serif",
+  /** The logo's own face. */
+  sans: "'Be Vietnam Pro', system-ui, sans-serif",
   /** What used to be IBM Plex Mono: eyebrows, figures, small caps chrome. */
-  mono: "Roboto, system-ui, sans-serif",
+  mono: "'Be Vietnam Pro', system-ui, sans-serif",
   /** Genuinely pre-formatted blocks, where column alignment carries meaning. */
   code: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
 } as const;
