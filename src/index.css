@@ -1,0 +1,112 @@
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #252525;
+}
+
+a {
+  color: #c2712b;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #8a8a8a;
+}
+
+::selection {
+  background: #252525;
+  color: #e3e3e3;
+}
+
+@keyframes omDash {
+  from {
+    stroke-dashoffset: 260;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes omPulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* The design file expresses hover with a `style-hover` attribute, which is a
+   canvas-editor affordance rather than real HTML. These are its translations. */
+.v-navlink:hover {
+  color: #252525;
+  text-decoration: underline wavy #8a8a8a 2px;
+  text-underline-offset: 6px;
+}
+
+.v-footlink:hover {
+  color: #c4c4c4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ---------------------------------------------------------------- workbench */
+
+@keyframes wbPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes wbDash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.wb-root * {
+  scrollbar-width: thin;
+  scrollbar-color: #4a4a4a #252525;
+}
+
+/* Roboto is proportional, so its default figures are too. Every number in the
+   workbench sits in a column that has to line up — metric tables, the candidate
+   list, the reproducibility card — so ask Roboto for its tabular figures. */
+.wb-root,
+table {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+.wb-ghost-btn:hover,
+.wb-link:hover,
+.wb-close:hover {
+  color: #e8963c;
+}
+
+.wb-rail-btn:hover,
+.wb-rung:hover,
+.wb-cand:hover,
+.wb-arm:hover {
+  background: #333333;
+}
+
+.wb-fpblock:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.wb-ctx:hover {
+  background: #3a3a3a;
+}
