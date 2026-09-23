@@ -41,10 +41,10 @@ export function PageShell({
           WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${color.ruleSoft}`,
         }}
       >
-        <div style={{ maxWidth: 1180, margin: '0 auto', padding: '16px 48px', display: 'flex', alignItems: 'center', gap: 28 }}>
-          <Link to="/" aria-label="Vallix Labs home"><Logo tone="onDark" height={45} /></Link>
+        <div className="v-gutter" style={{ maxWidth: 1180, margin: '0 auto', padding: '16px 48px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+          <Link to="/" aria-label="Vallix Labs home"><Logo tone="onDark" height={45} className="v-logo-md" /></Link>
           <span style={{ flex: 1 }} />
-          <nav style={{ display: 'flex', gap: 24, fontSize: 14 }}>
+          <nav className="v-pagenav" style={{ display: 'flex', flexWrap: 'wrap', gap: 24, fontSize: 14 }}>
             {NAV.map((n) => (
               <Link key={n.to} to={n.to} className="v-pagelink" style={{ color: color.textMuted }}>
                 {n.label}
@@ -55,7 +55,7 @@ export function PageShell({
         </div>
       </header>
 
-      <main style={{ maxWidth: 1180, margin: '0 auto', padding: '76px 48px 110px' }}>
+      <main className="v-gutter" style={{ maxWidth: 1180, margin: '0 auto', padding: '76px 48px 110px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: '62ch', marginBottom: 56 }}>
           <div style={{ fontFamily: font.mono, fontSize: 12, letterSpacing: '.16em', textTransform: 'uppercase', color: color.textFaint }}>
             {eyebrow}

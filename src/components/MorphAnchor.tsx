@@ -41,6 +41,7 @@ export function MorphAnchor() {
   return (
     <section
       id="om-anchor"
+      className="v-gutter"
       style={{
         position: 'relative',
         zIndex: 1,

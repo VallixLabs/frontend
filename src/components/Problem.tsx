@@ -43,6 +43,7 @@ const PROBLEMS = [
 export function Problem() {
   return (
     <section
+      className="v-gutter"
       style={{
         position: 'relative',
         zIndex: 1,

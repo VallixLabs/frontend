@@ -42,8 +42,9 @@ const deadStyle: React.CSSProperties = { ...linkStyle, color: color.textFaint, c
 
 export function Footer() {
   return (
-    <footer style={{ ...bleedDark, padding: '56px 48px 40px', borderTop: `1px solid ${color.ruleSoft}` }}>
+    <footer className="v-gutter" style={{ ...bleedDark, padding: '56px 48px 40px', borderTop: `1px solid ${color.ruleSoft}` }}>
       <div
+        className="v-cards"
         style={{
           display: 'grid',
           gridTemplateColumns: 'minmax(220px,1.4fr) repeat(auto-fit,minmax(150px,1fr))',
@@ -52,7 +53,7 @@ export function Footer() {
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 320 }}>
-          <Logo tone="onDark" height={45} />
+          <Logo tone="onDark" height={45} className="v-logo-md" />
           <p style={{ margin: 0, fontFamily: font.mono, fontSize: 12.5, lineHeight: 1.6, color: color.textFaint }}>
             Originated from P² Labs, EE, IIT Roorkee.
           </p>

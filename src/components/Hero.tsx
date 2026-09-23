@@ -32,6 +32,7 @@ export function Hero() {
       />
 
       <div
+        className="v-gutter"
         style={{
           position: 'relative',
           zIndex: 2,

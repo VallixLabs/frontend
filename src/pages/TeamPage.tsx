@@ -58,7 +58,7 @@ export default function TeamPage() {
               >
                 {group}
               </h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(340px,1fr))', gap: 20 }}>
+              <div className="v-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(340px,1fr))', gap: 20 }}>
                 {members.map((m) => (
                   <article key={m.name} style={{ ...panel, flexDirection: 'row', gap: 20, alignItems: 'flex-start' }}>
                     <Avatar member={m} />

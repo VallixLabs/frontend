@@ -24,11 +24,14 @@ export function Logo({
   tone = 'onDark',
   height = 28,
   title = 'Vallix Labs',
+  className,
   style,
 }: {
   tone?: LogoTone;
   height?: number;
   title?: string;
+  /** Lets a stylesheet resize the mark at a breakpoint — CSS height wins over the attribute. */
+  className?: string;
   style?: React.CSSProperties;
 }) {
   const { mark, grid } = TONES[tone];
@@ -36,6 +39,7 @@ export function Logo({
     <svg
       viewBox="90 547 1853 716"
       height={height}
+      className={className}
       role="img"
       aria-label={title}
       style={{ display: 'block', width: 'auto', ...style }}

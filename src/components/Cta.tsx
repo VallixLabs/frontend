@@ -3,7 +3,7 @@ import { CtaSilhouettes } from './CtaSilhouettes';
 
 export function Cta() {
   return (
-    <section id="cta" style={{ ...bleedDark, padding: '40px 48px 0' }}>
+    <section id="cta" className="v-gutter" style={{ ...bleedDark, padding: '40px 48px 0' }}>
       <div
         style={{
           position: 'relative',

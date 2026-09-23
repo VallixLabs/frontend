@@ -11,7 +11,7 @@ const ROWS = [
 
 export function Benchmarks() {
   return (
-    <section id="benchmarks" style={{ ...bleedDark, padding: '20px 48px 130px' }}>
+    <section id="benchmarks" className="v-gutter" style={{ ...bleedDark, padding: '20px 48px 130px' }}>
       <div
         style={{
           display: 'flex',

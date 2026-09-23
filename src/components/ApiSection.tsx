@@ -10,6 +10,7 @@ export function ApiSection() {
   return (
     <section
       id="api"
+      className="v-gutter v-stack"
       style={{
         ...bleedDark,
         padding: '20px 48px 130px',

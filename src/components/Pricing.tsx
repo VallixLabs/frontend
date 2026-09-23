@@ -29,7 +29,7 @@ const TIERS = [
 
 export function Pricing() {
   return (
-    <section id="pricing" style={{ ...bleedDark, padding: '20px 48px 130px' }}>
+    <section id="pricing" className="v-gutter" style={{ ...bleedDark, padding: '20px 48px 130px' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: '52ch', marginBottom: 40 }}>
         <div style={eyebrow}>Pricing</div>
         <h2

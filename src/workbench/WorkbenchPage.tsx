@@ -21,6 +21,7 @@ import { ResultsPanel } from './panels/ResultsPanel';
 export default function WorkbenchPage() {
   const R = useRun();
   const [compatOpen, setCompatOpen] = useState(false);
+  const [sideOpen, setSideOpen] = useState(false);
   const canvasRef = useRef<HTMLDivElement | null>(null);
   useCanvasGrid(canvasRef, `${R.run?.id ?? 'none'}-${R.run?.state ?? ''}`);
 
@@ -41,10 +42,18 @@ export default function WorkbenchPage() {
         runName={R.run?.id ?? ''}
         elapsed={R.run?.result ? `${R.run.result.seconds}s` : ''}
         onNew={R.clear}
+        onToggleSide={() => setSideOpen((o) => !o)}
       />
 
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'stretch', flex: 1, minHeight: 0 }}>
-        <HistorySidebar history={R.history} currentId={R.run?.id ?? null} onOpen={R.openRun} />
+        <HistorySidebar
+          history={R.history}
+          currentId={R.run?.id ?? null}
+          open={sideOpen}
+          onOpen={(id) => { setSideOpen(false); void R.openRun(id); }}
+          onClose={() => setSideOpen(false)}
+        />
+        {sideOpen && <div className="wb-scrim" onClick={() => setSideOpen(false)} />}
 
         <div ref={canvasRef} style={{ flex: 1, minWidth: 0, position: 'relative', overflowY: 'auto' }}>
           {R.offline && (
@@ -75,7 +84,7 @@ export default function WorkbenchPage() {
             </div>
           )}
 
-          <div style={{ padding: '30px 40px 80px', display: 'flex', flexDirection: 'column', gap: 26 }}>
+          <div className="wb-pad" style={{ padding: '30px 40px 80px', display: 'flex', flexDirection: 'column', gap: 26 }}>
             <TableInput
               run={R.run}
               demos={R.demos}

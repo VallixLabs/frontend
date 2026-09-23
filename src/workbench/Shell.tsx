@@ -15,11 +15,13 @@ export function TopBar({
   runName,
   elapsed,
   onNew,
+  onToggleSide,
 }: {
   model: ModelStatus | null;
   runName: string;
   elapsed: string;
   onNew: () => void;
+  onToggleSide: () => void;
 }) {
   const tone = MODEL_TONE[model?.status ?? 'cold'] ?? wb.dim;
   const label =
@@ -33,12 +35,28 @@ export function TopBar({
       style={{
         position: 'sticky', top: 0, zIndex: 20, isolation: 'isolate',
         display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap',
-        padding: '0 22px', height: 70,
+        padding: '8px 16px', minHeight: 70,
         background: 'linear-gradient(180deg, rgba(42,51,58,0.86), rgba(36,34,32,0.9))',
         borderBottom: '1px solid rgba(255,255,255,0.08)',
         backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)',
       }}
     >
+      {/* Only rendered as a control below 900px; the stylesheet hides it above. */}
+      <button
+        type="button"
+        onClick={onToggleSide}
+        className="wb-side-toggle wb-ghost-btn"
+        aria-label="Toggle run history"
+        style={{
+          all: 'unset', cursor: 'pointer', display: 'inline-flex', flexDirection: 'column',
+          gap: 4, padding: '9px 8px', color: wb.muted,
+        }}
+      >
+        {[0, 1, 2].map((i) => (
+          <span key={i} style={{ width: 18, height: 2, background: 'currentColor', display: 'block' }} />
+        ))}
+      </button>
+
       <Link
         to="/"
         style={{
@@ -46,7 +64,7 @@ export function TopBar({
           borderRight: '1px solid rgba(255,255,255,0.07)', height: '100%', color: wb.fg,
         }}
       >
-        <Logo tone="onDark" height={45} />
+        <Logo tone="onDark" height={45} className="v-logo-md" />
         
       </Link>
 
@@ -57,7 +75,7 @@ export function TopBar({
       </div>
 
       {runName && (
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, minWidth: 0 }}>
+        <div className="v-hide-sm" style={{ display: 'flex', alignItems: 'baseline', gap: 10, minWidth: 0 }}>
           <span style={{ fontFamily: mono, fontSize: 13, color: wb.muted }}>{runName}</span>
           <span style={{ fontFamily: mono, fontSize: 12, color: wb.dim }}>{elapsed}</span>
         </div>
@@ -80,14 +98,20 @@ export function TopBar({
 export function HistorySidebar({
   history,
   currentId,
+  open,
   onOpen,
+  onClose,
 }: {
   history: HistoryRow[];
   currentId: string | null;
+  /** Only meaningful below 900px, where the rail is an off-canvas drawer. */
+  open: boolean;
   onOpen: (id: string) => void;
+  onClose: () => void;
 }) {
   return (
     <div
+      className={`wb-side${open ? ' wb-side-open' : ''}`}
       style={{
         width: 268, flex: '0 0 268px', borderRight: '1px solid rgba(255,255,255,0.07)',
         background: 'linear-gradient(180deg, rgba(40,48,55,0.6), rgba(27,34,40,0.75))',
@@ -95,11 +119,23 @@ export function HistorySidebar({
         padding: '18px 0 40px', overflowY: 'auto',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', padding: '0 20px 14px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '0 20px 14px' }}>
         <span style={{ fontFamily: mono, fontSize: 11, letterSpacing: '.16em', textTransform: 'uppercase', color: wb.dim }}>
           Run history
         </span>
+        <span style={{ flex: 1 }} />
         <span style={{ fontFamily: mono, fontSize: 11, color: wb.faint }}>{history.length}</span>
+        {/* The drawer covers the whole viewport on a phone, including the bar that
+            opened it, so it carries its own way out. */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="wb-side-toggle wb-close"
+          aria-label="Close run history"
+          style={{ all: 'unset', cursor: 'pointer', fontFamily: mono, fontSize: 15, color: wb.dim, padding: '0 2px' }}
+        >
+          ✕
+        </button>
       </div>
 
       {history.length === 0 && (

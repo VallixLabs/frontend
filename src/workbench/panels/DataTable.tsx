@@ -89,23 +89,6 @@ export function DataTable({
     <div style={glass}>
       {/* ------------------------------------------------------------ header */}
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 14, padding: '13px 16px', borderBottom: `1px solid ${wb.line}` }}>
-        <button
-          type="button"
-          onClick={onRun}
-          disabled={!!busy || !modelReady}
-          title={!modelReady ? 'The model is still fitting' : undefined}
-          style={{ ...primaryBtn, padding: '10px 18px', opacity: busy || !modelReady ? 0.45 : 1 }}
-        >
-          {busy ? 'running…' : run.state === 'scored' ? 'Re-run' : 'Run inference'}
-        </button>
-
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, minWidth: 0 }}>
-          <span style={{ fontFamily: mono, fontSize: 13, color: wb.fg }}>{run.filename}</span>
-          <span style={{ fontFamily: mono, fontSize: 12, color: wb.dim }}>{run.shape}</span>
-        </div>
-
-        <span style={{ flex: 1 }} />
-
         {/* Compatibility as a status, not a panel. Clicking it opens the detail. */}
         <button
           type="button"
@@ -120,6 +103,23 @@ export function DataTable({
         >
           <span style={{ width: 7, height: 7, background: run.compatible ? wb.good : wb.bad }} />
           {run.compatible ? 'compatible' : 'incompatible'}
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, minWidth: 0 }}>
+          <span style={{ fontFamily: mono, fontSize: 13, color: wb.fg }}>{run.filename}</span>
+          <span style={{ fontFamily: mono, fontSize: 12, color: wb.dim }}>{run.shape}</span>
+        </div>
+
+        <span style={{ flex: 1 }} />
+
+        <button
+          type="button"
+          onClick={onRun}
+          disabled={!!busy || !modelReady}
+          title={!modelReady ? 'The model is still fitting' : undefined}
+          style={{ ...primaryBtn, padding: '10px 22px', opacity: busy || !modelReady ? 0.45 : 1 }}
+        >
+          {busy ? 'running…' : run.state === 'scored' ? 'Re-run' : 'Run'}
         </button>
       </div>
 
@@ -195,7 +195,7 @@ export function DataTable({
                 </th>
               ))}
               {/* the answer block, tinted so the join is visible at a glance */}
-              <th style={{ ...head, ...stick, background: ANSWER_HEAD, borderLeft: `1px solid ${wb.rule}`, padding: 0 }}>
+              <th className="wb-answer" style={{ ...head, ...stick, background: ANSWER_HEAD, borderLeft: `1px solid ${wb.rule}`, padding: 0 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: ANSWER_COLS, gap: 10, padding: '9px 14px' }}>
                   <span style={{ textAlign: 'right', color: wb.dim }}>actual</span>
                   <span style={{ textAlign: 'right', color: wb.acc }}>predicted</span>
@@ -215,7 +215,7 @@ export function DataTable({
                   {cells.map((v, j) => (
                     <td key={j} style={{ ...cell, color: wb.muted }}>{v}</td>
                   ))}
-                  <td style={{ ...cell, ...stick, background: ANSWER_CELL, borderLeft: `1px solid ${wb.rule}`, padding: 0 }}>
+                  <td className="wb-answer" style={{ ...cell, ...stick, background: ANSWER_CELL, borderLeft: `1px solid ${wb.rule}`, padding: 0 }}>
                     <div style={{ display: 'grid', gridTemplateColumns: ANSWER_COLS, gap: 10, padding: '9px 14px' }}>
                       <span style={{ textAlign: 'right', color: p ? wb.muted : wb.ghost }}>{p ? p.actual : '—'}</span>
                       <span style={{ textAlign: 'right', color: p ? (cls ? (hit ? wb.good : wb.bad) : wb.fg) : wb.ghost }}>{p ? p.predicted : '—'}</span>

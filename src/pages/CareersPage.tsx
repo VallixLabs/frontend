@@ -76,7 +76,7 @@ export default function CareersPage() {
           <h2 style={{ margin: 0, fontFamily: font.mono, fontSize: 12, letterSpacing: '.16em', textTransform: 'uppercase', color: color.accent, fontWeight: 400 }}>
             How hiring works
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 20 }}>
+          <div className="v-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 20 }}>
             {HOW.map(([t, d], i) => (
               <div key={t} style={panel}>
                 <div style={{ fontFamily: font.mono, fontSize: 12, color: color.textFaint }}>{String(i + 1).padStart(2, '0')}</div>

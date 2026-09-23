@@ -19,6 +19,7 @@ const navLink: React.CSSProperties = {
 export function Header() {
   return (
     <header
+      className="v-gutter"
       style={{
         position: 'relative',
         zIndex: 5,
@@ -28,11 +29,13 @@ export function Header() {
       }}
     >
       <div
+        className="v-navrow"
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 24,
+          flexWrap: 'wrap',
         }}
       >
         <div
@@ -46,7 +49,7 @@ export function Header() {
           {/* The scribbled underline that used to sit here was decoration for a text
               wordmark. The logo carries its own grid rule, so it now reads as an
               artifact rather than a flourish. */}
-          <Logo tone="onLight" height={60} />
+          <Logo tone="onLight" height={60} className="v-logo-lg" />
         </div>
 
         <nav style={{ display: 'flex', alignItems: 'center', gap: 26, fontSize: 15 }}>

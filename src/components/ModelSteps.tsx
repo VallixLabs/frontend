@@ -188,7 +188,7 @@ export function ModelSteps() {
   const { step, select, registerBar, wrapRef, hoverHandlers } = useStepCarousel(steps.length);
 
   return (
-    <section id="model" style={{ ...bleedDark, padding: '90px 48px 140px' }}>
+    <section id="model" className="v-gutter" style={{ ...bleedDark, padding: '90px 48px 140px' }}>
       <div
         style={{
           display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end',
@@ -249,6 +249,7 @@ export function ModelSteps() {
       <div
         id="om-steps"
         ref={wrapRef}
+        className="v-stack"
         style={{
           display: 'grid',
           gridTemplateColumns: 'minmax(0,0.82fr) minmax(0,1.18fr)',

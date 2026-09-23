@@ -35,7 +35,7 @@ export default function ContactPage() {
       title="Talk to us"
       lede="Bring the messiest table you have. We will score it and send you the comparison against whatever you are running now — no integration, and your rows never have to leave your machine."
     >
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 24, alignItems: 'start' }}>
+      <div className="v-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 24, alignItems: 'start' }}>
         <form
           style={{ ...panel, gap: 16 }}
           onSubmit={(e) => { e.preventDefault(); window.location.href = mailto; }}
