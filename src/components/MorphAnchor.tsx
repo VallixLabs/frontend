@@ -153,7 +153,7 @@ export function MorphAnchor() {
           strokeLinejoin="round"
           filter="url(#om-morph)"
         >
-          <path data-morph="fill-paper" fill="#ebece9" stroke="none" d="M28 74 H400 V462 H28 Z" />
+          <path data-morph="fill-paper" fill="#ffffff" stroke="none" d="M28 74 H400 V462 H28 Z" />
           <path data-morph="accent-fill" fill="#777c7e" stroke="none" d="M28 74 H400 V126 H28 Z" />
           <path data-morph="stroke" d="M28 74 H400 V462 H28 Z" />
           <path data-morph="stroke" d="M28 126 H400 M28 182 H400 M28 238 H400 M28 294 H400 M28 350 H400 M28 406 H400 M152 74 V462 M276 74 V462" />

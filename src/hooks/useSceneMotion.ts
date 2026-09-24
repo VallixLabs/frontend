@@ -132,7 +132,7 @@ export function useSceneMotion({ roughness, lineBoil, parallax }: SceneProps) {
       svg.querySelectorAll<SVGElement>('[data-morph]').forEach((el) => {
         const role = el.getAttribute('data-morph');
         if (el.hasAttribute('data-d0')) lerpPath(el, g);
-        if (role === 'fill-paper') el.setAttribute('fill', mixHex('#ebece9', '#293138', cp));
+        if (role === 'fill-paper') el.setAttribute('fill', mixHex('#ffffff', '#293138', cp));
         else if (role === 'accent-fill') el.setAttribute('fill', mixHex('#475625', '#859857', cp));
         else if (role === 'fill-soft') {
           el.setAttribute('fill', mixHex('#a7acaa', '#39424a', cp));
@@ -146,7 +146,7 @@ export function useSceneMotion({ roughness, lineBoil, parallax }: SceneProps) {
           el.setAttribute('fill', mixHex('#475625', '#859857', cp));
           el.setAttribute('stroke', inkColor);
         } else if (role === 'node') {
-          el.setAttribute('fill', mixHex('#ebece9', '#293138', cp));
+          el.setAttribute('fill', mixHex('#ffffff', '#293138', cp));
           el.setAttribute('stroke', inkColor);
         }
       });
@@ -196,11 +196,14 @@ export function useSceneMotion({ roughness, lineBoil, parallax }: SceneProps) {
 
       const anchor = document.getElementById('om-anchor');
       const paper = document.getElementById('om-paper');
+      const grain = document.getElementById('om-grain');
       if (!anchor) return;
 
       const ar = anchor.getBoundingClientRect();
       const t = clamp01((vh * 0.6 - ar.top) / (vh * 0.75));
       if (paper) paper.style.opacity = String(1 - t);
+      // The grain belongs to the paper, so it leaves on the same ramp.
+      if (grain) grain.style.opacity = String(1 - t);
 
       // The illustration morph runs over a much longer scroll distance than the
       // ground ramp, tied to the illustration's own viewport position.

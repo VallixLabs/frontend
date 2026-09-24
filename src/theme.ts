@@ -31,7 +31,11 @@
 
 export const color = {
   // grounds
-  paper: '#e0e1dd',        // brand light
+  // A tint of the brand light toward white, not the anchor itself. #e0e1dd is the
+  // logo *mark*, which in the logo sits on navy; used flat as a page ground at
+  // 87.5% lightness it reads as grey rather than as paper. This is the same hue,
+  // lifted to white, and every stroke and text tone on it gains contrast.
+  paper: '#ffffff',      // pure; the grain's sparse specks carry the texture
   ink: '#212930',          // brand navy
   inkRaised: '#293138',
   inkCard: '#262e35',
@@ -41,7 +45,7 @@ export const color = {
   sketchLine: '#212930',
   sketchSoft: '#777c7e',
   sketchFaint: '#8a8e8f',
-  sketchFill: '#ebece9',
+  sketchFill: '#ffffff',   // filled shapes still sit above the ground
   sketchMuted: '#485259',  // brand azure: body copy on paper
   sketchLabel: '#5a6064',
 

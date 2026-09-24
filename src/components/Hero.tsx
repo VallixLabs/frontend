@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 import { color, font } from '../theme';
 import { HeroDecor, Par } from './HeroDecor';
 
@@ -15,21 +17,12 @@ export function Hero() {
     >
       <HeroDecor />
 
-      {/* A radial scrim anchored over the copy, so the scenery stays legible
-          behind the headline without dimming the illustration on the right. */}
-      <div
-        style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: -160,
-          pointerEvents: 'none',
-          zIndex: 1,
-          background:
-            'radial-gradient(76% 84% at 22% 50%, rgba(224,225,221,0.985) 0%, rgba(224,225,221,0.93) 42%, rgba(224,225,221,0.5) 70%, rgba(224,225,221,0.05) 100%)',
-        }}
-      />
+      {/* The radial scrim that used to sit here is gone.
+          It was a white wash at up to 86% alpha, painted above the grain, so it
+          washed the texture out of exactly the area it covered — the left half —
+          and the grain read as uneven across the page. Its two jobs no longer
+          needed doing: it cannot brighten a ground that is already pure white, and
+          the scenery it was meant to quieten now sits at opacity 0.10 and below. */}
 
       <div
         className="v-gutter"
@@ -91,7 +84,43 @@ export function Hero() {
               textWrap: 'pretty',
             }}
           >
-            No data scientist, no ML pipeline, only predict.
+            No data scientist, no ML pipeline,{' '}
+            {/* The last word of the sentence is the way in. It keeps the handwriting
+                rather than becoming a separate CTA block, so the line still reads as
+                one sentence — the sketched outline is what marks it as pressable.
+                "just" travels with it so the line never breaks between the two. */}
+            <span style={{ whiteSpace: 'nowrap' }}>
+              just{' '}
+              <Link
+                to="/workbench"
+                style={{
+                  position: 'relative',
+                  display: 'inline-block',
+                  padding: '2px 15px 4px',
+                  fontFamily: font.hand,
+                  fontWeight: 700,
+                  fontSize: '1.12em',
+                  lineHeight: 1,
+                  color: color.accentDeep,
+                }}
+              >
+                <span style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} aria-hidden="true">
+                  <svg
+                    viewBox="0 0 150 52"
+                    preserveAspectRatio="none"
+                    style={{ width: '100%', height: '100%', display: 'block' }}
+                    fill="none"
+                    stroke={color.accentDeep}
+                    strokeWidth="2.6"
+                    strokeLinecap="round"
+                    filter="url(#rough)"
+                  >
+                    <path d="M13 7 H137 C146 7, 147 17, 146 27 C 145 39, 143 45, 133 45 H17 C 7 45, 4 35, 4 26 C 4 14, 5 7, 13 7 Z" />
+                  </svg>
+                </span>
+                <span style={{ position: 'relative' }}>predict</span>
+              </Link>
+            </span>
           </p>
 
         </div>

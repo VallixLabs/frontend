@@ -85,7 +85,7 @@ export function HeroDecor() {
         floatSpeed={0.35}
         mouse={26}
         rot={2.4}
-        style={{ position: 'absolute', right: '-14%', top: '4%', width: '74%', opacity: 0.16, color: '#212930' }}
+        style={{ position: 'absolute', right: '-14%', top: '4%', width: '74%', opacity: 0.1, color: '#212930' }}
       >
         <svg viewBox="0 0 620 460" style={{ width: '100%', display: 'block' }} {...sketch} strokeWidth="2.4" transform="rotate(-4)">
           <path d="M20 30 H600 V430 H20 Z" />
@@ -100,7 +100,7 @@ export function HeroDecor() {
         floatSpeed={0.5}
         mouse={-40}
         rot={-3}
-        style={{ position: 'absolute', left: '-8%', bottom: '-6%', width: '46%', opacity: 0.12, color: '#212930' }}
+        style={{ position: 'absolute', left: '-8%', bottom: '-6%', width: '46%', opacity: 0.075, color: '#212930' }}
       >
         <svg viewBox="0 0 460 340" style={{ width: '100%', display: 'block' }} {...sketch}>
           <path d="M16 24 H444 V316 H16 Z" />
@@ -131,12 +131,12 @@ export function HeroDecor() {
           strokeLinejoin="round"
           filter="url(#rough)"
         >
-          <path d="M24 54 H452 V444 H24 Z" fill="#ebece9" />
-          <path d="M24 54 H452 V104 H24 Z" fill="#777c7e" opacity="0.55" stroke="none" />
+          <path d="M24 54 H452 V444 H24 Z" fill="#ffffff" />
+          <path d="M24 54 H452 V104 H24 Z" fill="#777c7e" opacity="0.34" stroke="none" />
           <path d="M24 104 H452 M24 152 H452 M24 200 H452 M24 248 H452 M24 296 H452 M24 344 H452 M24 396 H452" />
           <path d="M131 54 V444 M238 54 V444 M345 54 V444" />
           <path d="M42 82 H104 M148 82 H214 M256 82 H318 M364 82 H432" strokeWidth="2.4" />
-          <path d="M24 248 H452 V296 H24 Z" fill="#777c7e" opacity="0.16" stroke="none" />
+          <path d="M24 248 H452 V296 H24 Z" fill="#777c7e" opacity="0.1" stroke="none" />
           <path d="M42 130 H112 M148 130 H210 M256 130 H310 M364 130 H420" strokeWidth="1.8" opacity="0.7" />
           <path d="M42 178 H100 M148 178 H186 M364 178 H414" strokeWidth="1.8" opacity="0.7" />
           <path d="M262 168 L288 190 M288 168 L262 190" stroke="#485259" strokeWidth="3.2" />
@@ -147,11 +147,11 @@ export function HeroDecor() {
           <path d="M42 322 H124 M148 322 H204 M256 322 H296 M364 322 H408" strokeWidth="1.8" opacity="0.7" />
           <path d="M42 372 H104 M148 372 H190 M256 372 H326 M364 372 H396" strokeWidth="1.8" opacity="0.7" />
           <path d="M42 420 H112 M148 420 H180 M256 420 H308 M364 420 H430" strokeWidth="1.8" opacity="0.7" />
-          <path d="M468 66 H612 V438 H468 Z" fill="#828d92" opacity="0.2" stroke="none" />
+          <path d="M468 66 H612 V438 H468 Z" fill="#828d92" opacity="0.13" stroke="none" />
           <path d="M468 66 H612 V438 H468 Z" stroke="#828d92" />
           <path d="M468 116 H612" stroke="#828d92" strokeWidth="2.2" />
           <path d="M482 94 H556" stroke="#828d92" strokeWidth="2.4" />
-          <path d="M482 142 H586 M482 190 H528 M482 238 H600 M482 286 H548 M482 334 H570 M482 382 H514 M482 424 H562" stroke="#828d92" strokeWidth="8" opacity="0.85" />
+          <path d="M482 142 H586 M482 190 H528 M482 238 H600 M482 286 H548 M482 334 H570 M482 382 H514 M482 424 H562" stroke="#828d92" strokeWidth="8" opacity="0.5" />
           <path d="M586 134 V150 M528 182 V198 M600 230 V246 M548 278 V294 M570 326 V342 M514 374 V390 M562 416 V432" stroke="#212930" strokeWidth="1.6" opacity="0.5" />
           <path d="M578 134 H594 M578 150 H594 M520 182 H536 M520 198 H536 M592 230 H608 M592 246 H608 M540 278 H556 M540 294 H556" stroke="#212930" strokeWidth="1.4" opacity="0.45" />
           <path d="M520 34 C 536 12, 590 14, 596 40" stroke="#485259" strokeWidth="2.4" />

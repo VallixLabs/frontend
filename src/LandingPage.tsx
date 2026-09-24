@@ -76,6 +76,30 @@ export default function LandingPage({
         }}
       />
 
+
+      {/* The grain, immediately above the ground and below everything else.
+          It is part of the paper, not a film over the page: the illustrations, the
+          cards and the type sit *on* the textured ground rather than being textured
+          themselves, which is how ink on paper actually behaves. `useSceneMotion`
+          drives its opacity from the same ramp as the ground, so the texture leaves
+          exactly when the paper does. */}
+      <div
+        id="om-grain"
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          // Same stacking level as the ground and later in the DOM, so it paints
+          // over the paper while staying under the content at zIndex 1.
+          zIndex: 0,
+          pointerEvents: 'none',
+          backgroundImage: 'url(/grain.png)',
+          backgroundRepeat: 'repeat',
+          backgroundSize: '128px 128px',
+          mixBlendMode: 'multiply',
+        }}
+      />
+
       <div style={{ position: 'relative', zIndex: 1 }}>
         <Header />
         <Hero />
