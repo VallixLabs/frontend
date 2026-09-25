@@ -3,10 +3,10 @@ import { color, font } from '../theme';
 /**
  * The hinge of the page.
  *
- * Scrolling through this section swaps the ground from paper to ink, wipes the
- * handwritten headline out from under a typeset copy of itself, and resolves the
- * sketched table-and-blob illustration into a structured diagram. All three are
- * driven from `useSceneMotion`; everything here is the markup it reaches for.
+ * Scrolling through this section wipes the handwritten headline out from under a
+ * typeset copy of itself and resolves the sketched table-and-blob illustration
+ * into a structured diagram. The ground no longer changes here — the video above
+ * does that — so both are animations on a fixed navy ground.
  *
  * The two headline copies are stacked and masked with complementary gradients —
  * a wipe, not a crossfade, so the handwriting is *overwritten* rather than faded
@@ -47,28 +47,16 @@ export function MorphAnchor() {
         zIndex: 1,
         maxWidth: 1180,
         margin: '0 auto',
-        padding: '60px 48px 230px',
+        padding: '18px 48px 210px',
         textAlign: 'center',
       }}
     >
-      {/* full-bleed ramp into the dark half */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          bottom: 0,
-          left: '50%',
-          width: '100vw',
-          transform: 'translateX(-50%)',
-          pointerEvents: 'none',
-          zIndex: -1,
-          background:
-            'linear-gradient(to bottom, rgba(33,41,48,0) 0%, rgba(33,41,48,0.55) 55%, #212930 100%)',
-        }}
-      />
+      {/* The full-bleed colour ramp that used to sit here is gone. The ground
+          changes at the video above, so this section is already on navy when it
+          arrives and has only its text and illustration animations left to run. */}
 
       <div id="om-morph-head" style={{ position: 'relative', marginBottom: 24 }}>
-        <h2 id="om-morph-doodle" style={{ ...headlineStyle, color: color.ink }}>
+        <h2 id="om-morph-doodle" style={{ ...headlineStyle, color: color.sketchMuted }}>
           {HEADLINE.map((line, i) => (
             <span
               key={i}
@@ -111,7 +99,7 @@ export function MorphAnchor() {
           data-line="0"
           style={{
             ...ledeStyle,
-            color: color.ink,
+            color: color.sketchMuted,
             WebkitMaskImage: 'linear-gradient(to right, transparent -7%, #000 7%)',
             maskImage: 'linear-gradient(to right, transparent -7%, #000 7%)',
           }}

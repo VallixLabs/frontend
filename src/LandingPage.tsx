@@ -7,6 +7,7 @@ import { RoughFilters } from './components/RoughFilters';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { Problem } from './components/Problem';
+import { VideoScroll } from './components/VideoScroll';
 import { MorphAnchor } from './components/MorphAnchor';
 import { ModelSteps } from './components/ModelSteps';
 import { Benchmarks } from './components/Benchmarks';
@@ -104,6 +105,7 @@ export default function LandingPage({
         <Header />
         <Hero />
         <Problem />
+        <VideoScroll />
         <MorphAnchor />
         <ModelSteps />
         <Benchmarks />

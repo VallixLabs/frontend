@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { breakpointFor, clamp01, lerpPath, mixHex, type Breakpoint } from '../lib/morph';
+import { breakpointFor, clamp01, lerpPath, type Breakpoint } from '../lib/morph';
 
 export type SceneProps = {
   /** Displacement scale of the hand-drawn `rough` filter. */
@@ -81,13 +81,17 @@ export function useSceneMotion({ roughness, lineBoil, parallax }: SceneProps) {
       if (deco) deco.style.opacity = mode === 'tight' ? '0.35' : '1';
     };
 
-    const morph = (p: number, mp: number) => {
+    const morph = (wipe: number, mp: number) => {
       // The handwriting is overwritten line by line by the typeset copy: a
       // soft-edged wipe, not a crossfade. Each line starts slightly after the last.
-      const wipe = (el: HTMLElement | null, dir: 'in' | 'out') => {
+      //
+      // `wipe` is the morph section's own progress now, not the ground ramp. The
+      // ground changes at the video above, so by the time this runs the page is
+      // already navy and a ramp shared with it would arrive here finished.
+      const wipeLines = (el: HTMLElement | null, dir: 'in' | 'out') => {
         if (!el) return;
         el.querySelectorAll<HTMLElement>('[data-line]').forEach((line, i) => {
-          const local = clamp01((p - (0.4 + i * 0.05)) / 0.16) * 100;
+          const local = clamp01((wipe - (0.18 + i * 0.1)) / 0.26) * 100;
           const g =
             dir === 'out'
               ? `linear-gradient(to right, transparent ${(local - 7).toFixed(1)}%, #000 ${(local + 7).toFixed(1)}%)`
@@ -96,13 +100,13 @@ export function useSceneMotion({ roughness, lineBoil, parallax }: SceneProps) {
           line.style.maskImage = g;
         });
       };
-      wipe(document.getElementById('om-morph-doodle'), 'out');
-      wipe(document.getElementById('om-morph-doodle-light'), 'in');
+      wipeLines(document.getElementById('om-morph-doodle'), 'out');
+      wipeLines(document.getElementById('om-morph-doodle-light'), 'in');
 
       const lede = document.getElementById('om-morph-lede');
       if (lede) {
         lede.querySelectorAll<HTMLElement>('p').forEach((el) => {
-          const local = clamp01((p - 0.42) / 0.16) * 100;
+          const local = clamp01((wipe - 0.34) / 0.26) * 100;
           const light = el.hasAttribute('data-lede-light');
           const g = light
             ? `linear-gradient(to right, #000 ${(local - 7).toFixed(1)}%, transparent ${(local + 7).toFixed(1)}%)`
@@ -115,39 +119,34 @@ export function useSceneMotion({ roughness, lineBoil, parallax }: SceneProps) {
       const svg = document.getElementById('om-morph-svg');
       if (!svg) return;
 
-      // Geometry rides the slow ramp so the whole arc plays while the illustration
-      // is on screen. Colour crosses in one narrow window centred on the ground's
-      // own crossover — endpoints are swapped, never lerped through mid-grey,
-      // because mid-grey is exactly where the ground is at that moment.
+      // Shape only. The colour crossfade that used to run here is gone with the
+      // ground change it accompanied — this section sits entirely on navy, so
+      // every tone below is the dark-side value, set once and never interpolated.
       const g = mp;
-      const cp = clamp01((p - 0.485) / 0.03);
 
       const disp = document.getElementById('om-morph-disp');
       if (disp) disp.setAttribute('scale', String(propsRef.current.roughness * (1 - g)));
 
       svg.setAttribute('stroke-width', (2.6 - 1.2 * g).toFixed(2));
-      const inkColor = mixHex('#212930', '#c2c4c3', cp);
-      svg.setAttribute('stroke', inkColor);
+      svg.setAttribute('stroke', '#c2c4c3');
 
       svg.querySelectorAll<SVGElement>('[data-morph]').forEach((el) => {
         const role = el.getAttribute('data-morph');
         if (el.hasAttribute('data-d0')) lerpPath(el, g);
-        if (role === 'fill-paper') el.setAttribute('fill', mixHex('#ffffff', '#293138', cp));
-        else if (role === 'accent-fill') el.setAttribute('fill', mixHex('#475625', '#859857', cp));
+        if (role === 'fill-paper') el.setAttribute('fill', '#293138');
+        else if (role === 'accent-fill') el.setAttribute('fill', '#859857');
         else if (role === 'fill-soft') {
-          el.setAttribute('fill', mixHex('#a7acaa', '#39424a', cp));
-          el.setAttribute('opacity', String(0.55 + cp * 0.45));
-        } else if (role === 'stroke-accent')
-          el.setAttribute('stroke', mixHex('#475625', '#859857', cp));
-        else if (role === 'stroke-dim') el.setAttribute('opacity', String(0.7 - cp * 0.25));
-        else if (role === 'stroke-ghost')
-          el.setAttribute('opacity', String(0.34 * (1 - cp * 0.55)));
+          el.setAttribute('fill', '#39424a');
+          el.setAttribute('opacity', '1');
+        } else if (role === 'stroke-accent') el.setAttribute('stroke', '#859857');
+        else if (role === 'stroke-dim') el.setAttribute('opacity', '0.45');
+        else if (role === 'stroke-ghost') el.setAttribute('opacity', '0.15');
         else if (role === 'node-accent') {
-          el.setAttribute('fill', mixHex('#475625', '#859857', cp));
-          el.setAttribute('stroke', inkColor);
+          el.setAttribute('fill', '#859857');
+          el.setAttribute('stroke', '#c2c4c3');
         } else if (role === 'node') {
-          el.setAttribute('fill', mixHex('#ffffff', '#293138', cp));
-          el.setAttribute('stroke', inkColor);
+          el.setAttribute('fill', '#293138');
+          el.setAttribute('stroke', '#c2c4c3');
         }
       });
     };
@@ -194,23 +193,31 @@ export function useSceneMotion({ roughness, lineBoil, parallax }: SceneProps) {
         el.style.willChange = 'transform';
       });
 
-      const anchor = document.getElementById('om-anchor');
+      // The ground now changes at the video, not at the morph section: the paper
+      // and its grain fade as the video grows to take the screen, and stay gone.
+      const video = document.getElementById('om-video');
       const paper = document.getElementById('om-paper');
       const grain = document.getElementById('om-grain');
+      if (video) {
+        const vt = video.getBoundingClientRect().top;
+        const e = clamp01((vh * 0.7 - vt) / (vh * 0.7));
+        if (paper) paper.style.opacity = String(1 - e);
+        if (grain) grain.style.opacity = String(1 - e);
+      }
+
+      const anchor = document.getElementById('om-anchor');
       if (!anchor) return;
 
+      // The text wipe rides the morph section's own position.
       const ar = anchor.getBoundingClientRect();
-      const t = clamp01((vh * 0.6 - ar.top) / (vh * 0.75));
-      if (paper) paper.style.opacity = String(1 - t);
-      // The grain belongs to the paper, so it leaves on the same ramp.
-      if (grain) grain.style.opacity = String(1 - t);
+      const wipe = clamp01((vh * 0.85 - ar.top) / (vh * 0.85));
 
-      // The illustration morph runs over a much longer scroll distance than the
-      // ground ramp, tied to the illustration's own viewport position.
+      // The illustration's shape morph runs over a longer distance, tied to where
+      // the drawing itself sits, so the whole arc plays while it is on screen.
       const msvg = document.getElementById('om-morph-svg');
       const sr = msvg ? msvg.getBoundingClientRect() : null;
-      const slow = sr ? clamp01((vh * 0.7 - sr.top) / (vh * 0.8)) : t;
-      morph(t, slow);
+      const slow = sr ? clamp01((vh * 0.7 - sr.top) / (vh * 0.8)) : wipe;
+      morph(wipe, slow);
     };
 
     const onMove = (e: PointerEvent) => {

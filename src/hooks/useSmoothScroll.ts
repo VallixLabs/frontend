@@ -14,6 +14,13 @@ import Lenis from 'lenis';
  * In-page anchors are routed through Lenis too, otherwise clicking a nav link
  * would jump while every other scroll eased.
  */
+let current: Lenis | null = null;
+
+/** The running Lenis instance, for components that need to drive the scroll. */
+export function getLenis(): Lenis | null {
+  return current;
+}
+
 export function useSmoothScroll() {
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -24,6 +31,8 @@ export function useSmoothScroll() {
       wheelMultiplier: 1,
       touchMultiplier: 1.6,
     });
+
+    current = lenis;
 
     let raf = 0;
     const frame = (time: number) => {
@@ -47,6 +56,7 @@ export function useSmoothScroll() {
       document.removeEventListener('click', onClick);
       cancelAnimationFrame(raf);
       lenis.destroy();
+      current = null;
     };
   }, []);
 }
