@@ -23,7 +23,9 @@ export function ResultsPanel({ run }: { run: Run }) {
   const px = (i: number) => 46 + (i * 300) / Math.max(1, ctx.length - 1);
   const py = (v: number) => 22 + (1 - (v - lo) / span) * 150;
 
-  const best = Math.min(...res.arms.map((a) => a.scores['8']?.loss ?? Infinity));
+  // the winner is read at the largest context, the setting the served model runs at
+  const top = ctx[ctx.length - 1];
+  const best = Math.min(...res.arms.map((a) => a.scores[String(top)]?.loss ?? Infinity));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -42,7 +44,7 @@ export function ResultsPanel({ run }: { run: Run }) {
         <div style={{ ...glass, display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 16px', borderBottom: `1px solid ${wb.line}` }}>
             <span style={capLabel}>{res.metric_name}</span>
-            <span style={{ fontFamily: mono, fontSize: 11, color: wb.faint }}>lower is better</span>
+            <span style={{ fontFamily: mono, fontSize: 11, color: wb.faint }}>held-out rows · lower is better</span>
           </div>
 
           <div style={{ overflowX: 'auto' }}>
@@ -51,17 +53,20 @@ export function ResultsPanel({ run }: { run: Run }) {
                 <tr>
                   <th style={{ textAlign: 'left', padding: '9px 16px', borderBottom: `1px solid ${wb.line}`, fontSize: 10, letterSpacing: '.08em', textTransform: 'uppercase', color: wb.faint, fontWeight: 400 }}>arm</th>
                   {ctx.map((c) => (
-                    <th key={c} style={{ textAlign: 'right', padding: '9px 14px', borderBottom: `1px solid ${wb.line}`, fontSize: 10, letterSpacing: '.08em', textTransform: 'uppercase', color: c === 8 ? wb.acc : wb.faint, fontWeight: 400 }}>{c}</th>
+                    <th key={c} style={{ textAlign: 'right', padding: '9px 14px', borderBottom: `1px solid ${wb.line}`, fontSize: 10, letterSpacing: '.08em', textTransform: 'uppercase', color: c === top ? wb.acc : wb.faint, fontWeight: 400 }}>{c}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {res.arms.map((a) => (
                   <tr key={a.key}>
-                    <td style={{ padding: '10px 16px', borderBottom: `1px solid ${wb.lineSoft}`, color: a.served ? wb.acc : wb.fg, whiteSpace: 'nowrap' }}>{a.name}</td>
+                    <td style={{ padding: '10px 16px', borderBottom: `1px solid ${wb.lineSoft}`, color: a.served ? wb.acc : wb.fg }}>
+                      <div style={{ whiteSpace: 'nowrap' }}>{a.name}</div>
+                      {a.note && <div style={{ marginTop: 3, fontSize: 10.5, color: wb.dim, maxWidth: 260, lineHeight: 1.4 }}>{a.note}</div>}
+                    </td>
                     {ctx.map((c) => {
                       const v = a.scores[String(c)]?.loss;
-                      const win = c === 8 && Math.abs((v ?? NaN) - best) < 1e-9;
+                      const win = c === top && Math.abs((v ?? NaN) - best) < 1e-9;
                       return (
                         <td key={c} style={{ textAlign: 'right', padding: '10px 14px', borderBottom: `1px solid ${wb.lineSoft}`, color: win ? wb.acc : wb.muted, fontWeight: win ? 600 : 400 }}>
                           {Number.isFinite(v) ? v!.toFixed(3) : '—'}

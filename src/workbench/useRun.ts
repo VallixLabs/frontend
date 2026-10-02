@@ -108,6 +108,23 @@ export function useRun() {
       void refreshHistory();
     }), [guard, refreshHistory, run]);
 
+  // PriorFM builds a model for an uploaded table in the background (minutes). While its row
+  // says queued/building, re-fetch the run so the scores appear without a reload.
+  const pending = run?.result?.arms.some((a) => a.key === 'priorfm' && /^(queued|building)/.test(a.note)) ?? false;
+  useEffect(() => {
+    if (!pending || !run) return;
+    const id = run.id;
+    const t = window.setInterval(async () => {
+      try {
+        const r = await api.run(id);
+        setRun((cur) => (cur?.id === id ? r : cur));
+      } catch {
+        /* a missed poll is retried on the next tick */
+      }
+    }, 3000);
+    return () => window.clearInterval(t);
+  }, [pending, run?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const clear = useCallback(() => {
     setRun(null);
     setError(null);

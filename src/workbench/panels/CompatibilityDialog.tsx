@@ -5,10 +5,10 @@ import type { Check } from '../api';
  * The architecture screen, shown as a dialog when a run is attempted on a table
  * that cannot be served.
  *
- * The caps are hard properties of the encoder, not a quota: it has exactly 17
- * slots, sixteen features plus the target. A table that misses them is refused
- * whole rather than truncated, because a model fitted to a mutilated table answers
- * a different question than the one that was asked.
+ * The caps come from the served models, not a quota: TabICL was pre-trained on up
+ * to 100 features and 10 classes, and PriorFM's router needs at least 64 rows. A
+ * table that misses them is refused whole rather than truncated, because a model
+ * fitted to a mutilated table answers a different question than the one asked.
  */
 export function CompatibilityDialog({
   checks,
@@ -68,9 +68,9 @@ export function CompatibilityDialog({
                 fitted to a mutilated table answers a different question than the one you asked.
               </p>
               <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.65, color: wb.muted, fontFamily: sans }}>
-                The encoder has exactly 17 slots: 16 feature columns plus the target. Of 331
-                published OpenML datasets, 189 fail that cap — it is a limitation of the
-                architecture, not a quota.
+                The limits come from the models: TabICL was pre-trained on tables of up to 100
+                features and 10 classes, and PriorFM's router needs at least 64 rows to describe
+                a table. This demo also caps tables at 10,000 rows.
               </p>
             </>
           )}

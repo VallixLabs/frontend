@@ -94,8 +94,12 @@ class ApiError extends Error {
   }
 }
 
+// Every request carries this header. The backend refuses POSTs without it, which stops another
+// site from driving the local API through the browser (a custom header needs CORS approval).
+const CLIENT_HEADER = { 'X-Vallix-Client': 'workbench' };
+
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(path, init);
+  const res = await fetch(path, { ...init, headers: { ...CLIENT_HEADER, ...(init?.headers ?? {}) } });
   if (!res.ok) {
     let detail = res.statusText;
     try {
