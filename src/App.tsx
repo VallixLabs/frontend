@@ -5,6 +5,7 @@ import WorkbenchPage from './workbench/WorkbenchPage';
 import TeamPage from './pages/TeamPage';
 import CareersPage from './pages/CareersPage';
 import ContactPage from './pages/ContactPage';
+import PrivacyPage from './pages/PrivacyPage';
 
 /**
  * Two pages, deliberately on paths rather than hashes: the landing page navigates
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/team" element={<TeamPage />} />
         <Route path="/careers" element={<CareersPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
       </Routes>
     </BrowserRouter>
   );

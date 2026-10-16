@@ -95,11 +95,17 @@ export function Footer() {
           © 2026 Vallix Labs. All rights reserved.
         </span>
         <span style={{ flex: 1 }} />
-        {LEGAL.map((l) => (
-          <span key={l} style={{ fontSize: 13, color: color.textFaint, cursor: 'default' }} title="Not available yet">
-            {l}
-          </span>
-        ))}
+        {LEGAL.map((l) =>
+          l === 'Privacy Policy' ? (
+            <Link key={l} to="/privacy" className="v-footlink" style={{ fontSize: 13, color: color.textMuted }}>
+              {l}
+            </Link>
+          ) : (
+            <span key={l} style={{ fontSize: 13, color: color.textFaint, cursor: 'default' }} title="Not available yet">
+              {l}
+            </span>
+          ),
+        )}
       </div>
     </footer>
   );

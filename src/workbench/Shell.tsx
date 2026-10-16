@@ -16,12 +16,15 @@ export function TopBar({
   elapsed,
   onNew,
   onToggleSide,
+  account,
 }: {
   model: ModelStatus | null;
   runName: string;
   elapsed: string;
   onNew: () => void;
   onToggleSide: () => void;
+  /** The signed-in account and its sign-out control. */
+  account?: React.ReactNode;
 }) {
   const tone = MODEL_TONE[model?.status ?? 'cold'] ?? wb.dim;
   const label =
@@ -82,6 +85,7 @@ export function TopBar({
       )}
 
       <div style={{ flex: 1 }} />
+      {account}
       <button type="button" onClick={onNew} className="wb-ghost-btn"
         style={{ all: 'unset', cursor: 'pointer', fontFamily: sans, fontSize: 13, color: wb.body, background: 'rgba(255,255,255,0.04)', padding: '7px 14px' }}>
         New run

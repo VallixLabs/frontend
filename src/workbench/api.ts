@@ -1,4 +1,11 @@
-/** Typed client for the workbench API. One origin in dev via the Vite proxy. */
+/**
+ * Typed client for the workbench API.
+ *
+ * In production the API lives on its own host (`VITE_API_BASE`, e.g. https://api.vallixlabs.com)
+ * and the browser proves who is calling with the session cookie that host set at sign-in, so every
+ * request is sent with `credentials: 'include'`. In dev the base is empty and the Vite proxy keeps
+ * the browser on one origin.
+ */
 
 export type Check = { label: string; value: string; ok: boolean };
 export type ColumnInfo = {
@@ -94,12 +101,36 @@ class ApiError extends Error {
   }
 }
 
+/** The session is missing or expired: the workbench shows the sign-in screen. */
+class UnauthorizedError extends ApiError {
+  constructor(message = 'sign in required') {
+    super(401, message);
+  }
+}
+
+/** Where the API is. Empty means "this origin" (dev, behind the Vite proxy). */
+export const API_BASE: string = (import.meta.env.VITE_API_BASE ?? '').replace(/\/+$/, '');
+
 // Every request carries this header. The backend refuses POSTs without it, which stops another
-// site from driving the local API through the browser (a custom header needs CORS approval).
+// site from driving the API through the browser (a custom header needs CORS approval, and the
+// backend approves only the Vallix frontend's origin).
 const CLIENT_HEADER = { 'X-Vallix-Client': 'workbench' };
 
-async function req<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(path, { ...init, headers: { ...CLIENT_HEADER, ...(init?.headers ?? {}) } });
+// A 401 from any call means the session ended while the page was open. Whoever shows the sign-in
+// screen subscribes here, so no individual caller has to handle it.
+type Listener = () => void;
+const unauthorizedListeners = new Set<Listener>();
+export function onUnauthorized(fn: Listener): () => void {
+  unauthorizedListeners.add(fn);
+  return () => unauthorizedListeners.delete(fn);
+}
+
+async function send(path: string, init?: RequestInit): Promise<Response> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...init,
+    credentials: 'include',
+    headers: { ...CLIENT_HEADER, ...(init?.headers ?? {}) },
+  });
   if (!res.ok) {
     let detail = res.statusText;
     try {
@@ -107,12 +138,31 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       /* the body was not JSON; the status text will do */
     }
+    if (res.status === 401) {
+      unauthorizedListeners.forEach((fn) => fn());
+      throw new UnauthorizedError(detail);
+    }
     throw new ApiError(res.status, detail);
   }
-  return res.json() as Promise<T>;
+  return res;
+}
+
+async function req<T>(path: string, init?: RequestInit): Promise<T> {
+  return (await send(path, init)).json() as Promise<T>;
+}
+
+export type Me = { email: string; name: string; picture: string | null };
+
+/** Sign-in is a full-page navigation: the backend redirects to Google and back. */
+export function signInUrl(next = '/workbench'): string {
+  return `${API_BASE}/auth/google/login?next=${encodeURIComponent(next)}`;
 }
 
 export const api = {
+  /** The signed-in account; throws UnauthorizedError when signed out. */
+  me: () => req<Me>('/api/me'),
+  logout: async () => { await send('/auth/logout', { method: 'POST' }); },
+
   model: () => req<ModelStatus>('/api/model'),
   demos: () => req<{ demos: Demo[] }>('/api/demos'),
   history: () => req<{ history: HistoryRow[] }>('/api/runs'),
@@ -153,4 +203,4 @@ export const api = {
     req<{ filename: string; content: string }>(`/api/runs/${id}/export/${kind}`),
 };
 
-export { ApiError };
+export { ApiError, UnauthorizedError };
