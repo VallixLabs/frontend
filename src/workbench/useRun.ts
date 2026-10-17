@@ -1,6 +1,27 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { api, type Demo, type HistoryRow, type ModelStatus, type Run } from './api';
+import { api, type Demo, type HistoryRow, type ModelKey, type ModelStatus, type Run } from './api';
+
+// The model choice is a per-browser convenience; storage can be blocked or throw (private windows),
+// in which case the choice simply starts at TabICL every visit.
+const CHOICE_KEY = 'vallix.workbench.model';
+
+function readChoice(): ModelKey {
+  try {
+    const v = window.localStorage.getItem(CHOICE_KEY);
+    return v === 'priorfm' || v === 'tabicl' ? v : 'tabicl';
+  } catch {
+    return 'tabicl';
+  }
+}
+
+function saveChoice(m: ModelKey) {
+  try {
+    window.localStorage.setItem(CHOICE_KEY, m);
+  } catch {
+    /* not remembered; nothing else depends on it */
+  }
+}
 
 /**
  * All workbench state.
@@ -15,6 +36,12 @@ export function useRun() {
   const [demos, setDemos] = useState<Demo[]>([]);
   const [model, setModel] = useState<ModelStatus | null>(null);
   const [offline, setOffline] = useState(false);
+
+  const [choice, setChoiceState] = useState<ModelKey>(readChoice);
+  const setChoice = useCallback((m: ModelKey) => {
+    setChoiceState(m);
+    saveChoice(m);
+  }, []);
 
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -40,29 +67,31 @@ export function useRun() {
     }
   }, []);
 
-  // The model fits itself on first start, so poll until it is ready rather than
-  // asking the user to reload.
+  // Which model servers are answering. Checked quickly until one is, then every 15 s, so a
+  // server that goes down or comes back shows in the picker without a reload.
   const pollRef = useRef<number | undefined>(undefined);
   useEffect(() => {
     let alive = true;
 
     const tick = async () => {
+      let delay = 1500;
       try {
         const m = await api.model();
         if (!alive) return;
         setModel(m);
         setOffline(false);
-        if (m.status === 'ready' || m.status === 'error') window.clearInterval(pollRef.current);
+        if (m.status === 'ready' || m.status === 'error') delay = 15000;
       } catch {
         if (alive) setOffline(true);
       }
+      if (alive) pollRef.current = window.setTimeout(tick, delay);
     };
 
     // One async kick-off so the model state, the demo list and the history are on
     // screen immediately rather than an interval later. Everything it sets happens
     // after an await, so no state is set synchronously during the effect.
     const init = async () => {
-      await tick();
+      await tick();                        // schedules the next check itself
       try {
         const d = await api.demos();
         if (alive) setDemos(d.demos);
@@ -73,11 +102,10 @@ export function useRun() {
     };
 
     void init();
-    pollRef.current = window.setInterval(tick, 1500);
 
     return () => {
       alive = false;
-      window.clearInterval(pollRef.current);
+      window.clearTimeout(pollRef.current);
     };
   }, [refreshHistory]);
 
@@ -101,15 +129,22 @@ export function useRun() {
   const setTarget = useCallback((t: string) =>
     run && guard('re-screening', async () => adopt(await api.setTarget(run.id, t))), [adopt, guard, run]);
 
+  // The model the next run uses: the remembered choice, unless its server is down and the other
+  // one is up (then the other, without forgetting the choice for when it comes back).
+  const available = model?.available ?? null;
+  const chosen: ModelKey =
+    available && !available.includes(choice) && available.length > 0 ? available[0] : choice;
+  const chosenUp = available === null || available.includes(chosen);
+
   const infer = useCallback(() =>
-    run && guard('running inference', async () => {
-      await api.infer(run.id);
+    run && guard(chosen === 'priorfm' ? 'running nanoTabPFN · PriorFM' : 'running TabICLv2', async () => {
+      await api.infer(run.id, chosen);
       setRun(await api.run(run.id));
       void refreshHistory();
-    }), [guard, refreshHistory, run]);
+    }), [chosen, guard, refreshHistory, run]);
 
   // PriorFM builds a model for an uploaded table in the background (minutes). While its row
-  // says queued/building, re-fetch the run so the scores appear without a reload.
+  // says queued/building, re-fetch the run so the scores and row predictions appear without a reload.
   const pending = run?.result?.arms.some((a) => a.key === 'priorfm' && /^(queued|building)/.test(a.note)) ?? false;
   useEffect(() => {
     if (!pending || !run) return;
@@ -118,12 +153,13 @@ export function useRun() {
       try {
         const r = await api.run(id);
         setRun((cur) => (cur?.id === id ? r : cur));
+        void refreshHistory();             // the history line names the build state, then the score
       } catch {
         /* a missed poll is retried on the next tick */
       }
     }, 3000);
     return () => window.clearInterval(t);
-  }, [pending, run?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pending, run?.id, refreshHistory]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const clear = useCallback(() => {
     setRun(null);
@@ -132,6 +168,7 @@ export function useRun() {
 
   return {
     run, history, demos, model, offline, busy, error,
+    choice: chosen, chosenUp, available, setChoice,
     clearError: () => setError(null),
     loadFile, loadPaste, loadDemo, openRun, setTarget, infer, clear, refreshHistory,
   };

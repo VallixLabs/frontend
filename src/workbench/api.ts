@@ -20,7 +20,23 @@ export type Arm = {
 };
 export type Prediction = { row: number; actual: string | number; predicted: string | number; confidence: number | '' };
 
+/**
+ * The model a run is served by. The backend routes the run to that model's inference server:
+ * `tabicl` -> infer_tabicl, `priorfm` (nanoTabPFN) -> infer_priorfm.
+ */
+export type ModelKey = 'tabicl' | 'priorfm';
+
+/** The models a run can be served by, in the order the picker shows them. */
+export const MODELS: { key: ModelKey; name: string; sub: string; server: string }[] = [
+  { key: 'tabicl', name: 'TabICLv2', sub: 'pre-trained · answers in seconds', server: 'infer_tabicl' },
+  { key: 'priorfm', name: 'nanoTabPFN · PriorFM', sub: 'per-table model · demos instant, uploads build ~10 min', server: 'infer_priorfm' },
+];
+
+export const modelName = (key: ModelKey) => MODELS.find((m) => m.key === key)?.name ?? key;
+
 export type Result = {
+  /** The model that served this run; its arm comes first and has `served: true`. */
+  model: ModelKey;
   contexts: number[];
   arms: Arm[];
   seconds: number;
@@ -81,6 +97,8 @@ export type ModelStatus = {
   error: string | null;
   name: string;
   kind: string;
+  /** The model servers answering right now. */
+  available: ModelKey[];
   meta: {
     trained_at: string;
     seed: number;
@@ -197,7 +215,12 @@ export const api = {
   predictions: (id: string, offset: number, limit: number) =>
     req<Page<Prediction>>(`/api/runs/${id}/predictions?offset=${offset}&limit=${limit}`),
 
-  infer: (id: string) => req<{ result: Result; state: RunState }>(`/api/runs/${id}/infer`, { method: 'POST' }),
+  infer: (id: string, model: ModelKey) =>
+    req<{ result: Result; state: RunState }>(`/api/runs/${id}/infer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model }),
+    }),
 
   exportFile: (id: string, kind: 'predictions' | 'metrics' | 'card') =>
     req<{ filename: string; content: string }>(`/api/runs/${id}/export/${kind}`),

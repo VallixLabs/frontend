@@ -1,14 +1,10 @@
 import { Link } from 'react-router-dom';
 
 import { mono, sans, wb } from './theme';
-import type { HistoryRow, ModelStatus } from './api';
+import { MODELS, type HistoryRow, type ModelStatus } from './api';
 import { Logo } from '../brand/Logo';
 
 const DOT: Record<string, string> = { good: wb.good, bad: wb.bad, dim: wb.dim };
-
-const MODEL_TONE: Record<string, string> = {
-  ready: wb.good, training: wb.acc, cold: wb.dim, error: wb.bad,
-};
 
 export function TopBar({
   model,
@@ -26,13 +22,6 @@ export function TopBar({
   /** The signed-in account and its sign-out control. */
   account?: React.ReactNode;
 }) {
-  const tone = MODEL_TONE[model?.status ?? 'cold'] ?? wb.dim;
-  const label =
-    model?.status === 'ready' ? 'model ready'
-      : model?.status === 'training' ? 'fitting the model…'
-        : model?.status === 'error' ? 'model failed'
-          : 'model starting';
-
   return (
     <div
       style={{
@@ -71,10 +60,23 @@ export function TopBar({
         
       </Link>
 
-      {/* The served model, not the run, is the thing with a state worth watching. */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 11px', background: 'rgba(255,255,255,0.05)' }}>
-        <span style={{ width: 7, height: 7, background: tone, animation: model?.status === 'training' ? 'wbPulse 1.3s ease-in-out infinite' : undefined }} />
-        <span style={{ fontFamily: mono, fontSize: 12, color: tone }}>{label}</span>
+      {/* Which model servers are answering: each run goes to one of them. */}
+      <div title={model?.error ?? undefined} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '5px 11px', background: 'rgba(255,255,255,0.05)' }}>
+        {model === null ? (
+          <span style={{ fontFamily: mono, fontSize: 12, color: wb.dim }}>checking models…</span>
+        ) : (
+          MODELS.map((sv) => {
+            const up = model.available?.includes(sv.key) ?? false;
+            return (
+              <span key={sv.key} style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                <span style={{ width: 7, height: 7, background: up ? wb.good : wb.bad }} />
+                <span style={{ fontFamily: mono, fontSize: 12, color: up ? wb.body : wb.bad }}>
+                  {sv.name}{up ? '' : ' · down'}
+                </span>
+              </span>
+            );
+          })
+        )}
       </div>
 
       {runName && (

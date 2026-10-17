@@ -1,8 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import { glass, mono, primaryBtn, sans, wb } from '../theme';
-import { api, type JoinedRow, type Run } from '../api';
+import { api, modelName, type JoinedRow, type ModelKey, type Run } from '../api';
 import { usePaged } from '../usePaged';
+import { ModelPicker } from './ModelPicker';
 import { Pager } from './Pager';
 
 const ROWS_PER_PAGE = 10;
@@ -19,18 +20,30 @@ const ROWS_PER_PAGE = 10;
  * coming is visible from the start. A row the model received as *context* stays
  * empty afterwards too: it was evidence rather than a question, and inventing a
  * prediction for it would misreport what the model was asked.
+ *
+ * The answers come from the model chosen in the picker next to Run (the backend sends the run to
+ * that model's inference server). PriorFM on an uploaded table first builds a model (minutes):
+ * until it lands the answer column says so, then the rows fill in on the next poll.
  */
 export function DataTable({
   run,
   busy,
-  modelReady,
+  model,
+  modelUp,
+  available,
+  onModel,
   onTarget,
   onRun,
   onShowCompatibility,
 }: {
   run: Run;
   busy: string | null;
-  modelReady: boolean;
+  /** The model the next run uses. */
+  model: ModelKey;
+  /** Whether that model's server is answering. */
+  modelUp: boolean;
+  available: ModelKey[] | null;
+  onModel: (m: ModelKey) => void;
   onTarget: (t: string) => void;
   onRun: () => void;
   onShowCompatibility: () => void;
@@ -42,7 +55,14 @@ export function DataTable({
     (offset: number, limit: number) => api.rows(run.id, offset, limit),
     [run.id],
   );
-  const paged = usePaged<JoinedRow>(fetchRows, ROWS_PER_PAGE, `${run.id}-${run.state}`);
+  // Refetch when the run changes state, when a different model serves it, or when PriorFM's
+  // predictions land after its build (same state, more predictions).
+  const res = run.result;
+  const paged = usePaged<JoinedRow>(
+    fetchRows, ROWS_PER_PAGE, `${run.id}-${run.state}-${res?.model ?? ''}-${res?.n_predictions ?? 0}`,
+  );
+  const served = res?.arms.find((a) => a.served) ?? null;
+  const building = !!res && res.n_predictions === 0 && res.model === 'priorfm';
 
   const featureCols = useMemo(
     () => run.columns.filter((c) => c.name !== run.target),
@@ -112,16 +132,28 @@ export function DataTable({
 
         <span style={{ flex: 1 }} />
 
+        <ModelPicker value={model} available={available} disabled={!!busy} onChange={onModel} />
+
         <button
           type="button"
           onClick={onRun}
-          disabled={!!busy || !modelReady}
-          title={!modelReady ? 'The model is still fitting' : undefined}
-          style={{ ...primaryBtn, padding: '10px 22px', opacity: busy || !modelReady ? 0.45 : 1 }}
+          disabled={!!busy || !modelUp}
+          title={!modelUp ? `The ${modelName(model)} server is not answering` : `Run ${modelName(model)}`}
+          style={{ ...primaryBtn, padding: '10px 22px', opacity: busy || !modelUp ? 0.45 : 1 }}
         >
           {busy ? 'running…' : run.state === 'scored' ? 'Re-run' : 'Run'}
         </button>
       </div>
+
+      {building && (
+        <div role="status" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 16px', borderBottom: `1px solid ${wb.line}`, background: 'rgba(133,152,87,0.08)' }}>
+          <span style={{ width: 8, height: 8, flex: '0 0 8px', background: wb.acc, animation: 'wbPulse 1.3s ease-in-out infinite' }} />
+          <span style={{ fontSize: 13, color: wb.fg, lineHeight: 1.5 }}>
+            PriorFM is building a model for this table — predictions appear when it is done.
+            {served?.note && <span style={{ marginLeft: 8, fontFamily: mono, fontSize: 11.5, color: wb.dim }}>{served.note}</span>}
+          </span>
+        </div>
+      )}
 
       {/* ---------------------------------------------- target, over its columns */}
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, padding: '10px 16px', borderBottom: `1px solid ${wb.line}`, background: 'rgba(0,0,0,0.16)' }}>
@@ -198,7 +230,7 @@ export function DataTable({
               <th className="wb-answer" style={{ ...head, ...stick, background: ANSWER_HEAD, borderLeft: `1px solid ${wb.rule}`, padding: 0 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: ANSWER_COLS, gap: 10, padding: '9px 14px' }}>
                   <span style={{ textAlign: 'right', color: wb.dim }}>actual</span>
-                  <span style={{ textAlign: 'right', color: wb.acc }}>predicted</span>
+                  <span style={{ textAlign: 'right', color: wb.acc }} title={served ? `predicted by ${served.name}` : undefined}>predicted</span>
                   <span style={{ textAlign: 'right', color: wb.dim }}>conf.</span>
                 </div>
               </th>
@@ -235,7 +267,17 @@ export function DataTable({
             answers fill in after a run
           </span>
         )}
-        {run.state === 'scored' && (
+        {building && (
+          <span style={{ fontFamily: sans, fontSize: 11.5, color: wb.dim }}>
+            answers fill in when PriorFM's model is built
+          </span>
+        )}
+        {run.state === 'scored' && served && !building && (
+          <span style={{ fontFamily: sans, fontSize: 11.5, color: wb.dim }}>
+            answers from <span style={{ color: wb.acc }}>{served.name}</span>
+          </span>
+        )}
+        {run.state === 'scored' && !building && (
           <button type="button" className="wb-link"
             onClick={() => api.exportFile(run.id, 'predictions').then((r) => {
               const url = URL.createObjectURL(new Blob([r.content], { type: 'text/csv' }));

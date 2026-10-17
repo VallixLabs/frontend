@@ -121,6 +121,16 @@ table {
   color: #859857;
 }
 
+/* The model picker is a radio group of unstyled buttons; keyboard focus needs a visible ring. */
+.wb-model-opt:focus-visible {
+  outline: 2px solid #9dad79;
+  outline-offset: -2px;
+}
+
+.wb-model-opt[aria-checked='false']:not([aria-disabled]):hover {
+  background: #2f373e !important;
+}
+
 .wb-rail-btn:hover,
 .wb-rung:hover,
 .wb-cand:hover,

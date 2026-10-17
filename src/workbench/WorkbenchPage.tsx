@@ -110,8 +110,8 @@ function Account({ me, onSignOut }: { me: Me; onSignOut: () => void }) {
 /**
  * The workbench, inference-only.
  *
- * One served model, fitted before any table arrives. A run is a table in, one
- * inference pass, and the scores and exports that come out — all on this page,
+ * A run is a table in, one inference pass by the model chosen next to Run (TabICLv2 or
+ * nanoTabPFN · PriorFM, each on its own inference server), and the scores and exports that come out — all on this page,
  * because there is no longer a sequence of stages to walk. The left rail is the
  * run history, so any earlier table is one click away.
  */
@@ -121,8 +121,6 @@ function Workbench({ me, onSignOut }: { me: Me; onSignOut: () => void }) {
   const [sideOpen, setSideOpen] = useState(false);
   const canvasRef = useRef<HTMLDivElement | null>(null);
   useCanvasGrid(canvasRef, `${R.run?.id ?? 'none'}-${R.run?.state ?? ''}`);
-
-  const modelReady = R.model?.status === 'ready';
 
   return (
     <div
@@ -202,7 +200,10 @@ function Workbench({ me, onSignOut }: { me: Me; onSignOut: () => void }) {
               <DataTable
                 run={R.run}
                 busy={R.busy}
-                modelReady={modelReady}
+                model={R.choice}
+                modelUp={R.chosenUp}
+                available={R.available}
+                onModel={R.setChoice}
                 onTarget={R.setTarget}
                 onShowCompatibility={() => setCompatOpen(true)}
                 // A run on an unservable table is refused here rather than at the

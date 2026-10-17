@@ -4,7 +4,8 @@ import type { Run } from '../api';
 const SERIES = [wb.acc, '#8b9295', wb.faint];
 
 /**
- * How well the model did, on the statistic that was fixed in advance.
+ * How well the model did, on the statistic that was fixed in advance: the model that served the
+ * run (chosen before Run; its arm comes first, `served`) against gradient boosting.
  *
  * Only the proper scoring rule lives here. *What* the model said is joined onto
  * the rows themselves in `DataTable`, where the inputs it said it about are
@@ -16,9 +17,10 @@ export function ResultsPanel({ run }: { run: Run }) {
   if (!res) return null;
 
   const ctx = res.contexts;
+  const served = res.arms.find((a) => a.served) ?? res.arms[0];
   const all = res.arms.flatMap((a) => ctx.map((c) => a.scores[String(c)]?.loss)).filter((v): v is number => Number.isFinite(v));
-  const lo = Math.min(...all);
-  const hi = Math.max(...all);
+  const lo = all.length ? Math.min(...all) : 0;
+  const hi = all.length ? Math.max(...all) : 1;
   const span = hi - lo || 1;
   const px = (i: number) => 46 + (i * 300) / Math.max(1, ctx.length - 1);
   const py = (v: number) => 22 + (1 - (v - lo) / span) * 150;
@@ -31,8 +33,17 @@ export function ResultsPanel({ run }: { run: Run }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, paddingTop: 22, borderTop: `1px solid ${wb.line}` }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={stageEyebrow}>Result</div>
-          <h2 style={{ margin: 0, fontSize: 23, fontWeight: 600, letterSpacing: '-0.015em' }}>{res.summary}</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={stageEyebrow}>Result</span>
+            {served && (
+              <span style={{ fontFamily: mono, fontSize: 11, padding: '3px 8px', background: wb.accWell, color: wb.accHi }}>
+                served by {served.name}
+              </span>
+            )}
+          </div>
+          <h2 style={{ margin: 0, fontSize: 23, fontWeight: 600, letterSpacing: '-0.015em' }}>
+            {res.summary || `${served?.name ?? 'The model'}: ${served?.note ?? 'no score yet'}`}
+          </h2>
         </div>
         <div style={{ display: 'flex', gap: 18, fontFamily: mono, fontSize: 12, color: wb.dim, paddingBottom: 3 }}>
           <span>{res.seconds}s</span>
