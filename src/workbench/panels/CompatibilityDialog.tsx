@@ -6,9 +6,9 @@ import type { Check } from '../api';
  * that cannot be served.
  *
  * The caps come from the served models, not a quota: TabICL was pre-trained on up
- * to 100 features and 10 classes, and PriorFM's router needs at least 64 rows. A
- * table that misses them is refused whole rather than truncated, because a model
- * fitted to a mutilated table answers a different question than the one asked.
+ * to 100 features and 10 classes, and scoring needs at least 64 rows. A table that
+ * misses them is refused whole rather than truncated, because a model fitted to a
+ * mutilated table answers a different question than the one asked.
  */
 export function CompatibilityDialog({
   checks,
@@ -69,8 +69,10 @@ export function CompatibilityDialog({
               </p>
               <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.65, color: wb.muted, fontFamily: sans }}>
                 The limits come from the models: TabICL was pre-trained on tables of up to 100
-                features and 10 classes, and PriorFM's router needs at least 64 rows to describe
-                a table. This demo also caps tables at 10,000 rows.
+                features and 10 classes. Valli, which fine-tunes a model for each table, also needs
+                at least 1,000 training rows and at most 9 classes; smaller tables get TabICL only.
+                This demo needs at least 64 rows, so that enough held-out rows are left to score
+                on, and caps tables at 10,000 rows.
               </p>
             </>
           )}

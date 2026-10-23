@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { api, type Demo, type HistoryRow, type ModelKey, type ModelStatus, type Run } from './api';
+import { api, MODELS, modelName, type Demo, type HistoryRow, type ModelKey, type ModelStatus, type Run } from './api';
 
 // The model choice is a per-browser convenience; storage can be blocked or throw (private windows),
 // in which case the choice simply starts at TabICL every visit.
@@ -9,7 +9,7 @@ const CHOICE_KEY = 'vallix.workbench.model';
 function readChoice(): ModelKey {
   try {
     const v = window.localStorage.getItem(CHOICE_KEY);
-    return v === 'priorfm' || v === 'tabicl' ? v : 'tabicl';
+    return v === 'valli' || v === 'tabicl' ? v : 'tabicl';
   } catch {
     return 'tabicl';
   }
@@ -129,23 +129,24 @@ export function useRun() {
   const setTarget = useCallback((t: string) =>
     run && guard('re-screening', async () => adopt(await api.setTarget(run.id, t))), [adopt, guard, run]);
 
-  // The model the next run uses: the remembered choice, unless its server is down and the other
-  // one is up (then the other, without forgetting the choice for when it comes back).
+  // The model the next run uses: the remembered choice, unless its server is down or it cannot serve
+  // this table (then the first model that can, without forgetting the choice for the next table).
   const available = model?.available ?? null;
-  const chosen: ModelKey =
-    available && !available.includes(choice) && available.length > 0 ? available[0] : choice;
+  const unavailable = run?.unavailable ?? {};
+  const usable = (k: ModelKey) => (available === null || available.includes(k)) && !unavailable[k];
+  const chosen: ModelKey = usable(choice) ? choice : (MODELS.find((m) => usable(m.key))?.key ?? choice);
   const chosenUp = available === null || available.includes(chosen);
 
   const infer = useCallback(() =>
-    run && guard(chosen === 'priorfm' ? 'running nanoTabPFN · PriorFM' : 'running TabICLv2', async () => {
+    run && guard(`running ${modelName(chosen)}`, async () => {
       await api.infer(run.id, chosen);
       setRun(await api.run(run.id));
       void refreshHistory();
     }), [chosen, guard, refreshHistory, run]);
 
-  // PriorFM builds a model for an uploaded table in the background (minutes). While its row
-  // says queued/building, re-fetch the run so the scores and row predictions appear without a reload.
-  const pending = run?.result?.arms.some((a) => a.key === 'priorfm' && /^(queued|building)/.test(a.note)) ?? false;
+  // Valli builds a model for the table in the background (minutes to an hour). While its row says
+  // queued/building, re-fetch the run so the scores and row predictions appear without a reload.
+  const pending = run?.result?.arms.some((a) => a.key === 'valli' && /^(queued|building)/.test(a.note)) ?? false;
   useEffect(() => {
     if (!pending || !run) return;
     const id = run.id;

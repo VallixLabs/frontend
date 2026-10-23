@@ -5,28 +5,33 @@ import { MODELS, type ModelKey } from '../api';
 
 /**
  * Which model the next run uses. A radio group: one choice, arrow keys move between the
- * options, and an option whose server is not answering is disabled with the reason on hover.
- * The run itself is routed by the backend to that model's own inference server.
+ * options, and an option whose server is not answering, or that cannot serve this table, is
+ * disabled with the reason on hover. The run itself is routed by the backend to that model's
+ * own inference server.
  */
 export function ModelPicker({
   value,
   available,
+  unavailable,
   disabled,
   onChange,
 }: {
   value: ModelKey;
   /** Servers answering now; null while the first status check is still out. */
   available: ModelKey[] | null;
+  /** Models that cannot serve this table, with the reason. */
+  unavailable: Partial<Record<ModelKey, string>>;
   disabled: boolean;
   onChange: (m: ModelKey) => void;
 }) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   const isUp = (k: ModelKey) => available === null || available.includes(k);
+  const usable = (k: ModelKey) => isUp(k) && !unavailable[k];
 
   const move = (from: number, step: number) => {
     for (let n = 1; n <= MODELS.length; n++) {
       const i = (from + step * n + MODELS.length) % MODELS.length;
-      if (isUp(MODELS[i].key)) {
+      if (usable(MODELS[i].key)) {
         onChange(MODELS[i].key);
         refs.current[i]?.focus();
         return;
@@ -44,7 +49,8 @@ export function ModelPicker({
       {MODELS.map((m, i) => {
         const on = m.key === value;
         const up = isUp(m.key);
-        const off = disabled || !up;
+        const reason = unavailable[m.key];
+        const off = disabled || !up || !!reason;
         return (
           <button
             key={m.key}
@@ -55,7 +61,7 @@ export function ModelPicker({
             aria-disabled={off || undefined}
             tabIndex={on ? 0 : -1}
             className="wb-model-opt"
-            title={!up ? `The ${m.server} server is not answering right now` : `Runs on ${m.server}`}
+            title={!up ? `The ${m.server} server is not answering right now` : reason ?? `Runs on ${m.server}`}
             onClick={() => { if (!off) onChange(m.key); }}
             onKeyDown={(e) => {
               if (disabled) return;
@@ -65,7 +71,7 @@ export function ModelPicker({
             style={{
               all: 'unset', boxSizing: 'border-box', cursor: off ? 'not-allowed' : 'pointer',
               display: 'flex', flexDirection: 'column', gap: 3, padding: '7px 14px', minWidth: 150,
-              background: on ? wb.acc : wb.surface, opacity: !up ? 0.45 : 1, fontFamily: sans,
+              background: on ? wb.acc : wb.surface, opacity: !up || reason ? 0.45 : 1, fontFamily: sans,
             }}
           >
             <span style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, fontWeight: on ? 600 : 500, color: on ? wb.accInk : wb.fg }}>
@@ -79,7 +85,7 @@ export function ModelPicker({
               {m.name}
             </span>
             <span style={{ fontFamily: mono, fontSize: 10.5, color: on ? wb.accWell : wb.dim }}>
-              {up ? m.sub : 'server not answering'}
+              {!up ? 'server not answering' : reason ? 'not for this table' : m.sub}
             </span>
           </button>
         );

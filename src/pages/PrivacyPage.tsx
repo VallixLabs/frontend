@@ -57,9 +57,10 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
           [Describe here anything that is written to disk, and for how long.]
         </P>
         <P>
-          For PriorFM, the server builds a small model for your table from synthetic training data
-          generated from a recipe derived from the table. [State whether these per-table models and
-          recipes are kept, and for how long.]
+          For Valli, the server builds a model for your table: it writes the table's training rows to
+          its disk, PriorFM proposes synthetic-data generators from them, and Kumo-Tabular is fine-tuned
+          on synthetic tables from the chosen generator. The training rows, the build's working files
+          and the model stay on the server's disk. [State how long these are kept.]
         </P>
       </>
     ),

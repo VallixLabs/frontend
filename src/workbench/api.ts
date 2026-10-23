@@ -22,14 +22,14 @@ export type Prediction = { row: number; actual: string | number; predicted: stri
 
 /**
  * The model a run is served by. The backend routes the run to that model's inference server:
- * `tabicl` -> infer_tabicl, `priorfm` (nanoTabPFN) -> infer_priorfm.
+ * `tabicl` -> tvarit_tabicl, `valli` (Kumo-Tabular fine-tuned per table) -> tvarit_valli.
  */
-export type ModelKey = 'tabicl' | 'priorfm';
+export type ModelKey = 'tabicl' | 'valli';
 
 /** The models a run can be served by, in the order the picker shows them. */
 export const MODELS: { key: ModelKey; name: string; sub: string; server: string }[] = [
-  { key: 'tabicl', name: 'TabICLv2', sub: 'pre-trained · answers in seconds', server: 'infer_tabicl' },
-  { key: 'priorfm', name: 'nanoTabPFN · PriorFM', sub: 'per-table model · demos instant, uploads build ~10 min', server: 'infer_priorfm' },
+  { key: 'tabicl', name: 'TabICLv2', sub: 'pre-trained · answers in seconds', server: 'tvarit_tabicl' },
+  { key: 'valli', name: 'Valli · Kumo-Tabular', sub: 'fine-tuned per table · builds in minutes to an hour', server: 'tvarit_valli' },
 ];
 
 export const modelName = (key: ModelKey) => MODELS.find((m) => m.key === key)?.name ?? key;
@@ -85,6 +85,8 @@ export type Run = {
   rows: string[][];
   elapsed: string;
   result: Result | null;
+  /** Models that cannot serve this table, with the reason (e.g. too few rows for a Valli build). */
+  unavailable: Partial<Record<ModelKey, string>>;
 };
 
 export type HistoryRow = {

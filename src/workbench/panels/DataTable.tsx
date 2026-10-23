@@ -22,7 +22,7 @@ const ROWS_PER_PAGE = 10;
  * prediction for it would misreport what the model was asked.
  *
  * The answers come from the model chosen in the picker next to Run (the backend sends the run to
- * that model's inference server). PriorFM on an uploaded table first builds a model (minutes):
+ * that model's inference server). Valli first builds a model for the table (minutes to an hour):
  * until it lands the answer column says so, then the rows fill in on the next poll.
  */
 export function DataTable({
@@ -55,14 +55,14 @@ export function DataTable({
     (offset: number, limit: number) => api.rows(run.id, offset, limit),
     [run.id],
   );
-  // Refetch when the run changes state, when a different model serves it, or when PriorFM's
+  // Refetch when the run changes state, when a different model serves it, or when Valli's
   // predictions land after its build (same state, more predictions).
   const res = run.result;
   const paged = usePaged<JoinedRow>(
     fetchRows, ROWS_PER_PAGE, `${run.id}-${run.state}-${res?.model ?? ''}-${res?.n_predictions ?? 0}`,
   );
   const served = res?.arms.find((a) => a.served) ?? null;
-  const building = !!res && res.n_predictions === 0 && res.model === 'priorfm';
+  const building = !!res && res.n_predictions === 0 && res.model === 'valli';
 
   const featureCols = useMemo(
     () => run.columns.filter((c) => c.name !== run.target),
@@ -132,7 +132,7 @@ export function DataTable({
 
         <span style={{ flex: 1 }} />
 
-        <ModelPicker value={model} available={available} disabled={!!busy} onChange={onModel} />
+        <ModelPicker value={model} available={available} unavailable={run.unavailable} disabled={!!busy} onChange={onModel} />
 
         <button
           type="button"
@@ -149,7 +149,7 @@ export function DataTable({
         <div role="status" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 16px', borderBottom: `1px solid ${wb.line}`, background: 'rgba(133,152,87,0.08)' }}>
           <span style={{ width: 8, height: 8, flex: '0 0 8px', background: wb.acc, animation: 'wbPulse 1.3s ease-in-out infinite' }} />
           <span style={{ fontSize: 13, color: wb.fg, lineHeight: 1.5 }}>
-            PriorFM is building a model for this table — predictions appear when it is done.
+            Valli is building a model for this table — predictions appear when it is done.
             {served?.note && <span style={{ marginLeft: 8, fontFamily: mono, fontSize: 11.5, color: wb.dim }}>{served.note}</span>}
           </span>
         </div>
@@ -269,7 +269,7 @@ export function DataTable({
         )}
         {building && (
           <span style={{ fontFamily: sans, fontSize: 11.5, color: wb.dim }}>
-            answers fill in when PriorFM's model is built
+            answers fill in when Valli's model is built
           </span>
         )}
         {run.state === 'scored' && served && !building && (
