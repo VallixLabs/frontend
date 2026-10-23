@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { api, MODELS, modelName, type Demo, type HistoryRow, type ModelKey, type ModelStatus, type Run } from './api';
+import { api, isModelKey, MODELS, modelName, type Demo, type HistoryRow, type ModelKey, type ModelStatus, type Run } from './api';
 
 // The model choice is a per-browser convenience; storage can be blocked or throw (private windows),
 // in which case the choice simply starts at TabICL every visit.
@@ -9,7 +9,7 @@ const CHOICE_KEY = 'vallix.workbench.model';
 function readChoice(): ModelKey {
   try {
     const v = window.localStorage.getItem(CHOICE_KEY);
-    return v === 'valli' || v === 'tabicl' ? v : 'tabicl';
+    return isModelKey(v) ? v : 'tabicl';
   } catch {
     return 'tabicl';
   }

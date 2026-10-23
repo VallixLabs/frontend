@@ -22,15 +22,25 @@ export type Prediction = { row: number; actual: string | number; predicted: stri
 
 /**
  * The model a run is served by. The backend routes the run to that model's inference server:
- * `tabicl` -> tvarit_tabicl, `valli` (Kumo-Tabular fine-tuned per table) -> tvarit_valli.
+ * `tabicl` -> tvarit_tabicl, `tabpfn` (TabPFN v2) -> tvarit_tabpfn, `valli` (Kumo-Tabular fine-tuned per
+ * table) -> tvarit_valli.
  */
-export type ModelKey = 'tabicl' | 'valli';
+export type ModelKey = 'tabicl' | 'tabpfn' | 'valli';
 
-/** The models a run can be served by, in the order the picker shows them. */
-export const MODELS: { key: ModelKey; name: string; sub: string; server: string }[] = [
+/**
+ * The models a run can be served by, in the order the picker shows them. `attribution`: a notice the model's
+ * licence asks to be displayed wherever it is offered (TabPFN v2: Prior Labs License, Section 10).
+ */
+export const MODELS: { key: ModelKey; name: string; sub: string; server: string; attribution?: string }[] = [
   { key: 'tabicl', name: 'TabICLv2', sub: 'pre-trained · answers in seconds', server: 'tvarit_tabicl' },
+  {
+    key: 'tabpfn', name: 'TabPFN v2', sub: 'pre-trained · answers in seconds', server: 'tvarit_tabpfn',
+    attribution: 'Built with PriorLabs-TabPFN',
+  },
   { key: 'valli', name: 'Valli · Kumo-Tabular', sub: 'fine-tuned per table · builds in minutes to an hour', server: 'tvarit_valli' },
 ];
+
+export const isModelKey = (v: unknown): v is ModelKey => MODELS.some((m) => m.key === v);
 
 export const modelName = (key: ModelKey) => MODELS.find((m) => m.key === key)?.name ?? key;
 

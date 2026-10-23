@@ -87,6 +87,9 @@ export function ModelPicker({
             <span style={{ fontFamily: mono, fontSize: 10.5, color: on ? wb.accWell : wb.dim }}>
               {!up ? 'server not answering' : reason ? 'not for this table' : m.sub}
             </span>
+            {m.attribution && (
+              <span style={{ fontFamily: mono, fontSize: 10.5, color: on ? wb.accWell : wb.dim }}>{m.attribution}</span>
+            )}
           </button>
         );
       })}
