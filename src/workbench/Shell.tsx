@@ -60,22 +60,32 @@ export function TopBar({
         
       </Link>
 
-      {/* Which model servers are answering: each run goes to one of them. */}
-      <div title={model?.error ?? undefined} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '5px 11px', background: 'rgba(255,255,255,0.05)' }}>
+      {/* Which model servers are answering: each run goes to one of them. Grouped as the picker groups them:
+          the Tvarit models, then Valli. */}
+      <div title={model?.error ?? undefined} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '5px 11px', background: 'rgba(255,255,255,0.05)', flexWrap: 'wrap' }}>
         {model === null ? (
           <span style={{ fontFamily: mono, fontSize: 12, color: wb.dim }}>checking models…</span>
         ) : (
-          MODELS.map((sv) => {
-            const up = model.available?.includes(sv.key) ?? false;
-            return (
-              <span key={sv.key} style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
-                <span style={{ width: 7, height: 7, background: up ? wb.good : wb.bad }} />
-                <span style={{ fontFamily: mono, fontSize: 12, color: up ? wb.body : wb.bad }}>
-                  {sv.name}{up ? '' : ' · down'}
+          (['tvarit', 'valli'] as const).map((family) => (
+            <span key={family} style={{ display: 'inline-flex', alignItems: 'center', gap: 14 }}>
+              {family === 'tvarit' && (
+                <span style={{ fontFamily: mono, fontSize: 10.5, letterSpacing: '.1em', textTransform: 'uppercase', color: wb.dim }}>
+                  Tvarit
                 </span>
-              </span>
-            );
-          })
+              )}
+              {MODELS.filter((sv) => sv.family === family).map((sv) => {
+                const up = model.available?.includes(sv.key) ?? false;
+                return (
+                  <span key={sv.key} style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                    <span style={{ width: 7, height: 7, background: up ? wb.good : wb.bad }} />
+                    <span style={{ fontFamily: mono, fontSize: 12, color: up ? wb.body : wb.bad }}>
+                      {sv.name}{up ? '' : ' · down'}
+                    </span>
+                  </span>
+                );
+              })}
+            </span>
+          ))
         )}
       </div>
 

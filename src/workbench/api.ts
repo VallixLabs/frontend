@@ -22,22 +22,29 @@ export type Prediction = { row: number; actual: string | number; predicted: stri
 
 /**
  * The model a run is served by. The backend routes the run to that model's inference server:
- * `tabicl` -> tvarit_tabicl, `tabpfn` (TabPFN v2) -> tvarit_tabpfn, `valli` (Kumo-Tabular fine-tuned per
- * table) -> tvarit_valli.
+ * `tabicl` -> tvarit_tabicl, `tabpfn` (TabPFN v2) -> tvarit_tabpfn, `kumo` (Kumo-Tabular large) -> tvarit_kumo,
+ * `valli` (the Valli pipeline: Kumo-Tabular fine-tuned per table) -> tvarit_valli.
  */
-export type ModelKey = 'tabicl' | 'tabpfn' | 'valli';
+export type ModelKey = 'tabicl' | 'tabpfn' | 'kumo' | 'valli';
+
+/**
+ * The two choices the picker offers: `tvarit`, the pre-trained models served as they are (one is picked in a
+ * dialog), and `valli`, the pipeline that builds a model for each table.
+ */
+export type Family = 'tvarit' | 'valli';
 
 /**
  * The models a run can be served by, in the order the picker shows them. `attribution`: a notice the model's
  * licence asks to be displayed wherever it is offered (TabPFN v2: Prior Labs License, Section 10).
  */
-export const MODELS: { key: ModelKey; name: string; sub: string; server: string; attribution?: string }[] = [
-  { key: 'tabicl', name: 'TabICLv2', sub: 'pre-trained · answers in seconds', server: 'tvarit_tabicl' },
+export const MODELS: { key: ModelKey; family: Family; name: string; sub: string; server: string; attribution?: string }[] = [
+  { key: 'tabicl', family: 'tvarit', name: 'TabICLv2', sub: 'pre-trained · answers in seconds', server: 'tvarit_tabicl' },
   {
-    key: 'tabpfn', name: 'TabPFN v2', sub: 'pre-trained · answers in seconds', server: 'tvarit_tabpfn',
+    key: 'tabpfn', family: 'tvarit', name: 'TabPFN v2', sub: 'pre-trained · answers in seconds', server: 'tvarit_tabpfn',
     attribution: 'Built with PriorLabs-TabPFN',
   },
-  { key: 'valli', name: 'Valli · Kumo-Tabular', sub: 'fine-tuned per table · builds in minutes to an hour', server: 'tvarit_valli' },
+  { key: 'kumo', family: 'tvarit', name: 'Kumo-Tabular large', sub: 'pre-trained · answers in seconds', server: 'tvarit_kumo' },
+  { key: 'valli', family: 'valli', name: 'Valli', sub: 'fine-tuned per table · builds in minutes to an hour', server: 'tvarit_valli' },
 ];
 
 export const isModelKey = (v: unknown): v is ModelKey => MODELS.some((m) => m.key === v);

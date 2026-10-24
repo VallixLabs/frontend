@@ -110,8 +110,8 @@ function Account({ me, onSignOut }: { me: Me; onSignOut: () => void }) {
 /**
  * The workbench, inference-only.
  *
- * A run is a table in, one inference pass by the model chosen next to Run (TabICLv2, TabPFN v2 or
- * Valli · Kumo-Tabular, each on its own inference server), and the scores and exports that come out — all on this page,
+ * A run is a table in, one inference pass by the model chosen next to Run (Tvarit: TabICLv2, TabPFN v2 or
+ * Kumo-Tabular large; or Valli; each on its own inference server), and the scores and exports that come out — all on this page,
  * because there is no longer a sequence of stages to walk. The left rail is the
  * run history, so any earlier table is one click away.
  */
