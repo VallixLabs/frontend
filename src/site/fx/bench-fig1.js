@@ -19,7 +19,7 @@ const W=1240,H=660,X0=120,X1=900,BX0=945,BX1=1150,Y0=168,Y1=572;
 const hs=M.filter(m=>m.h!=null).map(m=>Math.log10(m.h)),LH0=Math.floor(Math.min(...hs)*4)/4-.35,LH1=Math.ceil(Math.max(...hs)*4)/4+.25;
 const A0=Math.floor((Math.min(...M.map(m=>m.acc))-.02)*20)/20,A1=1.0;
 const xs=h=>X0+(Math.log10(h)-LH0)/(LH1-LH0)*(X1-X0), ys=a=>Y1-(a-A0)/(A1-A0)*(Y1-Y0);
-const rr=rps=>6+((Math.log10(rps)-3.8)/(6.0-3.8))*24;      // radius by inference speed (log)
+const rr=rps=>Math.max(5,6+((6.0-Math.log10(rps))/(6.0-3.8))*18);      // radius by inference time: bigger = slower (log)
 const svg=S('svg',{viewBox:`20 ${Y0-28} ${W-20} ${H-Y0+28}`,preserveAspectRatio:'xMidYMid meet','aria-label':'Scatter of tabular foundation models: accuracy against training time, bubble size is inference speed.'});
 svg.style.cssText='display:block;width:100%;height:100%;overflow:visible';host.appendChild(svg);
 const tip=document.createElement('div');tip.style.cssText='position:absolute;pointer-events:none;background:#141414;color:#f4f2ee;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:11px;line-height:1.55;padding:8px 11px;border-radius:2px;white-space:nowrap;opacity:0;transform:translate(-50%,-100%);margin-top:-16px;transition:opacity .12s;z-index:5';host.appendChild(tip);
@@ -39,17 +39,13 @@ S('path',{d:`M${X0} ${Y0} V${Y1} H${X1}`,stroke:MID,'stroke-width':1,fill:'none'
 T(g,(X0+X1)/2,Y1+50,'GPU TIME TO TRAIN THE MODEL  ·  log scale  ·  ← faster',{'text-anchor':'middle','font-size':10.5,'letter-spacing':1.4,fill:INK});
 T(g,0,0,'ACCURACY  ·  relative to the best model  ·  ↑ better',{'text-anchor':'middle','font-size':10.5,'letter-spacing':1.4,fill:INK,transform:`translate(${X0-66} ${(Y0+Y1)/2}) rotate(-90)`});
 
-D0.caption.forEach((line,i)=>T(g,(X0+X1)/2,Y1+70+i*14,line,{'text-anchor':'middle','font-size':9.5,fill:FAINT}));
+T(g,(X0+X1)/2,Y1+72,'Bigger circle = slower inference (fewer rows per second)',{'text-anchor':'middle','font-size':11,fill:MID});
 
 const nr=M.filter(m=>m.h==null);
 if(nr.length){S('rect',{x:BX0,y:Y0,width:BX1-BX0,height:Y1-Y0,fill:INK,'fill-opacity':.03},g);S('line',{x1:BX0,y1:Y0,x2:BX0,y2:Y1,stroke:MID,'stroke-width':.8,'stroke-dasharray':'2 3'},g);
   T(g,(BX0+BX1)/2,Y1+22,'not published',{'text-anchor':'middle','font-size':11.5});T(g,(BX0+BX1)/2,Y0-10,'TRAINING COMPUTE NOT PUBLISHED',{'text-anchor':'middle','font-size':9,'letter-spacing':1.1,fill:MID});
   nr.sort((a,b)=>b.acc-a.acc).forEach((m,k)=>{m.bx=BX0+(k+.5)*(BX1-BX0)/nr.length;});}
 
-/* size legend, top-right of plot */
-const lg=S('g',{},svg),lx=X1-250,ly=Y0+30;
-T(lg,lx,ly-6,'INFERENCE SPEED',{'font-size':9.5,'letter-spacing':1.4,fill:INK});
-[[1e4,'10k'],[1e5,'100k'],[1e6,'1M rows/s']].forEach(([v,l],i)=>{const r=rr(v),cx=lx+18+i*78;S('circle',{cx,cy:ly+30,r,fill:'none',stroke:MID,'stroke-width':1},lg);T(lg,cx,ly+30+r+15,l,{'text-anchor':'middle','font-size':9.5});});
 
 /* bubbles */
 const layer=S('g',{},svg),labels=S('g',{},svg);
@@ -65,6 +61,7 @@ const boxOf=(x,y,w,h)=>({x,y,w,h});
 const hit=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
 order.filter(m=>!m.ours).sort((a,b)=>b.acc-a.acc).forEach(m=>{const w=m.n.length*6.9,h=13,c=[
    [m.x+m.r+7,m.y+4,'start'],[m.x-m.r-7,m.y+4,'end'],[m.x,m.y-m.r-8,'middle'],[m.x,m.y+m.r+15,'middle']];
+  if(m.h==null)c.push(...c.splice(0,2)); // in the not-published band: above or below first, so labels stay in the band
   let pick=c[0];for(const cand of c){const[x,y,a]=cand,bx=a==='start'?x:a==='end'?x-w:x-w/2,bb=boxOf(bx,y-11,w,h);
     const clash=placed.some(p=>hit(p,bb))||M.some(o=>o!==m&&hit(boxOf(o.x-o.r,o.y-o.r,o.r*2,o.r*2),bb))||bb.x+bb.w>BX1-4;
     if(!clash){pick=cand;placed.push(bb);break;}}

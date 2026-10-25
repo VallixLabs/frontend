@@ -159,11 +159,7 @@ def main():
             print(f"hero: skipping {n}: ranked in {len(scores)} of {len(cells)} cells")
             continue
         models.append({"n": n, "ours": mid == OURS, "acc": round(float(np.mean(scores)), 4), "h": h, "hl": hl, "src": src, "rps": rps})
-    hero = {"source": out["source"], "cells": [f"{t} m={m}" for t, m in HERO_CELLS], "models": models, "caption": [
-        "ACCURACY: mean score vs the best ranked model per setting · 5 real scientific datasets · ≤ 100 labelled rows · both tasks",
-        "TRAINING: one model's pretraining GPU time as published by its authors (RTX 2080 Ti / A100 / H100, not equivalent) · valli: one table's build",
-        "INFERENCE: rows per second, Vallix measurements · valli served by Tvarit",
-    ]}
+    hero = {"source": out["source"], "cells": [f"{t} m={m}" for t, m in HERO_CELLS], "models": models}
     HERO = OUT.parent / "hero.json"
     HERO.write_text(json.dumps(hero, separators=(",", ":"), ensure_ascii=False))
     print(f"wrote {HERO} ({HERO.stat().st_size / 1024:.1f} KiB)")

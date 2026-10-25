@@ -107,29 +107,15 @@ const CSS_MORE = `
 
 const HTML = `<div class="bp">
   <aside class="toc" id="toc">
-    <a href="#overview"><b>01</b>Overview</a>
-    <a href="#leaderboard"><b>02</b>Leaderboard</a>
-    <a href="#accuracy"><b>03</b>Accuracy</a>
-    <a href="#calibration"><b>04</b>Calibration</a>
+    <a href="#leaderboard"><b>01</b>Leaderboard</a>
+    <a href="#accuracy"><b>02</b>Accuracy</a>
+    <a href="#calibration"><b>03</b>Calibration</a>
   </aside>
   <main>
 
-    <!-- ========== 01 OVERVIEW ========== -->
-    <section class="sec" id="overview">
-      <div class="sh"><span class="n">01</span><h2>Overview</h2><p>Where valli places among every ranked model at each number of labelled rows, against Kumo-small, the released model it is fine-tuned from.</p></div>
-      <div class="card">
-        <div class="chd"><div class="ctrls"><div class="seg" id="oB"><span class="lab">Benchmark</span></div><div class="seg" id="oT"><span class="lab">Task</span></div></div><span class="mono" id="f1ctx"></span></div>
-        <div class="cb">
-          <div class="key"><span><svg width="28" height="10"><line x1="1" y1="5" x2="27" y2="5" stroke="#141414" stroke-width="2.6"/></svg>valli</span><span><svg width="28" height="10"><line x1="1" y1="5" x2="27" y2="5" stroke="#6d6a64" stroke-width="1.6" stroke-dasharray="5 3"/></svg>Kumo-small, released</span><span style="color:var(--mid)"><svg width="28" height="10"><line x1="1" y1="5" x2="27" y2="5" stroke="#aaa69e" stroke-width=".9"/></svg>every other ranked model</span></div>
-          <div class="pw" id="w1"><svg id="s1"></svg><div class="tip"></div></div>
-        </div>
-        <div class="cft"><span class="mono">Fig. 01 · place by labelled rows</span><span class="note">Place by mean within-task rank of log loss (classification) or CRPS / sd of the target (regression). Models that completed fewer than 95% of a cell's tasks are unranked.</span></div>
-      </div>
-    </section>
-
-    <!-- ========== 02 LEADERBOARD ========== -->
+    <!-- ========== 01 LEADERBOARD ========== -->
     <section class="sec" id="leaderboard">
-      <div class="sh"><span class="n">02</span><h2>Leaderboard</h2><p>Place among all ranked models at each number of labelled rows. Click any column to sort.</p></div>
+      <div class="sh"><span class="n">01</span><h2>Leaderboard</h2><p>Place among all ranked models at each number of labelled rows. Click any column to sort.</p></div>
       <div class="card">
         <div class="chd"><div class="ctrls"><div class="seg" id="lbB"><span class="lab">Benchmark</span></div><div class="seg" id="lbT"><span class="lab">Task</span></div></div><span class="mono" id="t1ctx">Table 01</span></div>
         <div class="tw"><table class="t" id="lb"></table></div>
@@ -138,12 +124,12 @@ const HTML = `<div class="bp">
       </div>
     </section>
 
-    <!-- ========== 03 ACCURACY ========== -->
+    <!-- ========== 02 ACCURACY ========== -->
     <section class="sec" id="accuracy">
-      <div class="sh"><span class="n">03</span><h2>Accuracy</h2><p>Log loss for classification and CRPS (scaled by the target's standard deviation) for regression: both proper scoring rules, lower is better.</p></div>
+      <div class="sh"><span class="n">02</span><h2>Accuracy</h2><p>Log loss for classification and CRPS (scaled by the target's standard deviation) for regression: both proper scoring rules, lower is better.</p></div>
       <div class="ctrls" style="margin-bottom:14px"><div class="seg" id="aB"><span class="lab">Benchmark</span></div><div class="seg" id="aT"><span class="lab">Task</span></div></div>
       <div class="card">
-        <div class="chd"><span class="mono">Fig. 02 · error relative to the best model</span><span class="mono" id="f2ctx"></span></div>
+        <div class="chd"><span class="mono">Fig. 01 · error relative to the best model</span><span class="mono" id="f2ctx"></span></div>
         <div class="cb">
           <div class="key"><span>on the bottom line = lowest error of all ranked models</span><span><svg width="28" height="10"><line x1="1" y1="5" x2="27" y2="5" stroke="#141414" stroke-width="2.6"/></svg>valli</span><span><svg width="28" height="10"><line x1="1" y1="5" x2="27" y2="5" stroke="#6d6a64" stroke-width="1.4"/></svg>next three models</span><span style="color:var(--mid)"><svg width="28" height="10"><line x1="1" y1="5" x2="27" y2="5" stroke="#aaa69e" stroke-width=".9"/></svg>all other models</span></div>
           <div class="pw" id="w2"><svg id="s2"></svg><div class="tip"></div></div>
@@ -161,12 +147,12 @@ const HTML = `<div class="bp">
       </div>
     </section>
 
-    <!-- ========== 04 CALIBRATION ========== -->
+    <!-- ========== 03 CALIBRATION ========== -->
     <section class="sec" id="calibration">
-      <div class="sh"><span class="n">04</span><h2>Calibration</h2><p>Whether a model's stated confidence matches how often it is right. Classification: confidence of the predicted class against observed accuracy, and expected calibration error (lower is better). Regression: binned prediction against the mean actual value, and how often the 90% interval contains the truth (90% is ideal).</p></div>
+      <div class="sh"><span class="n">03</span><h2>Calibration</h2><p>Whether a model's stated confidence matches how often it is right. Classification: confidence of the predicted class against observed accuracy, and expected calibration error (lower is better). Regression: binned prediction against the mean actual value, and how often the 90% interval contains the truth (90% is ideal).</p></div>
       <div class="ctrls" style="margin-bottom:14px"><div class="seg" id="kT"><span class="lab">Task</span></div><div class="seg" id="kM"><span class="lab">Labelled rows</span></div></div>
       <div class="card">
-        <div class="chd"><span class="mono" id="f3name">Fig. 03 · reliability</span><span class="mono" id="f3ctx"></span></div>
+        <div class="chd"><span class="mono" id="f3name">Fig. 02 · reliability</span><span class="mono" id="f3ctx"></span></div>
         <div class="cb" style="padding-bottom:6px">
           <div class="key"><span><svg width="28" height="10"><line x1="1" y1="5" x2="27" y2="5" stroke="#141414" stroke-width="2.6"/></svg>valli</span><span><svg width="28" height="10"><line x1="1" y1="5" x2="27" y2="5" stroke="#6d6a64" stroke-width="1.6" stroke-dasharray="5 3"/></svg>Kumo-small, released</span><span style="color:var(--mid)"><svg width="28" height="10"><line x1="1" y1="5" x2="27" y2="5" stroke="#aaa69e" stroke-width="1.2"/></svg>six best-placed others</span><span><svg width="28" height="10"><line x1="1" y1="5" x2="27" y2="5" stroke="#141414" stroke-width="1" stroke-dasharray="3 3"/></svg>perfect calibration</span></div>
         </div>
@@ -229,37 +215,7 @@ const logX=(ms,X0,X1)=>m=>ms.length<2?(X0+X1)/2:X0+(Math.log10(m)-Math.log10(ms[
 // one path through the points a model has, broken where it is missing
 function pathOf(pts){let d='',on=false;pts.forEach(p=>{if(p==null){on=false;return;}d+=(on?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1);on=true;});return d;}
 
-/* ================= 01 · overview: place by labelled rows ================= */
-let oB='tab',oT='classification';
-const r1=lazy('s1',anim=>{const svg=document.getElementById('s1');svg.innerHTML='';svg.classList.remove('go');
-  const ms=msOf(oB),cells=ms.map(m=>cell(oB,oT,m)),nMax=Math.max(...cells.map(c=>c.n_ranked));
-  document.getElementById('f1ctx').textContent=`${BL(oB)} · ${oT} · ${cells[0].n_tables} tables · ${nMax} ranked models`;
-  const W=1000,H=470,X0=70,X1=820,Y0=20,Y1=400;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
-  const xs=logX(ms,X0,X1),ys=p=>Y0+(p-1)/(nMax-1)*(Y1-Y0);
-  ms.forEach(m=>{const x=xs(m);S('line',{x1:x,y1:Y0,x2:x,y2:Y1,stroke:RULE},svg);T(svg,x,Y1+22,m.toLocaleString(),{'text-anchor':'middle'});});
-  [1,5,10,20,30,40,50].filter(p=>p<=nMax).forEach(p=>{const y=ys(p);S('line',{x1:X0,y1:y,x2:X1,y2:y,stroke:p===1?INK:RULE,'stroke-width':p===1?1.2:.8},svg);T(svg,X0-10,y+4,ord(p),{'text-anchor':'end',fill:p===1?INK:MID});});
-  S('path',{d:`M${X0} ${Y0} V${Y1} H${X1}`,stroke:MID,fill:'none'},svg);
-  T(svg,(X0+X1)/2,Y1+50,'LABELLED ROWS · log scale',{'text-anchor':'middle','font-size':10.5,'letter-spacing':1.2,fill:INK});
-  T(svg,0,0,'PLACE · 1st = best',{'text-anchor':'middle','font-size':10.5,'letter-spacing':1.2,fill:INK,transform:`translate(${X0-52} ${(Y0+Y1)/2}) rotate(-90)`});
-  const tip=tipFor('w1'),all=[...new Set(cells.flatMap(c=>rankedRows(c).map(r=>r.id)))];
-  const pts=id=>ms.map((m,j)=>{const r=row(cells[j],id);return r&&r.place!=null?[xs(m),ys(r.place)]:null;});
-  const g=S('g',{},svg);
-  all.forEach((id,k)=>{if(id===OURS||id===BASE)return;const d=pathOf(pts(id));if(!d)return;
-    drawLine(S('path',{d,fill:'none',stroke:FAINT,'stroke-width':.9,'stroke-opacity':.7},g),1,.05+k*.006);
-    tip.on(S('path',{d,fill:'none',stroke:'transparent','stroke-width':7},g),name(id));});
-  const ends=[];
-  [[BASE,false],[OURS,true]].forEach(([id,ours])=>{const P=pts(id);const d=pathOf(P);if(!d)return;
-    drawLine(S('path',{d,fill:'none',stroke:ours?INK:MID,'stroke-width':ours?2.8:1.6,'stroke-dasharray':ours?null:'5 3','stroke-linejoin':'round'},svg),1.2,ours?.8:.4);
-    P.forEach((p,j)=>{if(!p)return;const r=row(cells[j],id);const c=D(S('circle',{cx:p[0],cy:p[1],r:ours?5:3.5,fill:ours?INK:PANEL,stroke:ours?INK:MID,'stroke-width':1.3,class:'pop'},svg),1+j*.06);
-      tip.on(c,`${name(id)} · ${ms[j].toLocaleString()} rows<br>${ord(r.place)} of ${cells[j].n_ranked}`);});
-    const last=[...P].reverse().find(Boolean);if(last)ends.push({id,y:last[1],ours});});
-  ends.sort((a,b)=>a.y-b.y);for(let k=1;k<ends.length;k++)if(ends[k].y-ends[k-1].y<18)ends[k].y=ends[k-1].y+18;
-  ends.forEach(e=>D(T(svg,X1+14,e.y+4,name(e.id),{'font-family':SANS,'font-size':e.ours?16:13.5,'font-weight':e.ours?600:400,fill:e.ours?INK:MID,class:'fade'}),1.4));
-  if(anim)go(svg);});
-seg('oB',benchOpts,oB,v=>{oB=v;r1();});
-seg('oT',taskOpts,oT,v=>{oT=v;r1();});
-
-/* ================= 02 · leaderboard ================= */
+/* ================= 01 · leaderboard ================= */
 let lbB='tab',lbT='classification',lbS='mean';
 const tintR=r=>r<=1?.82:r<=3?.42:r<=5?.22:r<=10?.1:r<=20?.04:0;
 function lb(anim){const ms=msOf(lbB),cells=ms.map(m=>cell(lbB,lbT,m)),tb=document.getElementById('lb');
@@ -277,7 +233,7 @@ seg('lbB',benchOpts,lbB,v=>{lbB=v;lb(true);});
 seg('lbT',taskOpts,lbT,v=>{lbT=v;lb(true);});
 lb(false);
 
-/* ================= 03 · accuracy ================= */
+/* ================= 02 · accuracy ================= */
 let aB='tab',aT='classification',accAll=false;
 const sciMs=msOf('sci');let dM=sciMs.includes(50)?50:sciMs[0];
 const r2=lazy('s2',anim=>{const svg=document.getElementById('s2');svg.innerHTML='';svg.classList.remove('go');
@@ -333,10 +289,10 @@ seg('dM',sciMs.map(m=>[m,m.toLocaleString()]),dM,v=>{dM=v;dsTable(true);});
 document.getElementById('accAll').onclick=()=>{accAll=!accAll;accTable(true);};
 accTable(false);dsTable(false);
 
-/* ================= 04 · calibration ================= */
+/* ================= 03 · calibration ================= */
 let kT='classification',kM=COMMON_MS.includes(200)?200:COMMON_MS[0],calAll=false;
 const r3=lazy('rel',anim=>{const host=document.getElementById('rel');host.innerHTML='';const cls=kT==='classification';
-  document.getElementById('f3name').textContent=cls?'Fig. 03 · reliability':'Fig. 03 · predicted vs actual';
+  document.getElementById('f3name').textContent=cls?'Fig. 02 · reliability':'Fig. 02 · predicted vs actual';
   document.getElementById('f3ctx').textContent=`${cls?'classification · confidence vs accuracy':'regression · standardised target'} · ${kM.toLocaleString()} rows`;
   BENCH.forEach(b=>{const cellEl=document.createElement('div');cellEl.innerHTML=`<div class="qh">${b.l}</div>`;host.appendChild(cellEl);
     const curves=(cls?data.rel:data.pva)[`${b.k}|${kM}`]||{},c=cell(b.k,kT,kM);
