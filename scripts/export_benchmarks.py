@@ -30,6 +30,28 @@ ERR = {"classification": "logloss", "regression": "crps_n"}       # rank metric,
 ACC = {"classification": "accuracy", "regression": "r2"}
 CAL = {"classification": "ece", "regression": "cov90"}
 
+# Landing-page chart. Accuracy cells: the scientific evaluation at <= 100 labelled rows, both tasks.
+HERO_CELLS = [(t, m) for t in ("classification", "regression") for m in (25, 50, 100)]
+# (model id, label, training GPU-hours or None if not published, training label, source, inference rows/s).
+# Training: one model's pretraining as stated by its authors (quotes checked against the sources).
+# Inference rows/s: Vallix's own measurements (the design's figures), not derived from the benchmark export.
+HERO_MODELS = [
+    ("Kumo-small fine-tuned on PriorFM's pick", "valli", 0.25, "~15 min per table",
+     "measured Valli builds: 14.5–18 min end to end on one GPU, on top of released Kumo-small", 760000),
+    ("tabpfn_v2", "TabPFN v2", 2688, "~2 weeks on 8 RTX 2080 Ti",
+     "Hollmann et al., Nature 2025, Methods: “around 2 weeks on one node with eight Nvidia RTX 2080 Ti GPUs”", 21000),
+    ("tabicl_v2", "TabICLv2", 588, "24.5 H100-days",
+     "Qu et al., arXiv:2602.11139, §4.1: “totaling 24.5 GPU-days per model” (H100)", 31000),
+    ("tabicl_v1_1", "TabICL", 1440, "20 days on 3 A100",
+     "Qu et al., ICML 2025, §4.2: “20 days on three A100 GPUs”", 25000),
+    ("mitra_v1", "Mitra", 480, "~60 h on 8 A100",
+     "Zhang et al., arXiv:2510.21204, App. B.3.2: “approximately 60 hours on 8 GPUs (Nvidia A100s)”", 18000),
+    ("tabpfn_v2_5", "TabPFN-2.5", None, "not published", "Prior Labs, arXiv:2511.08667: no training compute stated", 22000),
+    ("limix_16m", "LimiX", None, "not published", "LimiX, arXiv:2509.03505: no training compute stated", 14000),
+    ("kumo_tabular", "Kumo-large", None, "not published", "NVIDIA Kumo-Tabular model card: no training compute stated", 9000),
+    ("kumo_tabular_small", "Kumo-small", None, "not published", "NVIDIA Kumo-Tabular model card: no training compute stated", 26000),
+]
+
 NAMES = {
     OURS: "valli",
     "kumo_tabular_small": "Kumo-small",
@@ -122,18 +144,28 @@ def main():
     OUT.write_text(json.dumps(out, separators=(",", ":")))
     print(f"wrote {OUT} ({OUT.stat().st_size / 1024:.0f} KiB), valli {commit}")
 
-    # The landing page's chart: TabArena classification, every ranked model at each number of rows.
-    hb, ht = "tab", "classification"
-    ms = next(b["ms"] for b in out["benches"] if b["k"] == hb)
-    cells = [out["cells"][f"{hb}|{ht}|{m}"] for m in ms]
-    ids = sorted({r["id"] for c in cells for r in c["rows"] if r["place"] is not None})
-    hero = {"source": out["source"], "bench": "TabArena", "task": ht, "metric": "log loss", "ms": ms,
-            "n_ranked": [c["n_ranked"] for c in cells], "n_tables": cells[0]["n_tables"],
-            "models": {i: {"n": out["models"][i]["n"], "role": out["models"][i]["role"]} for i in ids},
-            "rows": {i: [next(({"err": r["err"], "place": r["place"]} for r in c["rows"] if r["id"] == i and r["place"] is not None), None)
-                         for c in cells] for i in ids}}
+    # The landing page's chart: accuracy on the real scientific datasets against training compute and
+    # inference speed. Accuracy = mean over the cells below of (best ranked error / the model's error).
+    cells = [out["cells"][f"sci|{t}|{m}"] for t, m in HERO_CELLS]
+    models = []
+    for mid, n, h, hl, src, rps in HERO_MODELS:
+        scores = []
+        for c in cells:
+            ranked = [r for r in c["rows"] if r["place"] is not None]
+            r = next((r for r in ranked if r["id"] == mid), None)
+            if r is not None:
+                scores.append(min(x["err"] for x in ranked) / r["err"])
+        if len(scores) < len(cells):    # not ranked in every cell (e.g. classification-only): not comparable
+            print(f"hero: skipping {n}: ranked in {len(scores)} of {len(cells)} cells")
+            continue
+        models.append({"n": n, "ours": mid == OURS, "acc": round(float(np.mean(scores)), 4), "h": h, "hl": hl, "src": src, "rps": rps})
+    hero = {"source": out["source"], "cells": [f"{t} m={m}" for t, m in HERO_CELLS], "models": models, "caption": [
+        "ACCURACY: mean score vs the best ranked model per setting · 5 real scientific datasets · ≤ 100 labelled rows · both tasks",
+        "TRAINING: one model's pretraining GPU time as published by its authors (RTX 2080 Ti / A100 / H100, not equivalent) · valli: one table's build",
+        "INFERENCE: rows per second, Vallix measurements · valli served by Tvarit",
+    ]}
     HERO = OUT.parent / "hero.json"
-    HERO.write_text(json.dumps(hero, separators=(",", ":")))
+    HERO.write_text(json.dumps(hero, separators=(",", ":"), ensure_ascii=False))
     print(f"wrote {HERO} ({HERO.stat().st_size / 1024:.1f} KiB)")
 
 
