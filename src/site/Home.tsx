@@ -201,8 +201,8 @@ export default function Home() {
     }).catch((e) => console.error(e));
     import('./fx/cursor-trail.js').then((m) => { if (alive) kills.push(m.cursorTrail()); }).catch((e) => console.error(e));
     import('./fx/vine-art.js').then((V) => { if (alive && footerRef.current) kills.push(V.footerVines(footerRef.current)); }).catch((e) => console.error(e));
-    import('./fx/bench-fig1.js').then((m) => {
-      if (alive && heroRef.current) { hero = m.drawFig1(heroRef.current, { autoplay: false }); if (playHeroWhenReady) hero.play(); }
+    Promise.all([import('./fx/bench-fig1.js'), import('./data/hero.json')]).then(([m, heroData]) => {
+      if (alive && heroRef.current) { hero = m.drawFig1(heroRef.current, { autoplay: false, data: heroData.default }); if (playHeroWhenReady) hero.play(); }
       done('hero');
     }).catch((e) => { console.error(e); done('hero'); });
     import('./fx/tree-scene.js').then((m) => {

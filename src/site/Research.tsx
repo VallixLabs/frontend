@@ -4,7 +4,7 @@ import { SiteFooter, SiteHeader } from './Chrome';
 
 /**
  * "Research & Benchmarks", ported from the Claude Design file `Research.dc.html`: the benchmark section (the
- * design's benchmarks.js, fed from fx/benchmark-data.js) and a filterable list of papers.
+ * design's benchmarks.js, fed from data/benchmarks.json: the valli benchmark export) and a filterable list of papers.
  */
 
 const mono = "'Geist Mono', ui-monospace, monospace";
@@ -49,9 +49,9 @@ export default function Research() {
     scrollTo(0, 0);
     let alive = true;
     const kills: (() => void)[] = [];
-    Promise.all([import('./fx/benchmarks.js'), import('./fx/benchmark-data.js')]).then(([B, data]) => {
+    Promise.all([import('./fx/benchmarks.js'), import('./data/benchmarks.json')]).then(([B, data]) => {
       if (!alive || !benchRef.current) return;
-      const kill = B.mountBenchmarks(benchRef.current, data.benchmarkData);
+      const kill = B.mountBenchmarks(benchRef.current, data.default);
       if (kill) kills.push(kill);
     }).catch((e) => console.error(e));
     import('./fx/cursor-trail.js').then((m) => { if (alive) kills.push(m.cursorTrail()); }).catch(() => {});
@@ -79,7 +79,7 @@ export default function Research() {
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
           <div style={{ fontFamily: mono, fontSize: 11, letterSpacing: '.16em', textTransform: 'uppercase', color: '#6c6963' }}>Research &amp; Benchmarks</div>
           <h1 style={{ margin: '18px 0 0', fontSize: 'clamp(36px, 5vw, 68px)', lineHeight: 1.04, fontWeight: 500, letterSpacing: '-0.035em' }}>Measured in the open.</h1>
-          <p style={{ margin: '18px 0 0', maxWidth: '56ch', fontSize: 18, lineHeight: 1.5, color: '#3e3c38', textWrap: 'balance' }}>Valli against 40 released tabular models on real scientific and business datasets, synthetic tables and TabArena, at 25 to 1,000 labelled rows. Every number below reproduces from our repository.</p>
+          <p style={{ margin: '18px 0 0', maxWidth: '56ch', fontSize: 18, lineHeight: 1.5, color: '#3e3c38', textWrap: 'balance' }}>Valli against the released tabular models, up to 49 ranked per setting, on 24 synthetic tables, TabArena’s 39 tables and 5 real scientific datasets, at 25 to 1,000 labelled rows. Every number below comes from our benchmark export; the source is noted above the figures.</p>
           <div style={{ display: 'flex', gap: 10, marginTop: 28, flexWrap: 'wrap', justifyContent: 'center' }}>
             <a href="#benchmarks" className="vx-btn-dark" style={{ display: 'flex', alignItems: 'center', padding: '10px 18px', borderRadius: 999, fontSize: 14.5, fontWeight: 500 }}>Benchmarks</a>
             <a href="#papers" className="vx-pg-ghost" style={{ display: 'flex', alignItems: 'center', padding: '10px 18px', borderRadius: 999, fontSize: 14.5, fontWeight: 500 }}>Publications</a>

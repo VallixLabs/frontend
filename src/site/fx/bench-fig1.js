@@ -1,4 +1,6 @@
-// Fig. 01 — accuracy vs training time, bubble = inference speed (from benchmarkfig1.html)
+// Fig. 01 on the landing page: error relative to the best model at each number of labelled rows, every ranked
+// model on one benchmark, valli in bold. Same ink, rules, tooltip and pop-in as the design's chart; the numbers
+// are `opt.data` (src/site/data/hero.json, built by scripts/export_benchmarks.py from the valli benchmark export).
 export function drawFig1(host, opt = {}) {
 
 const NS='http://www.w3.org/2000/svg';
@@ -8,93 +10,65 @@ function S(t,a={},p){const e=document.createElementNS(NS,t);for(const k in a)e.s
 function T(p,x,y,s,a={}){const e=S('text',Object.assign({x,y,'font-family':MONO,'font-size':11,fill:MID},a),p);e.textContent=s;return e;}
 const eo=t=>{t=Math.max(0,Math.min(1,t));return 1-Math.pow(1-t,3);};
 const back=t=>{t=Math.max(0,Math.min(1,t));const c=1.7;return 1+(c+1)*Math.pow(t-1,3)+c*Math.pow(t-1,2);};
+const ord=n=>{const v=n%100;return n+((v>10&&v<14)?'th':({1:'st',2:'nd',3:'rd'}[n%10]||'th'));};
 
-/* data — accuracy on 11 real datasets (placeholder), training GPU-hours, inference rows/s */
-const M=[
- {n:'valli',ours:1,acc:.98,h:.25,hl:'~15 min',rps:760000},
- {n:'TabPFN-2.5',acc:.89,h:4000,hl:'placeholder',rps:22000},
- {n:'TabPFN v2',acc:.84,h:2688,hl:'2 weeks × 8 GPUs',rps:21000},
- {n:'TabICLv2',acc:.87,h:588,hl:'24.5 H100-days',rps:31000},
- {n:'TabICL',acc:.82,h:1440,hl:'60 A100-days',rps:25000},
- {n:'LimiX',acc:.88,h:900,hl:'placeholder',rps:14000},
- {n:'Kumo-large',acc:.89,h:150,hl:'placeholder',rps:9000},
- {n:'Mitra',acc:.83,h:300,hl:'placeholder',rps:18000},
- {n:'Kumo-small',acc:.77,h:60,hl:'placeholder',rps:26000}];
+const data=opt.data,ms=data.ms,ids=Object.keys(data.rows);
+const OURS=ids.find(i=>data.models[i].role==='ours'),BASE=ids.find(i=>data.models[i].role==='base');
+const best=ms.map((_,j)=>Math.min(...ids.map(i=>data.rows[i][j]).filter(Boolean).map(r=>r.err)));
+const rel=(i,j)=>{const r=data.rows[i][j];return r?r.err/best[j]:null;};
 
-const W=1240,H=660,X0=120,X1=1150,Y0=168,Y1=572,LH0=-.9,LH1=3.75,A0=.72,A1=1.0;
-const xs=h=>X0+(Math.log10(h)-LH0)/(LH1-LH0)*(X1-X0), ys=a=>Y1-(a-A0)/(A1-A0)*(Y1-Y0);
-const rr=rps=>6+((Math.log10(rps)-3.8)/(6.0-3.8))*24;      // radius by inference speed (log)
-const svg=S('svg',{viewBox:`20 ${Y0-28} ${W-20} ${H-Y0+28}`,preserveAspectRatio:'xMidYMid meet','aria-label':'Scatter of tabular foundation models: accuracy against training time, bubble size is inference speed.'});
+const W=1240,H=660,X0=150,X1=1000,Y0=168,Y1=572,LO=.985,HI=1.30;
+const xs=m=>X0+(Math.log10(m)-Math.log10(ms[0]))/(Math.log10(ms[ms.length-1])-Math.log10(ms[0]))*(X1-X0);
+const ys=v=>Y1-(Math.min(v,HI)-LO)/(HI-LO)*(Y1-Y0);
+const svg=S('svg',{viewBox:`20 ${Y0-28} ${W-20} ${H-Y0+28}`,preserveAspectRatio:'xMidYMid meet','aria-label':`${data.bench} ${data.task}: ${data.metric} of every ranked model relative to the best, at ${ms.join(', ')} labelled rows; valli highlighted.`});
 svg.style.cssText='display:block;width:100%;height:100%;overflow:visible';host.appendChild(svg);
 const tip=document.createElement('div');tip.style.cssText='position:absolute;pointer-events:none;background:#141414;color:#f4f2ee;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:11px;line-height:1.55;padding:8px 11px;border-radius:2px;white-space:nowrap;opacity:0;transform:translate(-50%,-100%);margin-top:-16px;transition:opacity .12s;z-index:5';host.appendChild(tip);
 const defs=S('defs',{},svg);
-const rg=S('radialGradient',{id:'vxbest',cx:X0,cy:Y0,r:520,gradientUnits:'userSpaceOnUse'},defs);
+const rg=S('radialGradient',{id:'vxbest',cx:X0,cy:Y1,r:520,gradientUnits:'userSpaceOnUse'},defs);
 S('stop',{offset:'0','stop-color':INK,'stop-opacity':.075},rg);S('stop',{offset:'1','stop-color':INK,'stop-opacity':0},rg);
-const clipP=S('clipPath',{id:'vxpc'},defs);S('rect',{x:X0,y:Y0,width:X1-X0,height:Y1-Y0},clipP);
+const clip=S('clipPath',{id:'vxpc'},defs);S('rect',{x:X0-12,y:Y0-12,width:X1-X0+24,height:Y1-Y0+24},clip);
 
-/* ---- the reading key, big ---- */
 /* ---- plot ---- */
 S('rect',{x:X0,y:Y0,width:X1-X0,height:Y1-Y0,fill:'url(#vxbest)'},svg);
 const g=S('g',{},svg);
-const TT=[[.25,'15 min'],[1,'1 hour'],[24,'1 day'],[168,'1 week'],[720,'1 month'],[4320,'6 months']];
-TT.forEach(([h,l])=>{const x=xs(h);S('line',{x1:x,y1:Y0,x2:x,y2:Y1,stroke:RULE,'stroke-width':.8},g);T(g,x,Y1+22,l,{'text-anchor':'middle','font-size':11.5});});
-[.75,.8,.85,.9,.95,1].forEach(a=>{const y=ys(a);S('line',{x1:X0,y1:y,x2:X1,y2:y,stroke:RULE,'stroke-width':.8},g);T(g,X0-12,y+4,a.toFixed(2),{'text-anchor':'end','font-size':11.5});});
+ms.forEach((m,j)=>{const x=xs(m);S('line',{x1:x,y1:Y0,x2:x,y2:Y1,stroke:RULE,'stroke-width':.8},g);T(g,x,Y1+22,`${m.toLocaleString()} rows`,{'text-anchor':'middle','font-size':11.5});T(g,x,Y1+38,`${data.n_ranked[j]} ranked`,{'text-anchor':'middle','font-size':9.5,fill:FAINT});});
+[1,1.05,1.1,1.15,1.2,1.25,1.3].forEach(v=>{const y=ys(v);S('line',{x1:X0,y1:y,x2:X1,y2:y,stroke:v===1?INK:RULE,'stroke-width':v===1?1.1:.8},g);T(g,X0-12,y+4,v===1?'best':`+${Math.round((v-1)*100)}%`,{'text-anchor':'end','font-size':11.5,fill:v===1?INK:MID});});
 S('path',{d:`M${X0} ${Y0} V${Y1} H${X1}`,stroke:MID,'stroke-width':1,fill:'none'},g);
-T(g,(X0+X1)/2,Y1+50,'TIME TO TRAIN THE MODEL  ·  log scale  ·  ← faster',{'text-anchor':'middle','font-size':10.5,'letter-spacing':1.4,fill:INK});
-T(g,0,0,'ACCURACY  ·  relative to the best model  ·  ↑ better',{'text-anchor':'middle','font-size':10.5,'letter-spacing':1.4,fill:INK,transform:`translate(${X0-66} ${(Y0+Y1)/2}) rotate(-90)`});
+T(g,(X0+X1)/2,Y1+62,`LABELLED ROWS  ·  log scale  ·  ${data.bench.toUpperCase()}, ${data.task.toUpperCase()}, ${data.n_tables} TABLES`,{'text-anchor':'middle','font-size':10.5,'letter-spacing':1.4,fill:INK});
+T(g,0,0,`${data.metric.toUpperCase()}  ·  relative to the best model  ·  ↓ better`,{'text-anchor':'middle','font-size':10.5,'letter-spacing':1.4,fill:INK,transform:`translate(${X0-78} ${(Y0+Y1)/2}) rotate(-90)`});
 
-/* size legend, top-right of plot */
-const lg=S('g',{},svg),lx=X1-250,ly=Y0+30;
-T(lg,lx,ly-6,'INFERENCE SPEED',{'font-size':9.5,'letter-spacing':1.4,fill:INK});
-[[1e4,'10k'],[1e5,'100k'],[1e6,'1M rows/s']].forEach(([v,l],i)=>{const r=rr(v),cx=lx+18+i*78;S('circle',{cx,cy:ly+30,r,fill:'none',stroke:MID,'stroke-width':1},lg);T(lg,cx,ly+30+r+15,l,{'text-anchor':'middle','font-size':9.5});});
-
-/* bubbles */
-const layer=S('g',{},svg),labels=S('g',{},svg);
-const order=[...M].sort((a,b)=>(a.ours?1:0)-(b.ours?1:0));
-order.forEach((m,i)=>{m.x=xs(m.h);m.y=ys(m.acc);m.r=rr(m.rps);m.i=i;
-  m.rings=[0,1].map(()=>S('circle',{cx:m.x,cy:m.y,r:m.r,fill:'none',stroke:INK,'stroke-width':m.ours?1.1:.8,opacity:0},layer));
-  m.dot=S('circle',{cx:m.x,cy:m.y,r:0,fill:m.ours?INK:PANEL,stroke:INK,'stroke-width':m.ours?0:1.3},layer);
-  m.period=3.4-2.6*((Math.log10(m.rps)-3.8)/(6.0-3.8));});
-
-/* label placement: try right, left, above, below; avoid other labels and bubbles */
-const placed=[];
-const boxOf=(x,y,w,h)=>({x,y,w,h});
-const hit=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
-order.filter(m=>!m.ours).sort((a,b)=>b.acc-a.acc).forEach(m=>{const w=m.n.length*6.9,h=13,c=[
-   [m.x+m.r+7,m.y+4,'start'],[m.x-m.r-7,m.y+4,'end'],[m.x,m.y-m.r-8,'middle'],[m.x,m.y+m.r+15,'middle']];
-  let pick=c[0];for(const cand of c){const[x,y,a]=cand,bx=a==='start'?x:a==='end'?x-w:x-w/2,bb=boxOf(bx,y-11,w,h);
-    const clash=placed.some(p=>hit(p,bb))||M.some(o=>o!==m&&hit(boxOf(o.x-o.r,o.y-o.r,o.r*2,o.r*2),bb))||bb.x+bb.w>X1-4;
-    if(!clash){pick=cand;placed.push(bb);break;}}
-  m.lab=T(labels,pick[0],pick[1],m.n,{'text-anchor':pick[2],'font-size':11.5,fill:MID,opacity:0,stroke:PANEL,'stroke-width':4,'paint-order':'stroke'});});
-// valli label + guides
-const V=M[0];
-const guides=S('g',{opacity:0},svg);
-S('line',{x1:V.x,y1:V.y,x2:V.x,y2:Y1,stroke:INK,'stroke-width':.9,'stroke-dasharray':'3 4'},guides);
-S('line',{x1:V.x,y1:V.y,x2:X0,y2:V.y,stroke:INK,'stroke-width':.9,'stroke-dasharray':'3 4'},guides);
-S('circle',{cx:V.x,cy:Y1,r:3,fill:INK},guides);S('circle',{cx:X0,cy:V.y,r:3,fill:INK},guides);
-const vl=S('g',{opacity:0},svg);
-T(vl,V.x+V.r+16,V.y-4,'valli',{'font-family':SANS,'font-size':28,'font-weight':600,fill:INK,stroke:PANEL,'stroke-width':6,'paint-order':'stroke'});
-T(vl,V.x+V.r+18,V.y+18,`accuracy ${V.acc.toFixed(2)}  ·  ${V.hl} to train  ·  ${(V.rps/1000).toFixed(0)}k rows/s`,{'font-size':12,fill:INK,stroke:PANEL,'stroke-width':5,'paint-order':'stroke'});
-T(vl,V.x+V.r+18,V.y+36,'the rest took days to weeks to train, and predict ~20–80× slower',{'font-size':11,fill:MID,stroke:PANEL,'stroke-width':5,'paint-order':'stroke'});
+/* ---- every ranked model: a faint line; Kumo-small dashed; valli bold ---- */
+const lines=S('g',{'clip-path':'url(#vxpc)'},svg),layer=S('g',{},svg);
+const pathOf=i=>{let d='',on=false;ms.forEach((m,j)=>{const v=rel(i,j);if(v==null){on=false;return;}d+=(on?'L':'M')+xs(m).toFixed(1)+' '+ys(v).toFixed(1);on=true;});return d;};
+const drawn=[];
+ids.forEach(i=>{const ours=i===OURS,base=i===BASE,d=pathOf(i);if(!d)return;
+  const p=S('path',{d,fill:'none',stroke:ours?INK:base?MID:FAINT,'stroke-width':ours?2.8:base?1.6:.9,'stroke-opacity':ours||base?1:.6,'stroke-dasharray':base?'5 3':null,'stroke-linejoin':'round'},ours||base?layer:lines);
+  const L=p.getTotalLength();p.style.strokeDasharray=base?'5 3':`${L} ${L}`;if(!base)p.style.strokeDashoffset=L;p.style.opacity=base?0:1;
+  const dots=ms.map((m,j)=>{const v=rel(i,j);if(v==null||v>HI)return null;return S('circle',{cx:xs(m),cy:ys(v),r:0,fill:ours?INK:PANEL,stroke:ours?INK:base?MID:FAINT,'stroke-width':ours?0:1},ours||base?layer:lines);});
+  drawn.push({i,ours,base,p,L,dots,start:ours?1.5:base?1.1:.3+Math.random()*.4});});
+// valli's label and its place at each size, in the clear space right of its last point
+const V=OURS,vlast=ms.length-1,vl=S('g',{opacity:0},svg);
+const vEnd=ys(Math.min(rel(V,vlast)??1,HI)),lx=X1+18,ly=Math.min(Y1-60,Math.max(Y0+30,vEnd-40));
+T(vl,lx,ly,'valli',{'font-family':SANS,'font-size':28,'font-weight':600,fill:INK});
+ms.forEach((m,j)=>{const r=data.rows[V][j];if(r)T(vl,lx+2,ly+22+j*17,`${ord(r.place)} of ${data.n_ranked[j]} at ${m.toLocaleString()} rows`,{'font-size':11.5,fill:j===0?INK:MID});});
+// legend above the plot
+const bl=S('g',{opacity:0},svg),lg=[[INK,2.8,null,'valli'],[MID,1.6,'5 3',`${data.models[BASE].n}, released (valli's base)`],[FAINT,.9,null,'every other ranked model']];
+let gx=X0;lg.forEach(([c,w,da,l])=>{S('line',{x1:gx,y1:Y0-16,x2:gx+26,y2:Y0-16,stroke:c,'stroke-width':w,'stroke-dasharray':da},bl);const t=T(bl,gx+34,Y0-12,l,{'font-size':11,fill:INK});gx+=34+t.getComputedTextLength()+26;});
 
 /* animation */
 let t0=null;
 function loop(ts){if(t0===null)t0=ts;const t=(ts-t0)/1000;
-  order.forEach(m=>{const start=m.ours?1.5:.3+m.i*.09,k=(t-start)/(m.ours?.7:.5),s=m.ours?back(k):eo(k);
-    m.dot.setAttribute('r',Math.max(0,m.r*s));
-    if(m.lab)m.lab.setAttribute('opacity',eo((t-start-.35)/.4));
-    m.rings.forEach((ring,j)=>{if(t<start+.6){ring.setAttribute('opacity',0);return;}
-      const ph=(((t-start)/m.period)+j*.5)%1;ring.setAttribute('r',m.r+ph*(m.ours?26:15));ring.setAttribute('opacity',(1-ph)*(m.ours?.42:.2));});});
-  guides.setAttribute('opacity',eo((t-2.1)/.5));vl.setAttribute('opacity',eo((t-2.0)/.5));
-  if(t<4.5||running)raf=requestAnimationFrame(loop);}
+  drawn.forEach(o=>{const k=eo((t-o.start)/(o.ours?1:.8));if(o.base)o.p.style.opacity=k;else o.p.style.strokeDashoffset=o.L*(1-k);
+    o.dots.forEach((c,j)=>{if(!c)return;const s=o.ours?back((t-o.start-.2-j*.12)/.6):eo((t-o.start-.2)/.5);c.setAttribute('r',Math.max(0,(o.ours?5:o.base?3.5:2.2)*s));});});
+  vl.setAttribute('opacity',eo((t-2.1)/.5));bl.setAttribute('opacity',eo((t-2.0)/.5));
+  if(t<3.5&&running)raf=requestAnimationFrame(loop);}
 
 /* hover */
-order.forEach(m=>{const hz=S('circle',{cx:m.x,cy:m.y,r:Math.max(m.r,10)+4,fill:'transparent',style:'cursor:pointer'},svg);
-  hz.addEventListener('mousemove',ev=>{const r=svg.getBoundingClientRect();
-    tip.innerHTML=`<b>${m.n}</b><br>accuracy ${m.acc.toFixed(2)}<br>training ${m.h>=1?m.h.toLocaleString()+' GPU-h':'~15 GPU-min'} · ${m.hl}<br>${m.rps.toLocaleString()} rows/s${m.ours?' · tvarit':''}`;
-    const ctm=svg.getScreenCTM(),hr=host.getBoundingClientRect(),pt=svg.createSVGPoint();pt.x=m.x;pt.y=m.y-m.r;const q=pt.matrixTransform(ctm);
+drawn.forEach(o=>o.dots.forEach((c,j)=>{if(!c)return;const r=data.rows[o.i][j],hz=S('circle',{cx:c.getAttribute('cx'),cy:c.getAttribute('cy'),r:9,fill:'transparent',style:'cursor:pointer'},svg);
+  hz.addEventListener('mousemove',()=>{tip.innerHTML=`<b>${data.models[o.i].n}</b><br>${ms[j].toLocaleString()} rows · ${ord(r.place)} of ${data.n_ranked[j]}<br>${data.metric} ${r.err.toFixed(3)} (${rel(o.i,j)===1?'best':'+'+((rel(o.i,j)-1)*100).toFixed(1)+'%'})`;
+    const ctm=svg.getScreenCTM(),hr=host.getBoundingClientRect(),pt=svg.createSVGPoint();pt.x=+c.getAttribute('cx');pt.y=+c.getAttribute('cy')-6;const q=pt.matrixTransform(ctm);
     tip.style.left=(q.x-hr.left)+'px';tip.style.top=(q.y-hr.top)+'px';tip.style.opacity=1;});
-  hz.addEventListener('mouseleave',()=>tip.style.opacity=0);});
+  hz.addEventListener('mouseleave',()=>tip.style.opacity=0);}));
 
 let raf=0,running=true,started=false;
 const play=()=>{if(started)return;started=true;(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>{t0=null;raf=requestAnimationFrame(loop);});};
