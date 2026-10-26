@@ -4,7 +4,7 @@
 export function drawFig1(host, opt = {}) {
 
 const NS='http://www.w3.org/2000/svg';
-const INK='#141414',MID='#6d6a64',FAINT='#aaa69e',RULE='#dedbd4',PANEL='#f8f7f4';
+const INK='#141414',VX='#2e5c36',MID='#6d6a64',FAINT='#aaa69e',RULE='#dedbd4',PANEL='#f8f7f4';
 const MONO='"IBM Plex Mono", ui-monospace, Menlo, monospace',SANS='"Source Sans 3", Arial, sans-serif';
 function S(t,a={},p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;}
 function T(p,x,y,s,a={}){const e=S('text',Object.assign({x,y,'font-family':MONO,'font-size':11,fill:MID},a),p);e.textContent=s;return e;}
@@ -36,14 +36,14 @@ const TT=[[.25,'15 min'],[1,'1 hour'],[24,'1 day'],[168,'1 week'],[720,'1 month'
 TT.forEach(([h,l])=>{const x=xs(h);S('line',{x1:x,y1:Y0,x2:x,y2:Y1,stroke:RULE,'stroke-width':.8},g);T(g,x,Y1+22,l,{'text-anchor':'middle','font-size':11.5});});
 [.7,.75,.8,.85,.9,.95,1].filter(a=>a>=A0-1e-9).forEach(a=>{const y=ys(a);S('line',{x1:X0,y1:y,x2:BX1,y2:y,stroke:RULE,'stroke-width':.8},g);T(g,X0-12,y+4,a.toFixed(2),{'text-anchor':'end','font-size':11.5});});
 S('path',{d:`M${X0} ${Y0} V${Y1} H${X1}`,stroke:MID,'stroke-width':1,fill:'none'},g);
-T(g,(X0+X1)/2,Y1+50,'GPU TIME TO TRAIN THE MODEL  ·  log scale  ·  ← faster',{'text-anchor':'middle','font-size':10.5,'letter-spacing':1.4,fill:INK});
-T(g,0,0,'ACCURACY  ·  relative to the best model  ·  ↑ better',{'text-anchor':'middle','font-size':10.5,'letter-spacing':1.4,fill:INK,transform:`translate(${X0-66} ${(Y0+Y1)/2}) rotate(-90)`});
+T(g,(X0+X1)/2,Y1+50,'GPU TIME TO TRAIN THE MODEL  ·  log scale  ·  ← faster',{'font-family':SANS,'font-weight':600,'text-anchor':'middle','font-size':10.5,'letter-spacing':1.4,fill:INK});
+T(g,0,0,'ACCURACY  ·  relative to the best model  ·  ↑ better',{'font-family':SANS,'font-weight':600,'text-anchor':'middle','font-size':10.5,'letter-spacing':1.4,fill:INK,transform:`translate(${X0-66} ${(Y0+Y1)/2}) rotate(-90)`});
 
 T(g,(X0+X1)/2,Y1+72,'Bigger circle = slower inference (fewer rows per second)',{'text-anchor':'middle','font-size':11,fill:MID});
 
 const nr=M.filter(m=>m.h==null);
 if(nr.length){S('rect',{x:BX0,y:Y0,width:BX1-BX0,height:Y1-Y0,fill:INK,'fill-opacity':.03},g);S('line',{x1:BX0,y1:Y0,x2:BX0,y2:Y1,stroke:MID,'stroke-width':.8,'stroke-dasharray':'2 3'},g);
-  T(g,(BX0+BX1)/2,Y1+22,'not published',{'text-anchor':'middle','font-size':11.5});T(g,(BX0+BX1)/2,Y0-10,'TRAINING COMPUTE NOT PUBLISHED',{'text-anchor':'middle','font-size':9,'letter-spacing':1.1,fill:MID});
+  T(g,(BX0+BX1)/2,Y1+22,'not published',{'text-anchor':'middle','font-size':11.5});T(g,(BX0+BX1)/2,Y0-10,'TRAINING COMPUTE NOT PUBLISHED',{'font-family':SANS,'font-weight':600,'text-anchor':'middle','font-size':9,'letter-spacing':1.1,fill:MID});
   nr.sort((a,b)=>b.acc-a.acc).forEach((m,k)=>{m.bx=BX0+(k+.5)*(BX1-BX0)/nr.length;});}
 
 
@@ -51,8 +51,8 @@ if(nr.length){S('rect',{x:BX0,y:Y0,width:BX1-BX0,height:Y1-Y0,fill:INK,'fill-opa
 const layer=S('g',{},svg),labels=S('g',{},svg);
 const order=[...M].sort((a,b)=>(a.ours?1:0)-(b.ours?1:0));
 order.forEach((m,i)=>{m.x=m.h==null?m.bx:xs(m.h);m.y=ys(m.acc);m.r=rr(m.rps);m.i=i;
-  m.rings=[0,1].map(()=>S('circle',{cx:m.x,cy:m.y,r:m.r,fill:'none',stroke:INK,'stroke-width':m.ours?1.1:.8,opacity:0},layer));
-  m.dot=S('circle',{cx:m.x,cy:m.y,r:0,fill:m.ours?INK:PANEL,stroke:INK,'stroke-width':m.ours?0:1.3},layer);
+  m.rings=[0,1].map(()=>S('circle',{cx:m.x,cy:m.y,r:m.r,fill:'none',stroke:m.ours?VX:INK,'stroke-width':m.ours?1.1:.8,opacity:0},layer));
+  m.dot=S('circle',{cx:m.x,cy:m.y,r:0,fill:m.ours?VX:PANEL,stroke:INK,'stroke-width':m.ours?0:1.3},layer);
   m.period=3.4-2.6*((Math.log10(m.rps)-3.8)/(6.0-3.8));});
 
 /* label placement: try right, left, above, below; avoid other labels and bubbles */
@@ -69,11 +69,11 @@ order.filter(m=>!m.ours).sort((a,b)=>b.acc-a.acc).forEach(m=>{const w=m.n.length
 // valli label + guides
 const V=M[0];
 const guides=S('g',{opacity:0},svg);
-S('line',{x1:V.x,y1:V.y,x2:V.x,y2:Y1,stroke:INK,'stroke-width':.9,'stroke-dasharray':'3 4'},guides);
-S('line',{x1:V.x,y1:V.y,x2:X0,y2:V.y,stroke:INK,'stroke-width':.9,'stroke-dasharray':'3 4'},guides);
-S('circle',{cx:V.x,cy:Y1,r:3,fill:INK},guides);S('circle',{cx:X0,cy:V.y,r:3,fill:INK},guides);
+S('line',{x1:V.x,y1:V.y,x2:V.x,y2:Y1,stroke:VX,'stroke-width':.9,'stroke-dasharray':'3 4'},guides);
+S('line',{x1:V.x,y1:V.y,x2:X0,y2:V.y,stroke:VX,'stroke-width':.9,'stroke-dasharray':'3 4'},guides);
+S('circle',{cx:V.x,cy:Y1,r:3,fill:VX},guides);S('circle',{cx:X0,cy:V.y,r:3,fill:VX},guides);
 const vl=S('g',{opacity:0},svg);
-T(vl,V.x+V.r+16,V.y-4,'valli',{'font-family':SANS,'font-size':28,'font-weight':600,fill:INK,stroke:PANEL,'stroke-width':6,'paint-order':'stroke'});
+T(vl,V.x+V.r+16,V.y-4,'valli',{'font-family':SANS,'font-size':28,'font-weight':600,fill:VX,stroke:PANEL,'stroke-width':6,'paint-order':'stroke'});
 const others=M.filter(m=>!m.ours),rep=others.filter(m=>m.h!=null),hMin=Math.min(...rep.map(m=>m.h)),hMax=Math.max(...rep.map(m=>m.h));
 const slow=others.map(m=>V.rps/m.rps),sLo=Math.round(Math.min(...slow)),sHi=Math.round(Math.max(...slow));
 T(vl,V.x+V.r+18,V.y+18,`accuracy ${V.acc.toFixed(2)}  ·  trains in ${V.hl}  ·  ${(V.rps/1000).toFixed(0)}k rows/s`,{'font-size':12,fill:INK,stroke:PANEL,'stroke-width':5,'paint-order':'stroke'});

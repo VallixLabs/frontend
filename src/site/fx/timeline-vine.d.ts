@@ -4,6 +4,6 @@ export type Milestone = {
   d: [number, number, 'c' | 'l' | 'r']; t: [number, number, 'c' | 'l' | 'r']; w: number;
 };
 export function mountTimeline(o: {
-  svg: SVGSVGElement; stage: HTMLElement; track: HTMLElement; now: HTMLElement | null; hint: HTMLElement | null;
+  svg: SVGSVGElement; stage: HTMLElement; track: HTMLElement; now: HTMLElement | null; hint: HTMLElement | null; photos?: HTMLElement | null;
   milestones: Milestone[]; onNodeOff?: (i: number) => void;
 }): () => void;

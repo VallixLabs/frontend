@@ -1,9 +1,11 @@
 // Scroll-grown vine timeline for the "Who we are" page, ported from the design's WhoWeAre.dc.html
 // (its setup / leaf / curl / tendril methods). The SVG paths, labels and links are rendered by React;
 // this builds the vine artwork into the SVG and drives growth, nodes and labels from the scroll position.
-const INK = '#141414', PAPER = '#f6f5f2';
+const INK = '#141414', PAPER = '#f6f5f2', VINE = '#2e5c36', STEM = '#eef1e8', LEAF = '#e3ead9';
+// Where each photo card settles in the stack (px offset, degrees), one per milestone, cycling.
+const PH = [[-4, 2, -2.5], [5, -3, 2], [-2, 4, -1.2], [4, 1, 2.8], [-5, -2, -1.8], [3, 3, 1.4], [-3, -4, -3], [5, 2, 1.8], [-6, 1, -0.8], [2, -3, 2.4], [-2, 3, -2], [0, 0, 0.6]].map(([x, y, r]) => ({ x, y, r }));
 
-export function mountTimeline({ svg, stage, track, now, hint, milestones, onNodeOff }) {
+export function mountTimeline({ svg, stage, track, now, hint, photos, milestones, onNodeOff }) {
   let raf = 0;
   const NS = 'http://www.w3.org/2000/svg';
   const mk = (tag, at, p) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); if (p) p.appendChild(e); return e; };
@@ -29,7 +31,7 @@ export function mountTimeline({ svg, stage, track, now, hint, milestones, onNode
 
   const gfx = svg.querySelector('[data-vinegfx]'); gfx.innerHTML = '';
   const defs = mk('defs', {}, gfx);
-  const gShadow = mk('g', { fill: '#dedbd4' }, gfx), gBackLeaves = mk('g', {}, gfx), gStem = mk('g', {}, gfx), gLeaves = mk('g', {}, gfx), gTendril = mk('g', { fill: 'none', stroke: INK, 'stroke-width': 0.9, 'stroke-linecap': 'round' }, gfx);
+  const gShadow = mk('g', { fill: '#dedbd4' }, gfx), gBackLeaves = mk('g', {}, gfx), gStem = mk('g', {}, gfx), gLeaves = mk('g', {}, gfx), gTendril = mk('g', { fill: 'none', stroke: VINE, 'stroke-width': 0.9, 'stroke-linecap': 'round' }, gfx);
   const LIGHT = [-0.6, -0.8];
   const leaves = [], tendrils = [];
   const W = { main: [5.6, 2.7], tvarit: [3.7, 1.6], left: [3.8, 1.6] };
@@ -53,12 +55,12 @@ export function mountTimeline({ svg, stage, track, now, hint, milestones, onNode
     mp.style.strokeDasharray = P.L + ' ' + (P.L + 40); mp.style.strokeDashoffset = P.L; P.mask = mp;
     mk('path', { d: poly, transform: 'translate(2.2 3.2)', mask: 'url(#' + mid + ')' }, gShadow);
     const g = mk('g', { mask: 'url(#' + mid + ')' }, gStem);
-    mk('path', { d: poly, fill: PAPER }, g);
+    mk('path', { d: poly, fill: STEM }, g);
     // bark: fine longitudinal grooves
     [-0.22, 0.18].forEach((k, j) => {
       let d = '', on = false;
       S.forEach((s) => { const vis = Math.sin(s.l * 0.06 + j * 2.1 + k * 7) > -0.35; const p = [s.x + s.nx * s.w * k, s.y + s.ny * s.w * k]; if (vis) { d += (on ? 'L' : 'M') + f(p[0]) + ' ' + f(p[1]); on = true; } else on = false; });
-      mk('path', { d, fill: 'none', stroke: INK, 'stroke-width': 0.45, opacity: 0.55 }, g);
+      mk('path', { d, fill: 'none', stroke: VINE, 'stroke-width': 0.45, opacity: 0.55 }, g);
     });
     // hatching on the shadow side
     let hd = '';
@@ -68,10 +70,10 @@ export function mountTimeline({ svg, stage, track, now, hint, milestones, onNode
       const E = sg > 0 ? Lf[i] : Rt[i], k = s.w * rr(0.28, 0.5);
       hd += 'M' + f(E[0]) + ' ' + f(E[1]) + 'L' + f(E[0] - s.nx * sg * k + s.tx * k * 0.5) + ' ' + f(E[1] - s.ny * sg * k + s.ty * k * 0.5);
     });
-    mk('path', { d: hd, fill: 'none', stroke: INK, 'stroke-width': 0.55, 'stroke-linecap': 'round', opacity: 0.85 }, g);
+    mk('path', { d: hd, fill: 'none', stroke: VINE, 'stroke-width': 0.55, 'stroke-linecap': 'round', opacity: 0.85 }, g);
     // outline edges
-    mk('path', { d: 'M' + Lf.map(p => f(p[0]) + ' ' + f(p[1])).join('L'), fill: 'none', stroke: INK, 'stroke-width': 1.25, 'stroke-linejoin': 'round' }, g);
-    mk('path', { d: 'M' + Rt.map(p => f(p[0]) + ' ' + f(p[1])).join('L'), fill: 'none', stroke: INK, 'stroke-width': 1.25, 'stroke-linejoin': 'round' }, g);
+    mk('path', { d: 'M' + Lf.map(p => f(p[0]) + ' ' + f(p[1])).join('L'), fill: 'none', stroke: VINE, 'stroke-width': 1.25, 'stroke-linejoin': 'round' }, g);
+    mk('path', { d: 'M' + Rt.map(p => f(p[0]) + ' ' + f(p[1])).join('L'), fill: 'none', stroke: VINE, 'stroke-width': 1.25, 'stroke-linejoin': 'round' }, g);
     // twining secondary stem: over/under
     const per = key === 'main' ? 26 : 20;
     let tf = '', on2 = false;
@@ -81,8 +83,8 @@ export function mountTimeline({ svg, stage, track, now, hint, milestones, onNode
       const p = [s.x + s.nx * off, s.y + s.ny * off];
       if (front) { tf += (on2 ? 'L' : 'M') + f(p[0]) + ' ' + f(p[1]); on2 = true; } else on2 = false;
     });
-    mk('path', { d: tf, fill: 'none', stroke: PAPER, 'stroke-width': 2.6, 'stroke-linecap': 'round' }, g);
-    mk('path', { d: tf, fill: 'none', stroke: INK, 'stroke-width': 0.95, 'stroke-linecap': 'round' }, g);
+    mk('path', { d: tf, fill: 'none', stroke: STEM, 'stroke-width': 2.6, 'stroke-linecap': 'round' }, g);
+    mk('path', { d: tf, fill: 'none', stroke: VINE, 'stroke-width': 0.95, 'stroke-linecap': 'round' }, g);
     // leaves
     let l = rr(14, 22), side = 1;
     const nodeLs = nodes.filter(nd => nd.p === key).map(nd => nd.len);
@@ -115,8 +117,10 @@ export function mountTimeline({ svg, stage, track, now, hint, milestones, onNode
     nd.g = g; nd.ring = ring; nd.dot = dot; nd.on = false;
     nd.label = stage.querySelector('[data-label="' + i + '"]');
     nd.link = stage.querySelector('[data-link="' + i + '"]');
+    nd.photo = photos ? photos.querySelector('[data-photo="' + i + '"]') : null;
   });
-  let pT = 0, pC = 0, last = -1;
+  let pT = 0, pC = 0, last = -1, lastPh;
+  const phOff = i => PH[i % PH.length];
   const frame = () => {
     raf = requestAnimationFrame(frame);
     const r = track.getBoundingClientRect(), span = Math.max(1, r.height - innerHeight);
@@ -136,12 +140,15 @@ export function mountTimeline({ svg, stage, track, now, hint, milestones, onNode
       if (on !== nd.on) {
         nd.on = on;
         nd.g.style.transform = on ? 'scale(1)' : 'scale(0)';
+        if (nd.photo) { const P = phOff(nd.i); nd.photo.style.opacity = on ? 1 : 0; nd.photo.style.transform = on ? 'translate(' + P.x + 'px,' + P.y + 'px) rotate(' + P.r + 'deg)' : 'translate(' + (P.x + 70) + 'px,' + (P.y - 90) + 'px) rotate(' + (P.r + 18) + 'deg) scale(1.12)'; }
         if (nd.label) { nd.label.style.opacity = on ? 1 : 0; nd.label.style.filter = on ? 'blur(0)' : 'blur(4px)'; nd.label.style.transform = on ? 'none' : 'translateY(6px)'; }
         if (nd.link) nd.link.style.pointerEvents = on ? 'auto' : 'none';
         if (!on && onNodeOff) onNodeOff(nd.i);
       }
     });
-    nodes.forEach(nd => { const c = nd === latest; nd.dot.setAttribute('fill', c ? INK : PAPER); nd.ring.style.opacity = c ? 1 : 0; });
+    // older cards in the stack dim slightly
+    if (latest !== lastPh) { lastPh = latest; nodes.forEach(nd => { if (nd.photo) nd.photo.style.filter = nd.on && latest && nd.i < latest.i - 1 ? 'brightness(.94) saturate(.85)' : 'none'; }); }
+    nodes.forEach(nd => { const c = nd === latest; nd.dot.setAttribute('fill', c ? VINE : PAPER); nd.ring.setAttribute('stroke', c ? VINE : INK); nd.ring.style.opacity = c ? 1 : 0; });
     if (now) now.textContent = latest ? latest.date : milestones[0].date;
     if (hint) hint.style.opacity = pC > 0.03 ? 0 : 1;
   };
@@ -162,16 +169,16 @@ function leaf(mk, parent, s, side, size, rnd, key, l) {
   const d = 'M' + pt(P(0, 0)) + 'C' + pt(P(-0.18, 0.28)) + ' ' + pt(P(0.08, 0.62)) + ' ' + pt(P(0.38, 0.56)) + 'C' + pt(P(0.66, 0.5)) + ' ' + pt(P(0.86, 0.22)) + ' ' + pt(P(1.08, 0.02))
     + 'C' + pt(P(0.86, -0.2)) + ' ' + pt(P(0.66, -0.5)) + ' ' + pt(P(0.38, -0.56)) + 'C' + pt(P(0.08, -0.62)) + ' ' + pt(P(-0.18, -0.28)) + ' ' + pt(P(0, 0)) + 'Z';
   const g = mk('g', {}, parent);
-  mk('path', { d: 'M' + pt(base) + 'Q' + pt([base[0] + ax * pet * 0.5 + bx * size * 0.06, base[1] + ay * pet * 0.5 + by * size * 0.06]) + ' ' + pt(P(0, 0)), fill: 'none', stroke: INK, 'stroke-width': 0.9, 'stroke-linecap': 'round' }, g);
-  mk('path', { d, fill: PAPER, stroke: INK, 'stroke-width': 0.95, 'stroke-linejoin': 'round' }, g);
+  mk('path', { d: 'M' + pt(base) + 'Q' + pt([base[0] + ax * pet * 0.5 + bx * size * 0.06, base[1] + ay * pet * 0.5 + by * size * 0.06]) + ' ' + pt(P(0, 0)), fill: 'none', stroke: VINE, 'stroke-width': 0.9, 'stroke-linecap': 'round' }, g);
+  mk('path', { d, fill: LEAF, stroke: VINE, 'stroke-width': 0.95, 'stroke-linejoin': 'round' }, g);
   // midrib + veins
   let vd = 'M' + pt(P(0.02, 0)) + 'Q' + pt(P(0.5, 0.03 * side)) + ' ' + pt(P(0.98, 0.02));
   [[0.12, 0.42], [0.32, 0.46], [0.54, 0.34], [0.74, 0.2]].forEach(([u, v]) => { vd += 'M' + pt(P(u, 0)) + 'Q' + pt(P(u + 0.1, v * 0.5)) + ' ' + pt(P(u + 0.2, v)); vd += 'M' + pt(P(u, 0)) + 'Q' + pt(P(u + 0.1, -v * 0.5)) + ' ' + pt(P(u + 0.2, -v)); });
-  mk('path', { d: vd, fill: 'none', stroke: INK, 'stroke-width': 0.5, 'stroke-linecap': 'round', opacity: 0.8 }, g);
+  mk('path', { d: vd, fill: 'none', stroke: VINE, 'stroke-width': 0.5, 'stroke-linecap': 'round', opacity: 0.8 }, g);
   // stipple shade on one half
   let sdots = ''; const cnt = Math.round(size * 2.6);
   for (let i = 0; i < cnt; i++) { const u = 0.08 + rnd() * 0.8, lim = Math.sin(Math.PI * Math.min(1, u / 1.0)) * 0.5; const v = -(0.05 + Math.pow(rnd(), 0.6) * lim); sdots += 'M' + pt(P(u, v)) + 'h0'; }
-  mk('path', { d: sdots, fill: 'none', stroke: INK, 'stroke-width': 0.75, 'stroke-linecap': 'round', opacity: 0.7 }, g);
+  mk('path', { d: sdots, fill: 'none', stroke: VINE, 'stroke-width': 0.75, 'stroke-linecap': 'round', opacity: 0.7 }, g);
   g.style.transformOrigin = base[0] + 'px ' + base[1] + 'px'; g.style.transformBox = 'view-box';
   g.style.transform = 'scale(0) rotate(' + (side * -40) + 'deg)';
   g.style.transition = 'transform .9s cubic-bezier(.25,1.35,.45,1)';

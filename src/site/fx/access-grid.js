@@ -1,6 +1,6 @@
 // Interactive table background: hovering fills cells with values; the target column fills with predictions.
 export function accessGrid(host, opt = {}) {
-  const INK = '20,20,20', MUTE = '111,107,100', LINE = 'rgba(20,20,20,0.10)', HEAD = 'rgba(20,20,20,0.16)';
+  const INK = '20,20,20', GRN = '46,92,54', MUTE = '104,112,103', LINE = 'rgba(46,92,54,0.09)', HEAD = 'rgba(46,92,54,0.15)';
   const cv = document.createElement('canvas');
   cv.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block';
   host.appendChild(cv);
@@ -48,16 +48,16 @@ export function accessGrid(host, opt = {}) {
     for (let c = 0; c <= nc; c++) { const x = Math.round(off + c * CW) + 0.5; g.moveTo(x, 0); g.lineTo(x, H); }
     for (let r = 0; r <= nr; r++) { const y = Math.round(r * CH) + 0.5; g.moveTo(0, y); g.lineTo(W, y); }
     g.stroke();
-    g.fillStyle = 'rgba(20,20,20,0.035)'; g.fillRect(0, 0, W, CH);
+    g.fillStyle = 'rgba(46,92,54,0.035)'; g.fillRect(0, 0, W, CH);
     g.strokeStyle = HEAD; g.beginPath(); g.moveTo(0, CH + 0.5); g.lineTo(W, CH + 0.5); g.stroke();
     g.textBaseline = 'middle';
     let active = false;
     for (const k of cells) {
       const x = off + k.c * CW, y = k.r * CH;
       if (k.r === 0) {
-        g.font = "500 10px 'Geist Mono', ui-monospace, monospace";
-        g.fillStyle = ink(k.col.pred ? 0.75 : 0.42, k.col.pred ? INK : MUTE);
-        const label = (k.col.pred ? '◆ ' : '') + k.col.h.toUpperCase();
+        g.font = "600 11px 'Source Sans 3', system-ui, sans-serif";
+        g.fillStyle = ink(k.col.pred ? 0.85 : 0.5, k.col.pred ? GRN : MUTE);
+        const label = k.col.h.toUpperCase();
         g.fillText(label, x + 12, y + CH / 2);
         continue;
       }
@@ -70,13 +70,13 @@ export function accessGrid(host, opt = {}) {
       if (k.col.pred) {
         // predicted cell: reveal with a quick "computing" scramble, then a confidence bar
         const age = k.t ? (now - k.t) / 1000 : 0;
-        g.fillStyle = ink(0.06 * a); g.fillRect(x + 1, y + 1, CW - 1, CH - 1);
+        g.fillStyle = ink(0.055 * a, GRN); g.fillRect(x + 1, y + 1, CW - 1, CH - 1);
         g.font = "500 12px 'Geist Mono', ui-monospace, monospace";
         const settled = age > 0.35;
         const txt = settled ? k.txt : (k.col.h === 'churn_p' ? Math.random().toFixed(2) : '$' + Math.round(Math.random() * 18000).toLocaleString('en-US'));
-        g.fillStyle = ink(a * (settled ? 1 : 0.55)); g.fillText(txt, x + 12, y + CH / 2);
+        g.fillStyle = ink(a * (settled ? 1 : 0.55), GRN); g.fillText(txt, x + 12, y + CH / 2);
         const bw = (CW - 24) * (k.col.h === 'churn_p' ? k.p : 0.25 + k.p * 0.75) * Math.min(1, age / 0.6);
-        g.fillStyle = ink(0.75 * a); g.fillRect(x + 12, y + CH - 8, bw, 2);
+        g.fillStyle = ink(0.85 * a, GRN); g.fillRect(x + 12, y + CH - 8, bw, 2);
         if (!settled) active = true;
         if (age < 0.6) active = true;
       } else {
@@ -85,7 +85,7 @@ export function accessGrid(host, opt = {}) {
       }
     }
     if (mouse) { // crosshair highlight of hovered row
-      const r = Math.floor(mouse.y / CH); if (r > 0) { g.fillStyle = 'rgba(20,20,20,0.03)'; g.fillRect(0, r * CH, W, CH); }
+      const r = Math.floor(mouse.y / CH); if (r > 0) { g.fillStyle = 'rgba(46,92,54,0.025)'; g.fillRect(0, r * CH, W, CH); }
     }
     if ((active || mouse) && visible) kick();
   }

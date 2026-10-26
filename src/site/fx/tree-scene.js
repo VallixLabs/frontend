@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import * as ENG from './engrave.js';
 
 function buildTree() {
-  const TOUR = { roots: [], nodes: [], vines: [] };
+  const TOUR = { roots: [], nodes: [], vines: [] }, VEIN = [];
   // ---------- seeded random ----------
   let seed = 20261023;
   const rand = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
@@ -13,11 +13,13 @@ function buildTree() {
 
   // ---------- geometry buckets (merged per material) ----------
   const mk = () => ({ pos: [], idx: [], n: 0 });
-  const buckets = { trunk: mk(), branches: mk(), twigs: mk(), roots: mk(), vines: mk() };
+  const buckets = { trunk: mk(), branches: mk(), twigs: mk(), roots: mk(), vines: mk(), aerial: mk(), tendrils: mk() };
+  const leafSpots = [], vinePaths = [];
 
   // Tapered, fluted tube along a smooth curve. Shared ring vertices (no seam).
   function tube(bucket, pts, r0, r1, o = {}) {
     const curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal');
+    VEIN.push({ curve, r0, kind: bucket === buckets.trunk ? 'trunk' : bucket === buckets.branches ? 'branch' : bucket === buckets.twigs ? 'twig' : bucket === buckets.roots ? 'root' : bucket === buckets.aerial ? 'aerial' : 'other' });
     const L = curve.getLength();
     const segs = Math.max(3, Math.min(160, Math.ceil(L * (o.density || 10))));
     const radial = o.radial || (r0 > 0.15 ? 40 : r0 > 0.05 ? 16 : r0 > 0.02 ? 8 : 5);
@@ -105,7 +107,8 @@ function buildTree() {
     if (depth >= 1 && depth <= 3) for (let k = 2; k < pts.length; k++) anchors.push({ p: pts[k], r: r, depth });
     if (depth <= 1) TOUR.nodes.push({ p: pts[pts.length - 1].clone(), depth, r });
 
-    if (depth >= 5 || rEnd < 0.014) return;
+    if (depth >= 2) for (const f of depth >= 4 ? [0.45, 0.8] : [0.7]) leafSpots.push({ p: pts[Math.floor((pts.length - 1) * f)].clone(), d: d.clone(), tip: false });
+    if (depth >= 5 || rEnd < 0.014) { leafSpots.push({ p: pts[pts.length - 1].clone(), d: d.clone(), tip: true }); return; }
     const kids = depth < 1 ? 3 : (depth < 3 && rand() < 0.4 ? 3 : 2);
     const az0 = rand() * Math.PI * 2;
     for (let c = 0; c < kids; c++) {
@@ -246,6 +249,7 @@ function buildTree() {
       p.x += Math.sin(t * Math.PI) * rr(-0.03, 0.03);
       pts.push(p);
     }
+    vinePaths.push(pts.map(p => p.clone()));
     TOUR.vines.push({ a: A.clone(), b: B.clone(), mid: pts[7].clone() });
     tube(buckets.vines, pts, 0.02, 0.016, { density: 22, radial: 8, profile: t => 0.016 + 0.006 * Math.sin(t * Math.PI) });
   }
@@ -260,6 +264,7 @@ function buildTree() {
       p.z += Math.cos(i * 0.6 + sway) * 0.04;
       pts.push(p.clone());
     }
+    vinePaths.push(pts.map(p => p.clone()));
     tube(buckets.vines, pts, 0.018, 0.012, { density: 22, radial: 8 });
   }
   const used = new Set();
@@ -284,8 +289,148 @@ function buildTree() {
     vineDrop(cand[i].p); used.add(i); drops++;
   }
 
+  // ---------- banyan dressing: aerial roots, leaves, creeper detail (own RNG; structure above untouched) ----------
+  let seed2 = 9071;
+  const rnd2 = () => { seed2 |= 0; seed2 = seed2 + 0x6D2B79F5 | 0; let t = Math.imul(seed2 ^ seed2 >>> 15, 1 | seed2); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const r2 = (a, b) => a + (b - a) * rnd2();
+  const basis = d => { const a = V().crossVectors(d, Math.abs(d.y) < 0.9 ? UP : V(1, 0, 0)).normalize(); return [a, V().crossVectors(d, a).normalize()]; };
 
-  return { buckets, TOUR, CZ, V };
+  // aerial prop roots hanging from the big limbs
+  {
+    const hang = anchors.filter(a => a.depth <= 2 && a.p.y > 2.4 && a.p.y < 6.2 && Math.hypot(a.p.x, a.p.z) > 1.1);
+    const taken = [...dropPts];
+    let n = 0, pillars = 0;
+    for (const a of hang.sort(() => rnd2() - 0.5)) {
+      if (n >= 34) break;
+      if (taken.some(q => Math.hypot(q.x - a.p.x, q.z - a.p.z) < 0.42)) continue;
+      taken.push(a.p); n++;
+      const pillar = pillars < 4 && a.depth <= 1 && Math.hypot(a.p.x, a.p.z) > 1.8 && rnd2() < 0.6;
+      const toGround = pillar || rnd2() < 0.55;
+      const top = a.p.clone(); top.y -= a.r * 0.6;
+      const bottom = toGround ? -0.02 : top.y - r2(0.8, Math.max(1.0, top.y * 0.7));
+      const r0 = pillar ? r2(0.05, 0.075) : r2(0.012, 0.024), r1 = pillar ? r0 * 1.15 : (toGround ? r0 * 0.9 : 0.004);
+      const sw = r2(0, 6.28), amp = pillar ? 0.02 : 0.05, pts = [];
+      for (let i = 0; i <= 14; i++) { const t = i / 14; pts.push(V(top.x + Math.sin(t * 4 + sw) * amp * t, top.y + (bottom - top.y) * t, top.z + Math.cos(t * 3.3 + sw) * amp * t)); }
+      tube(buckets.aerial, pts, r0, r1, { density: 16, radial: pillar ? 12 : 6, profile: t => r0 + (r1 - r0) * t + (pillar ? r0 * 0.5 * Math.exp(-(1 - t) * 18) : 0) });
+      if (pillar) pillars++;
+      // frayed tips / small rootlets at the ground
+      const end = pts[pts.length - 1], k = toGround ? 3 : 2;
+      for (let j = 0; j < k; j++) {
+        const az = j / k * 6.28 + sw, sp = toGround ? r2(0.12, 0.3) * (pillar ? 1.6 : 1) : r2(0.06, 0.14);
+        const q = [end.clone().add(V(0, toGround ? 0.12 : 0.08, 0)), end.clone().add(V(Math.cos(az) * sp * 0.5, toGround ? 0.02 : -0.06, Math.sin(az) * sp * 0.5)), end.clone().add(V(Math.cos(az) * sp, toGround ? -0.02 : -0.16, Math.sin(az) * sp))];
+        tube(buckets.aerial, q, Math.max(0.004, r1 * 0.55), 0.0025, { density: 30, radial: 5 });
+      }
+    }
+  }
+
+  // ---------- foliage as textured cluster cards (2 tris each, one shared texture) ----------
+  function foliageTexture(kind) {
+    const S = 512, cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d');
+    const INK = '#2e5c36';
+    const leaf = (x, y, a, L, W, fill) => {
+      g.save(); g.translate(x, y); g.rotate(a);
+      g.beginPath(); g.moveTo(0, 0);
+      if (kind === 'heart') { g.bezierCurveTo(L * 0.05, -W * 1.1, L * 0.75, -W * 0.9, L, 0); g.bezierCurveTo(L * 0.75, W * 0.9, L * 0.05, W * 1.1, 0, 0); }
+      else { g.bezierCurveTo(L * 0.22, -W, L * 0.8, -W * 0.85, L, 0); g.bezierCurveTo(L * 0.8, W * 0.85, L * 0.22, W, 0, 0); }
+      g.closePath(); g.fillStyle = fill; g.fill();
+      g.save(); g.clip(); g.fillStyle = INK; g.globalAlpha = 0.55;
+      for (let i = 0; i < L * 0.5; i++) { const u = 0.1 + Math.random() * 0.85, v = Math.random() * W * 0.85 * Math.sin(Math.PI * u); g.fillRect(u * L, v * 0.9 + 1, 1.6, 1.6); }
+      g.restore();
+      g.strokeStyle = INK; g.lineWidth = Math.max(1.6, L / 55); g.lineJoin = 'round'; g.stroke();
+      g.lineWidth = Math.max(1.1, L / 80); g.beginPath(); g.moveTo(-L * 0.12, 0); g.lineTo(L * 0.94, 0); g.stroke();
+      g.globalAlpha = 0.65; g.lineWidth = Math.max(0.8, L / 140);
+      for (let k = 1; k <= 5; k++) { const u = k / 6.2; for (const s of [-1, 1]) { g.beginPath(); g.moveTo(u * L, 0); g.quadraticCurveTo(u * L + L * 0.08, s * W * 0.35, u * L + L * 0.16, s * W * 0.62 * Math.sin(Math.PI * Math.min(1, u + 0.12))); g.stroke(); } }
+      g.restore();
+    };
+    if (kind === 'heart') { leaf(S * 0.08, S * 0.5, 0, S * 0.84, S * 0.36, '#e4ebda'); }
+    else {
+      const items = [];
+      for (let i = 0; i < 46; i++) {
+        const a = Math.random() * Math.PI * 2, rad = Math.sqrt(Math.random()) * S * 0.3, L = S * (0.17 + Math.random() * 0.09);
+        const x = S / 2 + Math.cos(a) * rad, y = S / 2 + Math.sin(a) * rad * 0.9, ang = a + (Math.random() - 0.5) * 0.9;
+        const ex = x + Math.cos(ang) * L, ey = y + Math.sin(ang) * L;
+        if (ex < 12 || ex > S - 12 || ey < 12 || ey > S - 12) continue;
+        items.push({ x, y, ang, L, z: Math.random() });
+      }
+      items.sort((p, q) => p.z - q.z);
+      const fills = ['#aebf9f', '#c0cfb1', '#d1dcc4', '#e1e9d6'];
+      for (const it of items) leaf(it.x, it.y, it.ang, it.L, it.L * 0.4, fills[Math.min(3, Math.floor(it.z * 4))]);
+    }
+    const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+  }
+  const cardB = { pos: [], uv: [], col: [], idx: [], n: 0 }, ivyB = { pos: [], uv: [], col: [], idx: [], n: 0 };
+  function addCard(B, c, u, v, shade) {
+    const P = [c.clone().sub(u).sub(v), c.clone().add(u).sub(v), c.clone().add(u).add(v), c.clone().sub(u).add(v)], UV = [0, 0, 1, 0, 1, 1, 0, 1];
+    P.forEach((p, k) => { B.pos.push(p.x, p.y, p.z); B.uv.push(UV[k * 2], UV[k * 2 + 1]); B.col.push(shade, shade, shade); });
+    const b = B.n; B.idx.push(b, b + 1, b + 2, b, b + 2, b + 3); B.n += 4;
+  }
+  {
+    let cy = 0, cnt = 0; for (const sp of leafSpots) { cy += sp.p.y; cnt++; } cy /= Math.max(1, cnt);
+    for (const sp of leafSpots) {
+      if (!sp.tip && rnd2() > 0.45) continue;
+      const reps = sp.tip ? 2 : 1;
+      for (let r = 0; r < reps; r++) {
+        const out = V(sp.p.x, 0, sp.p.z); const hd = out.length(); out.normalize();
+        const c = sp.p.clone().addScaledVector(sp.d, r2(-0.05, 0.2)).add(V(r2(-0.12, 0.12), r2(-0.05, 0.12), r2(-0.12, 0.12)));
+        const w = out.clone().multiplyScalar(0.6).add(V(0, 0.7, 0)).add(V(r2(-0.6, 0.6), r2(-0.3, 0.3), r2(-0.6, 0.6))).normalize();
+        const [a0, b0] = basis(w), roll = r2(0, 6.28);
+        const u = a0.clone().multiplyScalar(Math.cos(roll)).addScaledVector(b0, Math.sin(roll)), v = V().crossVectors(w, u);
+        const s = r2(0.42, 0.66) * (sp.tip ? 1 : 0.8);
+        const shade = Math.max(0.5, Math.min(1, 0.6 + 0.26 * Math.min(1, hd / 4) + 0.16 * Math.max(-1, Math.min(1, (c.y - cy) / 1.5)) + r2(-0.05, 0.05)));
+        addCard(cardB, c, u.clone().multiplyScalar(s), v.clone().multiplyScalar(s), shade);
+        const w2 = w.clone().applyAxisAngle(v, Math.PI / 2), u2 = V().crossVectors(v, w2).normalize();
+        addCard(cardB, c, u2.multiplyScalar(s * 0.92), v.clone().multiplyScalar(s * 0.92), shade * 0.94);
+      }
+    }
+  }
+
+
+  // single hand-placed cluster filling the gap on the upper-left limb (attached at its twig)
+  {
+    const A = V(-1.777, 10.113, -6.535), C = V(-1.665, 9.84, -5.8);
+    for (let k = 0; k < 3; k++) {
+      const c = C.clone().lerp(A, [0, 0.45, -0.25][k]).add(V(0, [0, 0.05, -0.28][k], 0)).add(V(r2(-0.06, 0.06), r2(-0.04, 0.06), r2(-0.06, 0.06)));
+      const w = V(-0.35, 0.8, 0.2).add(V(r2(-0.3, 0.3), r2(-0.15, 0.15), r2(-0.3, 0.3))).normalize();
+      const [a0, b0] = basis(w), roll = r2(0, 6.28), u = a0.clone().multiplyScalar(Math.cos(roll)).addScaledVector(b0, Math.sin(roll)), v = V().crossVectors(w, u), s = [0.72, 0.6, 0.62][k], shade = [0.84, 0.78, 0.74][k];
+      addCard(cardB, c, u.clone().multiplyScalar(s), v.clone().multiplyScalar(s), shade);
+      const w2 = w.clone().applyAxisAngle(v, Math.PI / 2), u2 = V().crossVectors(v, w2).normalize();
+      addCard(cardB, c, u2.multiplyScalar(s * 0.92), v.clone().multiplyScalar(s * 0.92), shade * 0.94);
+    }
+  }
+
+  // creepers: twining strand, ivy leaves and fiddlehead tendrils (as on the Who we are page)
+  for (const pts of vinePaths) {
+    const c = new THREE.CatmullRomCurve3(pts, false, 'centripetal'), L = c.getLength();
+    const tw = [], NT = Math.ceil(L / 0.012);
+    for (let i = 0; i <= NT; i++) { const t = i / NT, P = c.getPointAt(t), T = c.getTangentAt(t), [a, b] = basis(T), ang = t * L / 0.16 * 6.2832; tw.push(P.clone().addScaledVector(a, Math.cos(ang) * 0.021).addScaledVector(b, Math.sin(ang) * 0.021)); }
+    for (let s = 0; s < tw.length - 1; s += 40) tube(buckets.vines, tw.slice(s, Math.min(tw.length, s + 42)), 0.0055, 0.0055, { density: 36, radial: 4, profile: () => 0.0055 });
+    let side = 1;
+    for (let l = r2(0.12, 0.22); l < L - 0.05; l += r2(0.2, 0.32)) {
+      const t = l / L, P = c.getPointAt(t), T = c.getTangentAt(t), [a, b] = basis(T);
+      const az = r2(0, 6.28), n = a.clone().multiplyScalar(Math.cos(az)).addScaledVector(b, Math.sin(az));
+      if (rnd2() < 0.62) {
+        const dir = n.clone().multiplyScalar(0.9).addScaledVector(T, 0.25 * side).add(V(0, -0.2, 0)).normalize();
+        let sd = V().crossVectors(dir, UP); if (sd.lengthSq() < 1e-4) sd = a.clone(); sd.normalize();
+        if (V().crossVectors(sd, dir).y < 0) sd.negate();
+        const len = r2(0.11, 0.16), c = P.clone().addScaledVector(n, 0.016).addScaledVector(dir, len * 0.5);
+        addCard(ivyB, c, dir.clone().multiplyScalar(len * 0.5), sd.clone().multiplyScalar(len * 0.5), 0.95);
+      }
+      if (rnd2() < 0.7) {
+        const m = n.clone().multiplyScalar(-1).applyAxisAngle(T, r2(-0.6, 0.6));
+        let h = m.clone().multiplyScalar(0.8).addScaledVector(T, 0.4 * side).add(V(0, 0.25, 0)).normalize();
+        let p = P.clone().addScaledVector(m, 0.016); const sp = [p.clone()], turn = rnd2() < 0.5 ? 1 : -1, stem = r2(0.06, 0.11);
+        for (let k = 1; k <= 10; k++) { h.applyAxisAngle(T, turn * Math.sin(k / 10 * Math.PI * 2) * 0.09); p = p.clone().addScaledVector(h, stem / 10); sp.push(p); }
+        const e2 = V().crossVectors(T, h).normalize().multiplyScalar(turn), R0 = r2(0.018, 0.03), turns = r2(2.0, 2.6), cc = p.clone().addScaledVector(e2, R0);
+        for (let k = 1; k <= 60; k++) { const u = k / 60, th = u * turns * Math.PI * 2, rr0 = R0 * Math.pow(1 - u * 0.9, 1.15);
+          sp.push(cc.clone().addScaledVector(e2, -Math.cos(th) * rr0).addScaledVector(h, Math.sin(th) * rr0)); }
+        tube(buckets.tendrils, sp, 0.0042, 0.0018, { density: 140, radial: 4 });
+      }
+      side = -side;
+    }
+  }
+
+
+  return { buckets, TOUR, CZ, V, cardB, ivyB, foliageTexture, VEIN };
 }
 
 const clamp01 = x => Math.max(0, Math.min(1, x));
@@ -294,7 +439,7 @@ const ease = x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 const dA = (a, b) => Math.atan2(Math.sin(a - b), Math.cos(a - b));
 
 export function mountTree({ section, canvas, overlay }) {
-  const { buckets, TOUR, CZ, V } = buildTree();
+  const { buckets, TOUR, CZ, V, cardB, ivyB, foliageTexture, VEIN } = buildTree();
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min((devicePixelRatio || 1) * 2, 2.5));
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -311,7 +456,7 @@ export function mountTree({ section, canvas, overlay }) {
   const under = new THREE.DirectionalLight(0xffffff, 0.5); under.position.set(0, -2, 6); scene.add(under);
 
   const M = (name, o = {}) => ENG.material(THREE, new THREE.MeshStandardMaterial({ name, color: 0xffffff, roughness: 0.88, metalness: 0 }), { invert: true, ...o });
-  const bark = M('bark'), rootM = M('root'), vineM = M('vine', { lines: false });
+  const bark = M('bark'), rootM = M('root'), vineM = M('vine', { lines: false, ink: 0x2e5c36, paper: [0.933, 0.945, 0.91] });
   const build = (name, b, mat) => {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(b.pos, 3)); g.setIndex(b.idx); g.computeVertexNormals();
@@ -320,10 +465,74 @@ export function mountTree({ section, canvas, overlay }) {
   const tree = new THREE.Group();
   tree.add(build('trunk', buckets.trunk, bark)); tree.add(build('limbs', buckets.branches, bark));
   tree.add(build('twigs', buckets.twigs, bark)); tree.add(build('roots', buckets.roots, rootM));
-  tree.add(build('vines', buckets.vines, vineM));
+  tree.add(build('vines', buckets.vines, vineM)); tree.add(build('tendrils', buckets.tendrils, vineM));
+  tree.add(build('aerial_roots', buckets.aerial, rootM));
   const lift = -new THREE.Box3().setFromObject(tree).min.y;
   tree.position.y = lift; tree.updateMatrixWorld(true);
-  scene.add(tree); scene.add(ENG.outlines(THREE, tree, 0.9, 0x1a1a1a));
+  const OL = ENG.outlines(THREE, tree, 0.9, 0x1a1a1a, { vines: 0x2e5c36, tendrils: 0x2e5c36 });
+  scene.add(tree); scene.add(OL);
+  for (const [name, B, kind] of [['foliage', cardB, 'cluster'], ['ivy_leaves', ivyB, 'heart']]) {
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(B.pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(B.uv, 2)); g.setAttribute('color', new THREE.Float32BufferAttribute(B.col, 3)); g.setIndex(B.idx);
+    const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ name, map: foliageTexture(kind), vertexColors: true, alphaTest: 0.5, side: THREE.DoubleSide }));
+    m.name = name; m.castShadow = true; tree.add(m);
+  }
+  tree.updateMatrixWorld(true);
+
+  // ---- x-ray: the tree turns to glass and its inner veins carry the flow (Tvarit stop) ----
+  const ghostMats = []; tree.traverse(m => { if (m.isMesh && !ghostMats.includes(m.material)) ghostMats.push(m.material); });
+  ghostMats.forEach(m => { m.transparent = true; m.userData.a0 = m.alphaTest || 0; m.needsUpdate = true; });
+  const PAPERC = new THREE.Color(0xf6f5f2), olMats = []; OL.children.forEach(o => { if (!olMats.includes(o.material)) { o.material.userData.c0 = o.material.uniforms.uCol.value.clone(); olMats.push(o.material); } });
+  const vP = [], vS = [], vI = []; let vN = 0;
+  const vb = T => { const a = new THREE.Vector3().crossVectors(T, Math.abs(T.y) < 0.9 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(1, 0, 0)).normalize(); return [a, new THREE.Vector3().crossVectors(T, a).normalize()]; };
+  const sOf = (p, root) => { const h = Math.hypot(p.x, p.z - CZ); return root ? -h * 1.1 : p.y + 0.6 * h; };
+  function vtube(pts, rad, root) {
+    const RAD = 4, b0 = vN;
+    for (let i = 0; i < pts.length; i++) {
+      const T = pts[Math.min(pts.length - 1, i + 1)].clone().sub(pts[Math.max(0, i - 1)]).normalize(), [a, b] = vb(T), s = sOf(pts[i], root);
+      const r = rad * (1 - 0.35 * i / (pts.length - 1));
+      for (let j = 0; j < RAD; j++) { const an = j / RAD * Math.PI * 2, p = pts[i].clone().addScaledVector(a, Math.cos(an) * r).addScaledVector(b, Math.sin(an) * r); vP.push(p.x, p.y, p.z); vS.push(s); }
+    }
+    for (let i = 0; i < pts.length - 1; i++) for (let j = 0; j < RAD; j++) { const a = b0 + i * RAD + j, b = b0 + i * RAD + (j + 1) % RAD; vI.push(a, b, a + RAD, b, b + RAD, a + RAD); }
+    vN += pts.length * RAD;
+  }
+  for (const rec of VEIN) {
+    const c = rec.curve, L = c.getLength();
+    if (rec.kind === 'trunk') {
+      for (let k = 0; k < 7; k++) { const ph = k / 7 * Math.PI * 2, pts = [];
+        for (let i = 0; i <= 48; i++) { const u = i / 48, P = c.getPointAt(u), [a, b] = vb(c.getTangentAt(u)), ro = rec.r0 * 0.42 * (1 - 0.45 * u), an = ph + u * 2.4; pts.push(P.addScaledVector(a, Math.cos(an) * ro).addScaledVector(b, Math.sin(an) * ro)); }
+        vtube(pts, 0.05, false); }
+    } else if ((rec.kind === 'branch' || rec.kind === 'twig') && rec.r0 > 0.02 || rec.kind === 'root' && rec.r0 > 0.05 || rec.kind === 'aerial' && rec.r0 > 0.02) {
+      const n = Math.max(4, Math.min(60, Math.ceil(L / 0.09))), pts = []; for (let i = 0; i <= n; i++) pts.push(c.getPointAt(i / n));
+      vtube(pts, Math.max(0.011, Math.min(0.045, rec.r0 * (rec.kind === 'root' ? 0.3 : 0.45))), rec.kind === 'root');
+    }
+  }
+  let sMin = 1e9, sMax = -1e9; for (const s of vS) { if (s < sMin) sMin = s; if (s > sMax) sMax = s; }
+  const G0 = sMin - 1, G1 = sMax + 1;
+  const vg = new THREE.BufferGeometry(); vg.setAttribute('position', new THREE.Float32BufferAttribute(vP, 3)); vg.setAttribute('aS', new THREE.Float32BufferAttribute(vS, 1)); vg.setIndex(vI);
+  const veinMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false,
+    uniforms: { uT: { value: 0 }, uMix: { value: 0 }, uGrow: { value: G0 } },
+    vertexShader: 'attribute float aS; varying float vS; void main(){ vS = aS; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `uniform float uT; uniform float uMix; uniform float uGrow; varying float vS;
+      void main(){
+        float vis = 1.0 - smoothstep(uGrow - 0.7, uGrow, vS);
+        if (vis * uMix < 0.004) discard;
+        float p1 = smoothstep(0.8, 1.0, fract(vS * 0.5 - uT * 0.55));
+        float p2 = smoothstep(0.9, 1.0, fract(vS * 1.7 - uT * 1.3)) * 0.6;
+        float front = smoothstep(uGrow - 1.2, uGrow - 0.15, vS) * vis;
+        float hot = clamp(max(max(p1, p2), front), 0.0, 1.0);
+        vec3 col = mix(vec3(0.13, 0.3, 0.17), vec3(0.36, 0.82, 0.45), hot);
+        gl_FragColor = vec4(col, uMix * vis * (0.82 + 0.18 * hot));
+      }`,
+  });
+  const veins = new THREE.Mesh(vg, veinMat); veins.name = 'veins'; veins.position.y = lift; veins.renderOrder = 10; veins.frustumCulled = false; scene.add(veins);
+  let ghost = 0, grow = G0;
+  const setGhost = g => {
+    const op = 1 - 0.93 * g;
+    ghostMats.forEach(m => { m.opacity = m.isMeshBasicMaterial ? 1 - 0.95 * g : op; m.depthWrite = g < 0.02; if (m.userData.a0) m.alphaTest = Math.max(0.02, m.userData.a0 * (1 - 0.93 * g)); });
+    olMats.forEach(m => m.uniforms.uCol.value.copy(m.userData.c0).lerp(PAPERC, 0.9 * g));
+    tree.traverse(m => { if (m.isMesh) m.castShadow = g < 0.5; });
+  };
   const soil = new THREE.Mesh(new THREE.CircleGeometry(7, 96), ENG.material(THREE, new THREE.MeshStandardMaterial({ name: 'soil', color: 0x8a8a8a, roughness: 1, transparent: true, depthWrite: false }), { ground: 6.5, lines: false, rim: false, gain: 0.9, gamma: 2.0, invert: true, invBase: 0.0 }));
   soil.rotation.x = -Math.PI / 2; soil.position.set(0, 0.001, CZ); soil.receiveShadow = true; soil.renderOrder = -1; scene.add(soil);
   const catcher = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.ShadowMaterial({ opacity: 0.16, depthWrite: false }));
@@ -392,7 +601,7 @@ export function mountTree({ section, canvas, overlay }) {
     w.innerHTML = '<div style="position:absolute;left:-12px;top:-12px;width:24px;height:24px;border-radius:50%;border:1px solid #141414;box-sizing:border-box"></div>'
       + '<div style="position:absolute;left:-4px;top:-4px;width:8px;height:8px;border-radius:50%;background:#141414"></div>'
       + '<div style="position:absolute;left:0;top:0;height:1px;background:#141414;transform-origin:0 50%"></div>'
-      + '<div style="position:absolute;font:500 11px/1 \'Geist Mono\',ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;padding:8px 11px;background:#141414;color:#f6f5f2;white-space:nowrap">' + m.label + '</div>';
+      + '<div style="position:absolute;font:600 12px/1 \'Source Sans 3\',system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;padding:8px 11px;background:#141414;color:#f6f5f2;white-space:nowrap">' + m.label + '</div>';
     overlay.appendChild(w);
     w.firstChild.animate([{ transform: 'scale(.35)', opacity: 0.9 }, { transform: 'scale(1.5)', opacity: 0 }], { duration: 1800, iterations: Infinity, easing: 'ease-out' });
     m.el = w; m.line = w.children[2]; m.lab = w.children[3];
@@ -401,9 +610,10 @@ export function mountTree({ section, canvas, overlay }) {
 
   const cards = [...section.querySelectorAll('[data-stop]')];
   const rails = [...section.querySelectorAll('[data-rail]')], railFill = section.querySelector('[data-rail-fill]');
+  const HOLD = 0.86;
   let this_perm = null, frozen = false, W = 1, H = 1, uT = 0, uC = -1, inView = true, dirty = true, last = performance.now(), raf = 0, lastActive = -1;
   const resize = () => { const r = canvas.getBoundingClientRect(); W = Math.max(1, r.width); H = Math.max(1, r.height); renderer.setSize(W, H, false); dirty = true; };
-  const readScroll = () => { const r = section.getBoundingClientRect(); const span = Math.max(1, r.height - innerHeight); uT = clamp01(-r.top / span) * 4; inView = r.bottom > -50 && r.top < innerHeight + 50; };
+  const readScroll = () => { const r = section.getBoundingClientRect(); const span = Math.max(1, r.height - innerHeight); uT = clamp01(-r.top / span / HOLD) * 4; inView = r.bottom > -50 && r.top < innerHeight + 50; };
   const pos = V(0, 0, 0), tgt = V(0, 0, 0), proj = V(0, 0, 0); let offX = 0, offY = 0;
   function pose(u) {
     let i = Math.min(3, Math.floor(u)), f = u - i;
@@ -424,10 +634,15 @@ export function mountTree({ section, canvas, overlay }) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     if (!frozen) readScroll(); if (!inView) return;
     if (uC < 0) uC = uT;
-    const prev = uC; uC += (uT - uC) * (1 - Math.exp(-dt * 5));
+    const prev = uC; uC += (uT - uC) * (1 - Math.exp(-dt * 11));
     if (Math.abs(uT - uC) < 1e-4) uC = uT;
     if (Math.abs(prev - uC) > 1e-6) dirty = true;
+    const gT = 1 - sstep(0.14, 0.3, Math.abs(uC - 4));
+    if (gT > 0.001 || ghost > 0.001 || grow > G0) dirty = true;
     if (!dirty) return; dirty = false;
+    { const ng = ghost + (gT - ghost) * (1 - Math.exp(-dt * 9)); const g2 = Math.abs(ng - gT) < 1e-3 ? gT : ng; if (Math.abs(g2 - ghost) > 1e-4 || (g2 === 0) !== (ghost === 0)) setGhost(g2); ghost = g2;
+      grow = gT > 0.6 ? Math.min(G1, grow + dt * (G1 - G0) / 2.6) : Math.max(G0, grow - dt * (G1 - G0) / 1.2);
+      veinMat.uniforms.uMix.value = Math.min(1, ghost * 1.15); veinMat.uniforms.uGrow.value = grow; veinMat.uniforms.uT.value = now / 1000; }
     pose(uC);
     camera.aspect = W / H;
     const ox = W > 760 ? W * offX : 0, oy = H * offY;
@@ -498,9 +713,48 @@ export function mountTree({ section, canvas, overlay }) {
   }
   const ro = new ResizeObserver(resize); ro.observe(canvas); resize();
   raf = requestAnimationFrame(frame);
+
+  // ---- one gesture = one stop. Tvarit holds until the x-ray transition has finished ----
+  let snapRaf = 0, busyUntil = 0, cur = 0, arrivedT4 = 0, lastWheel = 0, lastMag = 0, stepAt = 0;
+  const geo = () => { const top = section.getBoundingClientRect().top + scrollY, span = Math.max(1, section.offsetHeight - innerHeight); return { top, span }; };
+  const yOf = k => { const g = geo(); return g.top + g.span * HOLD * k / 4; };
+  const inSnap = () => { const g = geo(), y = scrollY; return y >= g.top - 2 && y <= g.top + g.span * HOLD + 2; };
+  const tvaritDone = () => ghost > 0.9 && performance.now() - arrivedT4 > 900;
+  const goTo = k => {
+    cancelAnimationFrame(snapRaf);
+    const y0 = scrollY, y1 = yOf(k), t0 = performance.now(), D = 560; cur = k; busyUntil = t0 + D + 60; stepAt = t0;
+    if (k === 4) arrivedT4 = t0 + D;
+    const st = now => { const p = Math.min(1, (now - t0) / D), e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; scrollTo({ top: y0 + (y1 - y0) * e, behavior: 'instant' }); if (p < 1) snapRaf = requestAnimationFrame(st); };
+    snapRaf = requestAnimationFrame(st);
+  };
+  const intent = (dir, ev) => {
+    if (frozen || !inSnap()) return false;
+    if (performance.now() < busyUntil) { ev && ev.cancelable && ev.preventDefault(); return true; }
+    cur = Math.max(0, Math.min(4, Math.round(uT)));
+    const next = cur + dir;
+    if (next < 0) return false;
+    if (next > 4) { if (!tvaritDone()) { ev && ev.cancelable && ev.preventDefault(); return true; } return false; }
+    ev && ev.cancelable && ev.preventDefault(); goTo(next); return true;
+  };
+  const onWheel = e => {
+    const now = performance.now(), mag = Math.abs(e.deltaY), gap = now - lastWheel;
+    // momentum tail: events keep arriving with decaying magnitude -> stay locked until a quiet gap or a fresh, stronger push
+    const fresh = gap > 90 || mag > lastMag * 1.4 + 2;
+    lastWheel = now; lastMag = mag;
+    if (mag < 2) { if (inSnap() && e.cancelable) e.preventDefault(); return; }
+    if (inSnap() && (now < busyUntil || !fresh)) {  if (e.cancelable) e.preventDefault(); return; }
+    intent(e.deltaY > 0 ? 1 : -1, e);
+  };
+  const onKey = e => { const k = e.key; const d = (k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) ? 1 : (k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey)) ? -1 : 0; if (d && !/INPUT|TEXTAREA/.test((e.target || {}).tagName || '')) intent(d, e); };
+  let ty = null;
+  const onTS = e => { ty = e.touches[0].clientY; };
+  const onTM = e => { if (ty == null || !inSnap()) return; const dy = ty - e.touches[0].clientY; if (Math.abs(dy) > 28) { const done = intent(dy > 0 ? 1 : -1, e); ty = null; if (!done) return; } else if (e.cancelable && performance.now() < busyUntil + 400) e.preventDefault(); };
+  addEventListener('wheel', onWheel, { passive: false }); addEventListener('keydown', onKey); addEventListener('touchstart', onTS, { passive: true }); addEventListener('touchmove', onTM, { passive: false });
+  const unbind = () => { removeEventListener('wheel', onWheel); removeEventListener('keydown', onKey); removeEventListener('touchstart', onTS); removeEventListener('touchmove', onTM); cancelAnimationFrame(snapRaf); };
   return {
     seek(u) { frozen = true; inView = true; uT = uC = u; dirty = true; cancelAnimationFrame(raf); frame(performance.now()); },
     unfreeze() { frozen = false; },
-    destroy() { cancelAnimationFrame(raf); ro.disconnect(); renderer.dispose(); overlay.innerHTML = ''; },
+    _dbg() { return { G0, G1, ghost, grow, vN, idx: vI.length, mix: veinMat.uniforms.uMix.value, vein: VEIN.length, kinds: VEIN.reduce((a, r) => (a[r.kind] = (a[r.kind] || 0) + 1, a), {}) }; },
+    destroy() { unbind(); cancelAnimationFrame(raf); ro.disconnect(); renderer.dispose(); overlay.innerHTML = ''; },
   };
 }

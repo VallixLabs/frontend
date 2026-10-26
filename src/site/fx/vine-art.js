@@ -1,6 +1,6 @@
 // Engraved creeper that grows along an SVG path: tapered inked stem, twining strand,
 // ivy leaves, fiddlehead curls and tendrils. Returns { L, setLen(len), grow(ms) }.
-const NS = 'http://www.w3.org/2000/svg', INK = '#141414', PAPER = '#f6f5f2';
+const NS = 'http://www.w3.org/2000/svg', INK = '#2e5c36', PAPER = '#f6f5f2', STEM = '#eef1e8', LEAF = '#e3ead9';
 const mk = (tag, at, p) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); if (p) p.appendChild(e); return e; };
 const f = n => n.toFixed(1), f2 = n => n.toFixed(2);
 let UID = 0;
@@ -28,7 +28,7 @@ export function growVine(svg, d, o = {}) {
   const line = pts => 'M' + pts.map(p => f(p[0]) + ' ' + f(p[1])).join('L');
   const poly = line(Lf) + 'L' + Rt.slice().reverse().map(p => f(p[0]) + ' ' + f(p[1])).join('L') + 'Z';
   mk('path', { d: poly, transform: 'translate(2 3)', mask: `url(#${id})` }, gShadow);
-  mk('path', { d: poly, fill: PAPER }, gStem);
+  mk('path', { d: poly, fill: STEM }, gStem);
   [-0.22, 0.18].forEach((k, j) => { let dd = '', on = false; S.forEach(s => { const vis = Math.sin(s.l * 0.06 + j * 2.1 + k * 7) > -0.35; const p = [s.x + s.nx * s.w * k, s.y + s.ny * s.w * k]; if (vis) { dd += (on ? 'L' : 'M') + f(p[0]) + ' ' + f(p[1]); on = true; } else on = false; }); mk('path', { d: dd, fill: 'none', stroke: INK, 'stroke-width': 0.45, opacity: 0.55 }, gStem); });
   const LIGHT = [-0.6, -0.8]; let hd = '';
   S.forEach((s, i) => { if (i % 2) return; const sg = (s.nx * LIGHT[0] + s.ny * LIGHT[1]) < 0 ? 1 : -1; const E = sg > 0 ? Lf[i] : Rt[i], k = s.w * rr(0.28, 0.5); hd += 'M' + f(E[0]) + ' ' + f(E[1]) + 'L' + f(E[0] - s.nx * sg * k + s.tx * k * 0.5) + ' ' + f(E[1] - s.ny * sg * k + s.ty * k * 0.5); });
@@ -38,7 +38,7 @@ export function growVine(svg, d, o = {}) {
   let tw = '', on2 = false; const per = 22;
   S.forEach(s => { const ph = s.l / per * Math.PI * 2, front = Math.cos(ph) > 0, off = Math.sin(ph) * s.w * 0.62; const p = [s.x + s.nx * off, s.y + s.ny * off]; if (front) { tw += (on2 ? 'L' : 'M') + f(p[0]) + ' ' + f(p[1]); on2 = true; } else on2 = false; });
   if (o.twine !== false) {
-    mk('path', { d: tw, fill: 'none', stroke: PAPER, 'stroke-width': 2.4, 'stroke-linecap': 'round' }, gStem);
+    mk('path', { d: tw, fill: 'none', stroke: STEM, 'stroke-width': 2.4, 'stroke-linecap': 'round' }, gStem);
     mk('path', { d: tw, fill: 'none', stroke: INK, 'stroke-width': 0.9, 'stroke-linecap': 'round' }, gStem);
   }
 
@@ -79,7 +79,7 @@ function leaf(parent, s, side, size, rnd, l) {
     + 'C' + pt(P(0.86, -0.2)) + ' ' + pt(P(0.66, -0.5)) + ' ' + pt(P(0.38, -0.56)) + 'C' + pt(P(0.08, -0.62)) + ' ' + pt(P(-0.18, -0.28)) + ' ' + pt(P(0, 0)) + 'Z';
   const g = mk('g', {}, parent);
   mk('path', { d: 'M' + pt(base) + 'L' + pt(P(0, 0)), fill: 'none', stroke: INK, 'stroke-width': 0.9, 'stroke-linecap': 'round' }, g);
-  mk('path', { d, fill: PAPER, stroke: INK, 'stroke-width': 0.95, 'stroke-linejoin': 'round' }, g);
+  mk('path', { d, fill: LEAF, stroke: INK, 'stroke-width': 0.95, 'stroke-linejoin': 'round' }, g);
   let vd = 'M' + pt(P(0.02, 0)) + 'Q' + pt(P(0.5, 0.03 * side)) + ' ' + pt(P(0.98, 0.02));
   [[0.12, 0.42], [0.32, 0.46], [0.54, 0.34], [0.74, 0.2]].forEach(([u, v]) => { vd += 'M' + pt(P(u, 0)) + 'Q' + pt(P(u + 0.1, v * 0.5)) + ' ' + pt(P(u + 0.2, v)) + 'M' + pt(P(u, 0)) + 'Q' + pt(P(u + 0.1, -v * 0.5)) + ' ' + pt(P(u + 0.2, -v)); });
   mk('path', { d: vd, fill: 'none', stroke: INK, 'stroke-width': 0.5, 'stroke-linecap': 'round', opacity: 0.8 }, g);

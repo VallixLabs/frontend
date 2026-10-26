@@ -8,7 +8,8 @@ import { LogoGridPaths } from './Logo';
  * after the first render, the way the design does it.
  */
 
-const mono = "'Geist Mono', ui-monospace, monospace";
+const sans = "'Source Sans 3', system-ui, sans-serif";
+const green = '#2e5c36';
 const pad = 'clamp(16px, 4vw, 56px)';
 const stopPad = '64px clamp(16px, 5vw, 80px) calc(clamp(20px, 4vh, 40px) + 46px)';
 
@@ -24,7 +25,7 @@ const DUR = 6500; // ms each industry stays selected
 const CALENDAR_URL = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Vallix%20Labs%20%C3%97%20Founders&details=Intro%20call%20with%20the%20Vallix%20Labs%20founders&add=contact%40vallixlabs.com';
 const MAIL_URL = 'mailto:contact@vallixlabs.com?subject=Vallix%20Labs%20%E2%80%94%20getting%20started';
 
-const eyebrow: CSSProperties = { display: 'flex', justifyContent: 'space-between', fontFamily: mono, fontSize: 11, letterSpacing: '.14em', textTransform: 'uppercase', color: '#7d7a73' };
+const eyebrow: CSSProperties = { display: 'flex', justifyContent: 'space-between', fontFamily: sans, fontWeight: 600, fontSize: 11, letterSpacing: '.14em', textTransform: 'uppercase', color: '#7d7a73' };
 const boxStyle: CSSProperties = {
   width: 'min(430px, 100%)', maxHeight: '100%', overflow: 'auto', boxSizing: 'border-box', background: 'rgba(246,245,242,.9)',
   backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1.5px solid #141414', padding: '28px 28px 26px', pointerEvents: 'auto',
@@ -100,7 +101,7 @@ export default function Home() {
       { duration: 650, delay: k * 90, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'both' }));
   }, [ind, exRefs]);
 
-  // ---- loader, hero figure, tree, access grid, cursor trail, footer vines ----
+  // ---- loader, hero figure, tree, access grid, footer vines ----
   useEffect(() => {
     let alive = true;
     const timers: number[] = [];
@@ -199,7 +200,6 @@ export default function Home() {
     import('./fx/access-grid.js').then((m) => {
       if (alive && accessGridRef.current) kills.push(m.accessGrid(accessGridRef.current, { eventTarget: accessRef.current ?? undefined }));
     }).catch((e) => console.error(e));
-    import('./fx/cursor-trail.js').then((m) => { if (alive) kills.push(m.cursorTrail()); }).catch((e) => console.error(e));
     import('./fx/vine-art.js').then((V) => { if (alive && footerRef.current) kills.push(V.footerVines(footerRef.current)); }).catch((e) => console.error(e));
     Promise.all([import('./fx/bench-fig1.js'), import('./data/hero.json')]).then(([m, heroData]) => {
       if (alive && heroRef.current) { hero = m.drawFig1(heroRef.current, { autoplay: false, data: heroData.default }); if (playHeroWhenReady) hero.play(); }
@@ -230,7 +230,7 @@ export default function Home() {
 
       <section id="top" style={{ position: 'relative', height: '100svh', minHeight: 560, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', padding: `84px ${pad} 20px`, background: 'radial-gradient(130% 62% at 50% 0%, #d9d8d3 0%, #e8e7e2 40%, #f6f5f2 78%)', textAlign: 'center' }}>
         <div ref={heroTextRef} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <h1 style={{ margin: 0, fontSize: 'clamp(30px, 4.4vw, 60px)', lineHeight: 1.08, fontWeight: 500, letterSpacing: '-0.035em' }}>Models. For your problem.<br />From your data. At our speed.</h1>
+          <h1 style={{ margin: 0, fontSize: 'clamp(30px, 4.4vw, 60px)', lineHeight: 1.08, fontWeight: 500, letterSpacing: '-0.035em' }}><span style={{ color: green }}>Tabular Models.</span> For your problem.<br />From your data. At <span style={{ color: green }}>our speed.</span></h1>
           <p style={{ margin: '14px 0 0', fontSize: 18, lineHeight: 1.5, color: '#3e3c38' }}>A lab for task-specific, scale-adaptive, fast-inference<br />Tabular foundation models that build themselves.</p>
           <p style={{ margin: '8px 0 0', fontSize: 16, lineHeight: 1.55, color: '#6c6963' }}>Get your own tabular foundation model in a few clicks, and<br />predict without limits.</p>
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
@@ -249,9 +249,9 @@ export default function Home() {
           <div ref={overlayRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />
 
           <div data-stop="0" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 clamp(16px, 5vw, 80px)', pointerEvents: 'none' }}>
-            <h2 style={{ margin: 0, maxWidth: '11ch', fontSize: 'clamp(34px, 4vw, 58px)', lineHeight: 1.04, fontWeight: 500, letterSpacing: '-0.035em', textWrap: 'balance' }}>Our roots grow down to meet your data.</h2>
+            <h2 style={{ margin: 0, maxWidth: '11ch', fontSize: 'clamp(34px, 4vw, 58px)', lineHeight: 1.04, fontWeight: 500, letterSpacing: '-0.035em', textWrap: 'balance' }}>Our <span style={{ color: green }}>roots</span> grow down to meet <span style={{ color: green }}>your data.</span></h2>
           </div>
-          <div data-stop="0" style={{ position: 'absolute', bottom: 34, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, fontFamily: mono, fontSize: 11, letterSpacing: '.16em', textTransform: 'uppercase', color: '#6c6963', pointerEvents: 'none' }}>
+          <div data-stop="0" style={{ position: 'absolute', bottom: 34, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, fontFamily: sans, fontWeight: 600, fontSize: 11, letterSpacing: '.16em', textTransform: 'uppercase', color: '#6c6963', pointerEvents: 'none' }}>
             <span>Scroll</span>
             <span style={{ width: 1, height: 36, background: '#141414' }} />
           </div>
@@ -267,7 +267,7 @@ export default function Home() {
                   ['Larger', 'A foundation model adapted to your data, leading the public benchmarks at that scale.'],
                 ].map(([k, v]) => (
                   <div key={k} style={{ display: 'grid', gridTemplateColumns: '74px minmax(0,1fr)', gap: 12, padding: '10px 0', borderBottom: '1px solid #dfddd7' }}>
-                    <span style={{ fontFamily: mono, fontSize: 10.5, letterSpacing: '.12em', textTransform: 'uppercase', paddingTop: 3 }}>{k}</span>
+                    <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 10.5, letterSpacing: '.12em', textTransform: 'uppercase', paddingTop: 3 }}>{k}</span>
                     <span style={{ fontSize: 14, lineHeight: 1.5, color: '#5d5a54' }}>{v}</span>
                   </div>
                 ))}
@@ -282,7 +282,7 @@ export default function Home() {
               <h3 style={h3Style}>Tana</h3>
               <p style={bodyP}>Every tabular foundation model conditions on your rows at prediction time. Tana also conditions on the prior, on what kind of data this is, so it starts from the right place instead of a general one.</p>
               <p style={{ ...bodyP, color: '#5d5a54', paddingTop: 14, borderTop: '1px solid #dfddd7' }}>
-                <span style={{ fontFamily: mono, fontSize: 10.5, letterSpacing: '.12em', textTransform: 'uppercase', color: '#141414', marginRight: 8 }}>Tana 0.1</span>
+                <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 10.5, letterSpacing: '.12em', textTransform: 'uppercase', color: '#141414', marginRight: 8 }}>Tana 0.1</span>
                 In development. It becomes the base model inside Valli, which is adapted to give you the final model.
               </p>
             </div>
@@ -320,7 +320,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div style={{ position: 'absolute', left: 'clamp(16px, 5vw, 80px)', bottom: 'clamp(20px, 4vh, 40px)', zIndex: 3, padding: '12px 14px 10px', background: 'rgba(246,245,242,.9)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', fontFamily: mono, fontSize: 11, letterSpacing: '.12em', textTransform: 'uppercase', pointerEvents: 'none' }}>
+          <div style={{ position: 'absolute', left: 'clamp(16px, 5vw, 80px)', bottom: 'clamp(20px, 4vh, 40px)', zIndex: 3, padding: '12px 14px 10px', background: 'rgba(246,245,242,.9)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', fontFamily: sans, fontWeight: 600, fontSize: 11, letterSpacing: '.12em', textTransform: 'uppercase', pointerEvents: 'none' }}>
             <div style={{ position: 'absolute', left: 53, right: 53, top: 17, height: 1.5, background: '#d6d4ce' }} />
             <div data-rail-fill="" style={{ position: 'absolute', left: 53, top: 17, height: 1.5, width: 0, background: '#141414' }} />
             <div style={{ position: 'relative', display: 'flex' }}>
@@ -345,10 +345,10 @@ export default function Home() {
                 const on = i === ind;
                 return (
                   <button key={d.name} type="button" onClick={() => select(i)} style={{ all: 'unset', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '14px 0', borderBottom: '1px solid #d6d4ce' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 12, fontFamily: "'Source Sans 3', system-ui, sans-serif", fontSize: 'clamp(22px, 2.2vw, 28px)', fontWeight: 500, letterSpacing: '-0.015em', color: on ? '#141414' : '#9a968f', transition: 'color .3s' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 12, fontFamily: "'Source Sans 3', system-ui, sans-serif", fontSize: 'clamp(22px, 2.2vw, 28px)', fontWeight: 500, letterSpacing: '-0.015em', color: on ? green : '#9a968f', transition: 'color .3s' }}>
                       <span>{d.name}</span>
                     </span>
-                    <span style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 1, background: '#141414', transformOrigin: '0 50%', transform: `scaleX(${on ? prog.toFixed(4) : 0})` }} />
+                    <span style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 2, background: green, transformOrigin: '0 50%', transform: `scaleX(${on ? prog.toFixed(4) : 0})` }} />
                   </button>
                 );
               })}
@@ -367,11 +367,11 @@ export default function Home() {
       </section>
 
       <section id="access" style={{ padding: `0 ${pad} clamp(96px, 10vw, 140px)` }}>
-        <div ref={accessRef} style={{ position: 'relative', maxWidth: 1200, margin: '0 auto', overflow: 'hidden', border: '1px solid #dfddd7', backgroundColor: '#efeee9' }}>
+        <div ref={accessRef} style={{ position: 'relative', maxWidth: 1200, margin: '0 auto', overflow: 'hidden', border: '1px solid #dbe1d7', backgroundColor: '#eef1ea' }}>
           <div ref={accessGridRef} style={{ position: 'absolute', inset: 0 }} />
-          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(42% 52% at 50% 52%, rgba(239,238,233,.97) 30%, rgba(239,238,233,.82) 62%, rgba(239,238,233,0) 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(42% 52% at 50% 52%, rgba(238,241,234,.97) 30%, rgba(238,241,234,.82) 62%, rgba(238,241,234,0) 100%)' }} />
           <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'clamp(96px, 12vw, 168px) 24px', pointerEvents: 'none' }}>
-            <h2 style={{ margin: 0, fontSize: 'clamp(34px, 4.6vw, 64px)', lineHeight: 1.02, fontWeight: 500, letterSpacing: '-0.035em', textWrap: 'balance' }}>Get your table predicted.</h2>
+            <h2 style={{ margin: 0, fontSize: 'clamp(34px, 4.6vw, 64px)', lineHeight: 1.02, fontWeight: 500, letterSpacing: '-0.035em', textWrap: 'balance' }}>Get your table <span style={{ color: green }}>predicted.</span></h2>
             <p style={{ margin: '16px 0 0', maxWidth: '60ch', fontSize: 17, lineHeight: 1.55, color: '#5d5a54', textWrap: 'balance' }}>Schedule a meet with the founders or send us an email.</p>
             <div style={{ pointerEvents: 'auto', display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10, marginTop: 32, width: 'min(380px, 100%)' }}>
               <a href={CALENDAR_URL} target="_blank" rel="noopener" className="vx-btn-dark" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '11px 14px', whiteSpace: 'nowrap', borderRadius: 999, fontSize: 14.5, fontWeight: 500 }}>
@@ -400,7 +400,7 @@ export default function Home() {
         </div>
         <div ref={progRef} style={{ display: 'flex', flexDirection: 'column', gap: 12, width: 'min(460px, 72vw)', marginTop: 56 }}>
           <div style={{ position: 'relative', height: 1, background: '#dcdad4', overflow: 'hidden' }}><div ref={barRef} style={{ position: 'absolute', inset: 0, background: '#141414', transformOrigin: '0 50%', transform: 'scaleX(0)' }} /></div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: mono, fontSize: 11, letterSpacing: '.14em', textTransform: 'uppercase', color: '#6c6963' }}><span>Loading</span><span ref={pctRef}>00%</span></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: sans, fontWeight: 600, fontSize: 11, letterSpacing: '.14em', textTransform: 'uppercase', color: '#6c6963' }}><span>Loading</span><span ref={pctRef}>00%</span></div>
         </div>
       </div>
     </div>

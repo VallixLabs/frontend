@@ -7,11 +7,13 @@ input::placeholder { color: #8f8b84; }
 
 /* Hover states the design specifies with style-hover. */
 .vx-btn-dark { background: #141414; color: #f6f5f2; transition: background .2s; }
-.vx-btn-dark:hover { background: #000; color: #fff; }
+.vx-btn-dark:hover { background: #2e5c36; color: #fff; }
 .vx-btn-soft { background: #e7e6e1; color: #141414; transition: background .2s; }
-.vx-btn-soft:hover { background: #dcdad4; }
-.vx-btn-outline { background: #f6f5f2; border: 1px solid #d6d4ce; color: #141414; transition: border-color .2s; }
-.vx-btn-outline:hover { border-color: #141414; }
+.vx-btn-soft:hover { background: #2e5c36; color: #f6f5f2; }
+.vx-btn-outline { background: #f6f5f2; border: 1px solid #d6d4ce; color: #141414; transition: border-color .2s, color .2s; }
+.vx-btn-outline:hover { border-color: #2e5c36; color: #2e5c36; }
+.vx-link { color: #141414; transition: color .2s; }
+.vx-link:hover { color: #2e5c36; }
 
 /* Phone widths: the three-column header would overflow, so keep logo + "Get access" only. */
 @media (max-width: 760px) {
@@ -22,36 +24,31 @@ input::placeholder { color: #8f8b84; }
 /* "Who we are": person cards, their link chips, timeline labels and the link preview card. */
 .vx-card { transition: transform .5s cubic-bezier(.2,.7,.2,1), box-shadow .5s; }
 .vx-card:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -30px rgba(20,20,20,.45); }
-.vx-chip { border: 1px solid #d6d4ce; color: #141414; transition: border-color .2s, background .2s; }
-.vx-chip:hover { border-color: #141414; background: #141414; color: #f6f5f2; }
+.vx-chip { background: #ecebe6; color: #141414; transition: background .2s, color .2s; }
+.vx-chip:hover { background: #2e5c36; color: #f6f5f2; }
 .vx-tl-link { text-decoration-color: rgba(20,20,20,.28); transition: text-decoration-color .2s; }
 .vx-tl-link:hover { text-decoration-color: #141414; }
 @keyframes popIn { from { opacity: 0; transform: translateY(6px) scale(.97); } to { opacity: 1; transform: none; } }
 
-/* Playground: toolbar buttons, remove (×) buttons, row hover and the 1–10 sliders. */
+/* Playground: toolbar buttons, remove (×) buttons, row hover and the typed 1–10 cells. */
 .vx-pg-btn { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 500; }
-.vx-pg-btn:focus-visible { outline: 2px solid #141414; outline-offset: 2px; }
-.vx-pg-predict { background: #141414; color: #f6f5f2; transition: box-shadow .3s, transform .15s; }
-.vx-pg-predict:hover { background: #000; }
+.vx-pg-btn:focus-visible { outline: 2px solid #2e5c36; outline-offset: 2px; }
+.vx-pg-predict { background: #141414; color: #f6f5f2; transition: background .2s, box-shadow .3s, transform .15s; }
+.vx-pg-predict:hover { background: #2e5c36; }
 .vx-pg-predict:active { transform: scale(.97); }
-.vx-pg-add { border: 1.5px solid #141414; background: #f6f5f2; }
-.vx-pg-add:not(:disabled):hover { background: #141414; color: #f6f5f2; }
-.vx-pg-ghost { border: 1px solid #d6d4ce; }
-.vx-pg-ghost:hover { border-color: #141414; }
+.vx-pg-add { border: 1.5px solid #141414; background: #f6f5f2; transition: background .2s, color .2s; }
+.vx-pg-add:not(:disabled):hover { background: #2e5c36; color: #f6f5f2; }
+.vx-pg-ghost { border: 1px solid #d6d4ce; transition: border-color .2s, color .2s; }
+.vx-pg-ghost:hover { border-color: #2e5c36; color: #2e5c36; }
 .vx-pg-x { all: unset; cursor: pointer; width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; color: #8f8b84; font-size: 14px; }
-.vx-pg-x:hover { background: #141414; color: #f6f5f2; }
+.vx-pg-x:hover { background: #2e5c36; color: #f6f5f2; }
 .vx-pg-row { transition: background .2s; }
 .vx-pg-row:hover { background: #f1f0ec; }
-input[type=range].vx-range { -webkit-appearance: none; appearance: none; width: 100%; height: 16px; margin: 0; cursor: pointer; accent-color: #141414; background-color: transparent; background-repeat: no-repeat; background-position: center; background-size: 100% 3px; }
-input[type=range].vx-range::-webkit-slider-runnable-track { height: 3px; background: transparent; }
-input[type=range].vx-range::-moz-range-track { height: 3px; background: transparent; }
-input[type=range].vx-range:focus-visible { outline: none; }
-input[type=range].vx-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 1px #141414, 0 0 0 5px rgba(20,20,20,.15); }
-input[type=range].vx-range::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -5.5px; border-radius: 50%; background: #141414; border: 2px solid #f6f5f2; box-shadow: 0 0 0 1px #141414; transition: transform .15s; }
-input[type=range].vx-range::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: #141414; border: 2px solid #f6f5f2; box-shadow: 0 0 0 1px #141414; }
-input[type=range].vx-range:active::-webkit-slider-thumb { transform: scale(1.25); }
+.vx-pg-in { all: unset; box-sizing: border-box; width: 100%; padding: 6px 4px 5px; text-align: center; font-family: 'Source Sans 3', system-ui, sans-serif; line-height: 1; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: #141414; border-bottom: 1.5px solid #cfccc5; cursor: text; transition: border-color .2s, background .2s; }
+.vx-pg-in:hover { border-color: #8f8b84; }
+.vx-pg-in:focus { border-color: #2e5c36; background: rgba(46,92,54,.06); }
 
-/* Research: paper title and link chips. */
-.vx-paper-title:hover { text-decoration: underline; text-underline-offset: 4px; }
-.vx-paper-chip { border: 1px solid #d6d4ce; color: #141414; }
-.vx-paper-chip:hover { border-color: #141414; }
+/* Research: paper titles; the figure stacks above the text on phones. */
+.vx-paper-title { color: #141414; transition: color .2s; }
+.vx-paper-title:hover { color: #2e5c36; text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 600px) { .vx-paper-row { grid-template-columns: minmax(0, 1fr) !important; gap: 16px !important; } }

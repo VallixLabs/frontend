@@ -5,7 +5,7 @@ import { Logo } from './Logo';
 
 /** Header and footer shared by the site's pages, as the design repeats them on each. */
 
-const mono = "'Geist Mono', ui-monospace, monospace";
+const label: CSSProperties = { fontFamily: "'Source Sans 3', system-ui, sans-serif", fontWeight: 600, fontSize: 11, letterSpacing: '.14em', textTransform: 'uppercase' };
 const pad = 'clamp(16px, 4vw, 56px)';
 
 /** A link to a section of the landing page: a plain in-page anchor there, a route + hash elsewhere. */
@@ -29,9 +29,9 @@ export function SiteHeader({ page, logoRef }: { page: Page; logoRef?: Ref<HTMLAn
   return (
     <header className="vx-header" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, height: 64, display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto minmax(0,1fr)', alignItems: 'center', padding: `0 ${pad}`, background: 'rgba(246,245,242,.74)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', borderBottom: '1px solid rgba(20,20,20,.08)' }}>
       <nav className="vx-nav" style={{ display: 'flex', gap: 26, fontSize: 14, fontWeight: 500 }}>
-        <Link to="/who-we-are" style={page === 'who' ? current : undefined}>Who we are</Link>
-        <Link to="/research" style={page === 'research' ? current : undefined}>Research &amp; Benchmarks</Link>
-        <ToSection hash="access" home={home}>Contact us</ToSection>
+        <Link to="/who-we-are" className="vx-link" style={page === 'who' ? current : undefined}>Who we are</Link>
+        <Link to="/research" className="vx-link" style={page === 'research' ? current : undefined}>Research &amp; Benchmarks</Link>
+        <ToSection hash="access" home={home} className="vx-link">Contact us</ToSection>
       </nav>
       {home ? (
         <a href="#top" aria-label="Vallix Labs" ref={logoRef} style={{ display: 'flex' }}>
@@ -43,7 +43,7 @@ export function SiteHeader({ page, logoRef }: { page: Page; logoRef?: Ref<HTMLAn
         </Link>
       )}
       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 22 }}>
-        <Link to="/playground" className="vx-nav-extra" style={{ fontSize: 14, fontWeight: 500, ...(page === 'playground' ? current : {}) }}>Playground</Link>
+        <Link to="/playground" className="vx-nav-extra vx-link" style={{ fontSize: 14, fontWeight: 500, ...(page === 'playground' ? current : {}) }}>Playground</Link>
         <ToSection hash="access" home={home} className="vx-btn-soft" style={{ display: 'flex', alignItems: 'center', gap: 18, padding: '7px 9px 7px 15px', borderRadius: 999, fontSize: 14, fontWeight: 500 }}>
           <span>Get access</span>
           <Arrow />
@@ -53,7 +53,7 @@ export function SiteHeader({ page, logoRef }: { page: Page; logoRef?: Ref<HTMLAn
   );
 }
 
-const footHead: CSSProperties = { fontFamily: mono, fontSize: 11, letterSpacing: '.14em', textTransform: 'uppercase', color: '#8f8b84', marginBottom: 6 };
+const footHead: CSSProperties = { ...label, color: '#2e5c36', marginBottom: 6 };
 const footCol: CSSProperties = { flex: '1 1 110px', display: 'flex', flexDirection: 'column', gap: 10, fontSize: 14.5 };
 
 export function SiteFooter({ page, footerRef }: { page: Page; footerRef?: Ref<HTMLElement> }) {
@@ -64,7 +64,7 @@ export function SiteFooter({ page, footerRef }: { page: Page; footerRef?: Ref<HT
         <div style={{ flex: '2 1 300px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 26 }}>
           <Logo width={374} height={144} style={{ maxWidth: '100%', alignSelf: 'flex-start' }} />
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 12, marginTop: 18 }}>
-            <span style={{ fontFamily: mono, fontSize: 11, letterSpacing: '.14em', textTransform: 'uppercase', color: '#8f8b84' }}>Originated from</span>
+            <span style={{ ...label, color: '#8f8b84' }}>Originated from</span>
             <img src="/plab-logo.svg" alt="P² Lab, EE, IIT Roorkee" width={2235} height={1698} style={{ height: 80, width: 'auto', display: 'block' }} />
           </div>
         </div>
