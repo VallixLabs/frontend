@@ -32,25 +32,34 @@ CAL = {"classification": "ece", "regression": "cov90"}
 
 # Landing-page chart. Accuracy cells: the scientific evaluation at <= 100 labelled rows, both tasks.
 HERO_CELLS = [(t, m) for t in ("classification", "regression") for m in (25, 50, 100)]
-# (model id, label, training GPU-hours or None if not published, training label, source, inference rows/s).
-# Training: one model's pretraining as stated by its authors (quotes checked against the sources).
+HERO_N = 15     # Valli and the best released models by that accuracy (our own ablations are left out)
+# Training compute: one model's pretraining as stated by its authors (quotes checked against the sources);
+# (GPU-hours, label, source). Models absent here have none published and sit in the chart's separate band.
+COMPUTE = {
+    OURS: (0.25, "~15 min per table", "measured Valli builds: 14.5–18 min end to end on one GPU, on top of released Kumo-small"),
+    "tabpfn_v2": (2688, "~2 weeks on 8 RTX 2080 Ti", "Hollmann et al., Nature 2025, Methods: “around 2 weeks on one node with eight Nvidia RTX 2080 Ti GPUs”"),
+    "tabicl_v2": (588, "24.5 H100-days", "Qu et al., arXiv:2602.11139, §4.1: “totaling 24.5 GPU-days per model” (H100)"),
+    "tabicl_v1_1": (1440, "20 days on 3 A100", "Qu et al., ICML 2025, §4.2: “20 days on three A100 GPUs”"),
+    "mitra_v1": (480, "~60 h on 8 A100", "Zhang et al., arXiv:2510.21204, App. B.3.2: “approximately 60 hours on 8 GPUs (Nvidia A100s)”"),
+}
+NOT_PUBLISHED = {
+    "tabpfn_v2_5": "Prior Labs, arXiv:2511.08667: no training compute stated",
+    "realtabpfn_v2_5": "Prior Labs, arXiv:2511.08667: no training compute stated",
+    "tabpfn_v3": "Prior Labs, TabPFN-3 technical report, arXiv:2605.13986: no training compute stated",
+    "tabpfn_v2_6": "Prior Labs: no training compute found in published material",
+    "tabpfn_v3_5": "Prior Labs: no training compute found in published material",
+    "tabdpt": "Ma et al., arXiv:2410.18164: A100 GPUs, 600K steps, no training duration stated",
+    "mitra_v2": "Mitra-v2 technical report, arXiv:2609.04540: 4 nodes × 8 H200, no training duration stated",
+    "limix_2": "LimiX-2, arXiv:2609.17488: no training compute stated",
+    "limix_16m": "LimiX, arXiv:2509.03505: no training compute stated",
+    "kumo_tabular": "NVIDIA Kumo-Tabular model card: no training compute stated",
+    "kumo_tabular_medium": "NVIDIA Kumo-Tabular model card: no training compute stated",
+    "kumo_tabular_small": "NVIDIA Kumo-Tabular model card: no training compute stated",
+}
 # Inference rows/s: Vallix's own measurements (the design's figures), not derived from the benchmark export.
-HERO_MODELS = [
-    ("Kumo-small fine-tuned on PriorFM's pick", "valli", 0.25, "~15 min per table",
-     "measured Valli builds: 14.5–18 min end to end on one GPU, on top of released Kumo-small", 760000),
-    ("tabpfn_v2", "TabPFN v2", 2688, "~2 weeks on 8 RTX 2080 Ti",
-     "Hollmann et al., Nature 2025, Methods: “around 2 weeks on one node with eight Nvidia RTX 2080 Ti GPUs”", 21000),
-    ("tabicl_v2", "TabICLv2", 588, "24.5 H100-days",
-     "Qu et al., arXiv:2602.11139, §4.1: “totaling 24.5 GPU-days per model” (H100)", 31000),
-    ("tabicl_v1_1", "TabICL", 1440, "20 days on 3 A100",
-     "Qu et al., ICML 2025, §4.2: “20 days on three A100 GPUs”", 25000),
-    ("mitra_v1", "Mitra", 480, "~60 h on 8 A100",
-     "Zhang et al., arXiv:2510.21204, App. B.3.2: “approximately 60 hours on 8 GPUs (Nvidia A100s)”", 18000),
-    ("tabpfn_v2_5", "TabPFN-2.5", None, "not published", "Prior Labs, arXiv:2511.08667: no training compute stated", 22000),
-    ("limix_16m", "LimiX", None, "not published", "LimiX, arXiv:2509.03505: no training compute stated", 14000),
-    ("kumo_tabular", "Kumo-large", None, "not published", "NVIDIA Kumo-Tabular model card: no training compute stated", 9000),
-    ("kumo_tabular_small", "Kumo-small", None, "not published", "NVIDIA Kumo-Tabular model card: no training compute stated", 26000),
-]
+# Only these models were measured; the others show no speed.
+RPS = {OURS: 760000, "tabpfn_v2": 21000, "tabicl_v2": 31000, "tabicl_v1_1": 25000, "mitra_v1": 18000,
+       "tabpfn_v2_5": 22000, "limix_16m": 14000, "kumo_tabular": 9000, "kumo_tabular_small": 26000}
 
 NAMES = {
     OURS: "valli",
@@ -147,18 +156,23 @@ def main():
     # The landing page's chart: accuracy on the real scientific datasets against training compute and
     # inference speed. Accuracy = mean over the cells below of (best ranked error / the model's error).
     cells = [out["cells"][f"sci|{t}|{m}"] for t, m in HERO_CELLS]
-    models = []
-    for mid, n, h, hl, src, rps in HERO_MODELS:
-        scores = []
+    scores = {}
+    for mid, meta in out["models"].items():
+        if meta["role"] == "internal":
+            continue
+        sc = []
         for c in cells:
             ranked = [r for r in c["rows"] if r["place"] is not None]
             r = next((r for r in ranked if r["id"] == mid), None)
             if r is not None:
-                scores.append(min(x["err"] for x in ranked) / r["err"])
-        if len(scores) < len(cells):    # not ranked in every cell (e.g. classification-only): not comparable
-            print(f"hero: skipping {n}: ranked in {len(scores)} of {len(cells)} cells")
-            continue
-        models.append({"n": n, "ours": mid == OURS, "acc": round(float(np.mean(scores)), 4), "h": h, "hl": hl, "src": src, "rps": rps})
+                sc.append(min(x["err"] for x in ranked) / r["err"])
+        if len(sc) == len(cells):       # ranked in every cell, so the scores are comparable
+            scores[mid] = float(np.mean(sc))
+    models = []
+    for mid in sorted(scores, key=lambda i: -scores[i])[:HERO_N]:
+        h, hl, src = COMPUTE.get(mid) or (None, "not published", NOT_PUBLISHED.get(mid, "no training compute found in published material"))
+        models.append({"n": out["models"][mid]["n"], "ours": mid == OURS, "acc": round(scores[mid], 4), "h": h, "hl": hl, "src": src, "rps": RPS.get(mid)})
+    assert any(m["ours"] for m in models), "Valli is not among the top models"
     hero = {"source": out["source"], "cells": [f"{t} m={m}" for t, m in HERO_CELLS], "models": models}
     HERO = OUT.parent / "hero.json"
     HERO.write_text(json.dumps(hero, separators=(",", ":"), ensure_ascii=False))

@@ -243,7 +243,7 @@ export default function Home() {
 
       <section id="top" style={{ position: 'relative', height: '100svh', minHeight: 560, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', padding: `84px ${pad} 20px`, background: 'radial-gradient(130% 62% at 50% 0%, #d9d8d3 0%, #e8e7e2 40%, #f6f5f2 78%)', textAlign: 'center' }}>
         <div ref={heroTextRef} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <h1 style={{ margin: 0, fontSize: 'clamp(30px, 4.4vw, 60px)', lineHeight: 1.08, fontWeight: 500, letterSpacing: '-0.035em' }}><span style={{ color: green }}>Tabular Models.</span> For your problem.<br />From your data. At <span style={{ color: green }}>our speed.</span></h1>
+          <h1 style={{ margin: 0, fontSize: 'clamp(28px, min(4.4vw, 6.2vh), 60px)', lineHeight: 1.08, fontWeight: 500, letterSpacing: '-0.035em' }}><span style={{ color: green }}>Tabular Models.</span> For your problem.<br />From your data. At <span style={{ color: green }}>our speed.</span></h1>
           <p style={{ margin: '14px 0 0', fontSize: 18, lineHeight: 1.5, color: '#3e3c38' }}>A lab for task-specific, scale-adaptive, fast-inference<br />Tabular foundation models that build themselves.</p>
           <p style={{ margin: '8px 0 0', fontSize: 16, lineHeight: 1.55, color: '#6c6963' }}>Get your own tabular foundation model in a few clicks, and<br />predict without limits.</p>
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
@@ -253,7 +253,7 @@ export default function Home() {
             </a>
           </div>
         </div>
-        <div ref={heroRef} style={{ position: 'relative', flex: '1 1 0', minHeight: 200, width: '100%', maxWidth: 1300, margin: '18px auto 0' }} />
+        <div ref={heroRef} style={{ position: 'relative', flex: '1 1 0', minHeight: 220, width: '100%', maxWidth: 1400, margin: '14px auto 0' }} />
       </section>
 
       <section id="ecosystem" ref={treeRef} style={{ position: 'relative', height: '640vh', background: '#f6f5f2', marginTop: 120 }}>
