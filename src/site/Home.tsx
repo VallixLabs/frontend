@@ -22,6 +22,9 @@ const INDUSTRIES = [
 ];
 const DUR = 6500; // ms each industry stays selected
 
+// The intro loader plays on the first visit to the landing page only, not when coming back to it.
+let loaderPlayed = false;
+
 const CALENDAR_URL = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Vallix%20Labs%20%C3%97%20Founders&details=Intro%20call%20with%20the%20Vallix%20Labs%20founders&add=contact%40vallixlabs.com';
 const MAIL_URL = 'mailto:contact@vallixlabs.com?subject=Vallix%20Labs%20%E2%80%94%20getting%20started';
 
@@ -44,6 +47,7 @@ function RailStep({ k, label }: { k: number; label: string }) {
 }
 
 export default function Home() {
+  const [withLoader] = useState(() => !loaderPlayed);
   const navLogoRef = useRef<HTMLAnchorElement>(null);
   const heroTextRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -142,8 +146,13 @@ export default function Home() {
       }, D + 170);
     };
 
-    // runLoader
-    {
+    if (!withLoader) {
+      // Returning to the page: no loader, show it straight away (at the linked section, if any).
+      const target = location.hash && document.getElementById(location.hash.slice(1));
+      if (target) target.scrollIntoView({ behavior: 'instant' }); else scrollTo(0, 0);
+      startPage();
+    } else {
+      loaderPlayed = true;
       const EZ = 'cubic-bezier(.6,0,.25,1)';
       if (navLogoRef.current) navLogoRef.current.style.opacity = '0';
       document.documentElement.style.overflow = 'hidden';
@@ -221,7 +230,7 @@ export default function Home() {
       hero?.destroy(); tree?.destroy();
       document.documentElement.style.overflow = '';
     };
-  }, []);
+  }, [withLoader]);
 
   return (
     <div style={{ fontFamily: "'Source Sans 3', system-ui, sans-serif", color: '#141414', background: '#f6f5f2', minHeight: '100vh' }}>
@@ -389,7 +398,7 @@ export default function Home() {
 
       <SiteFooter page="home" footerRef={footerRef} />
 
-      <div ref={loaderRef} style={{ position: 'fixed', inset: 0, zIndex: 200, background: '#f6f5f2', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      {withLoader && <div ref={loaderRef} style={{ position: 'fixed', inset: 0, zIndex: 200, background: '#f6f5f2', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <div ref={loaderLogoRef} style={{ position: 'relative', width: 'min(460px, 72vw)', aspectRatio: '1830 / 705', transformOrigin: '0 0', willChange: 'transform' }}>
           <svg viewBox="0 0 1830 705" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible' }}>
             <g ref={gridRef} fill="none" stroke="#bdb9b2" strokeWidth={11}><LogoGridPaths /></g>
@@ -402,7 +411,7 @@ export default function Home() {
           <div style={{ position: 'relative', height: 1, background: '#dcdad4', overflow: 'hidden' }}><div ref={barRef} style={{ position: 'absolute', inset: 0, background: '#141414', transformOrigin: '0 50%', transform: 'scaleX(0)' }} /></div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: sans, fontWeight: 600, fontSize: 11, letterSpacing: '.14em', textTransform: 'uppercase', color: '#6c6963' }}><span>Loading</span><span ref={pctRef}>00%</span></div>
         </div>
-      </div>
+      </div>}
     </div>
   );
 }

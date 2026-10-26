@@ -135,8 +135,6 @@ const CSS = `.vxb{
 .vxb .illus-banner{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin:0 0 28px;padding:14px 18px;border:1px solid #a2553f;background:rgba(162,85,63,.07);font-size:15px;line-height:1.5;color:var(--ink)}
 `;
 const CSS_MORE = `
-.vxb .src{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin:0 0 40px;padding:12px 16px;border:1px solid var(--rule);background:var(--panel);font-size:13.5px;line-height:1.55;color:var(--mid)}
-.vxb .src b{font-family:'Source Sans 3',system-ui,sans-serif;font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#2e5c36}
 .vxb .tfoot .lkey{flex:1 1 100%}
 .vxb .quad.q3{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:900px){.vxb .quad.q3{grid-template-columns:1fr}.vxb .quad.q3 > div{border-right:0;border-bottom:1px solid var(--rule)}}
@@ -204,9 +202,7 @@ const DS_NAMES = { wind: 'Wind', radon: 'Radon', insurance: 'Insurance', pv: 'PV
 export function mountBenchmarks(host, data) {
   if (host.dataset.mounted) return; host.dataset.mounted = '1';
   if (!document.getElementById('vxb-style')) { const st = document.createElement('style'); st.id = 'vxb-style'; st.textContent = CSS + CSS_MORE; document.head.appendChild(st); }
-  const src = data.source;
-  const SRC = src ? `<div class="src"><b>Source</b><span>${src.repo} @ ${src.commit} · ${src.path} · ${src.note} Valli = Kumo-small fine-tuned on PriorFM's pick. Places, means and curves are the export's own; intervals are a 95% bootstrap over tables.</span></div>` : '';
-  host.classList.add('vxb'); host.innerHTML = (data.illustrative ? BANNER : SRC) + HTML;
+  host.classList.add('vxb'); host.innerHTML = (data.illustrative ? BANNER : '') + HTML;
   if (data.illustrative) host.querySelectorAll('.chd').forEach(h => { const s = document.createElement('span'); s.className = 'illus'; s.textContent = 'Illustrative data'; h.appendChild(s); });
 
 /* ================= helpers ================= */
