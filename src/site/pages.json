@@ -1,0 +1,26 @@
+{
+  "site": "https://www.vallixlabs.com",
+  "pages": {
+    "/": {
+      "title": "Vallix Labs | Tabular foundation models built for your data",
+      "description": "Vallix Labs builds task-specific, scale-adaptive tabular foundation models. Valli builds a model for your problem from your table; Tvarit serves tabular foundation models with fast inference."
+    },
+    "/research": {
+      "title": "Research & Benchmarks | Vallix Labs",
+      "description": "Valli benchmarked against released tabular models on synthetic tables, TabArena and real scientific datasets: leaderboards, accuracy and calibration at 25 to 1,000 labelled rows."
+    },
+    "/playground": {
+      "title": "Playground | Vallix Labs",
+      "description": "Type a few labelled rows and watch a small in-browser demo model predict the rest of the table."
+    },
+    "/who-we-are": {
+      "title": "Who we are | Vallix Labs",
+      "description": "Vallix Labs grew out of P² Lab at IIT Roorkee. Our timeline, founders, advisors and mentors."
+    },
+    "/workbench": {
+      "title": "Sign in | Vallix Labs",
+      "description": "Sign in to Vallix Labs.",
+      "noindex": true
+    }
+  }
+}

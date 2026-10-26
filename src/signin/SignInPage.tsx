@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 
 import { Logo } from '../site/Logo';
+import { usePageMeta } from '../site/seo';
 import { api, signInUrl, UnauthorizedError, type Me } from './api';
 
 /** Why the last sign-in did not work, as reported by the backend's redirect (`?auth=...`). */
@@ -26,6 +27,7 @@ const eyebrow: CSSProperties = { fontFamily: mono, fontSize: 11, letterSpacing: 
  * this screen only starts the sign-in, reports what came back, and shows who is signed in.
  */
 export default function SignInPage() {
+  usePageMeta('/workbench');
   // The backend reports a failed sign-in as ?auth=<reason>; read it once, then drop it from the URL.
   const [problem] = useState<AuthProblem | null>(() => {
     const v = new URLSearchParams(window.location.search).get('auth');

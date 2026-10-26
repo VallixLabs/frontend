@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type FocusEvent } from 'react';
 
 import { SiteFooter, SiteHeader } from './Chrome';
+import { usePageMeta } from './seo';
 
 /**
  * The playground, ported from the Claude Design file `Playground.dc.html`: a small table whose first two rows
@@ -65,6 +66,7 @@ function NumIn({ value, draft, label, size, onDraft, onCommit }: {
 const big: CSSProperties = { fontSize: 24, lineHeight: 1, fontWeight: 600, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' };
 
 export default function Playground() {
+  usePageMeta('/playground');
   const [grid, setGrid] = useState(() => INIT.map((r) => r.slice()));
   const [labels, setLabels] = useState(INIT_LABELS);
   const [prev, setPrev] = useState<number[] | null>(null);

@@ -1,6 +1,7 @@
 import { useEffect, useRef, type CSSProperties } from 'react';
 
 import { SiteFooter, SiteHeader } from './Chrome';
+import { usePageMeta } from './seo';
 
 /**
  * "Research & Benchmarks", ported from the Claude Design file `Research.dc.html`: the benchmark section (the
@@ -32,6 +33,7 @@ const PAPERS: Paper[] = [
 const warn: CSSProperties = { fontFamily: "'Source Sans 3', system-ui, sans-serif", fontWeight: 600, fontSize: 10.5, letterSpacing: '.12em', textTransform: 'uppercase', color: '#f6f5f2', background: '#a2553f', padding: '4px 8px' };
 
 export default function Research() {
+  usePageMeta('/research');
   const benchRef = useRef<HTMLDivElement>(null);
   const footerRef = useRef<HTMLElement>(null);
 

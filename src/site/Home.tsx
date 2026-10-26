@@ -1,5 +1,6 @@
 import { createRef, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Arrow, SiteFooter, SiteHeader } from './Chrome';
+import { usePageMeta } from './seo';
 import { LogoGridPaths } from './Logo';
 
 /**
@@ -25,7 +26,10 @@ const DUR = 6500; // ms each industry stays selected
 // The intro loader plays on the first visit to the landing page only, not when coming back to it.
 let loaderPlayed = false;
 
-const CALENDAR_URL = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Vallix%20Labs%20%C3%97%20Founders&details=Intro%20call%20with%20the%20Vallix%20Labs%20founders&add=contact%40vallixlabs.com';
+// "Schedule a meet": the Google Calendar appointment-schedule booking page of contact@vallixlabs.com (open slots,
+// 12:00-17:00, are set there) from VITE_BOOKING_URL; without it, a pre-filled "new event" invite as before.
+const CALENDAR_URL = (import.meta.env.VITE_BOOKING_URL as string | undefined)
+  || 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Vallix%20Labs%20%C3%97%20Founders&details=Intro%20call%20with%20the%20Vallix%20Labs%20founders&add=contact%40vallixlabs.com';
 const MAIL_URL = 'mailto:contact@vallixlabs.com?subject=Vallix%20Labs%20%E2%80%94%20getting%20started';
 
 const eyebrow: CSSProperties = { display: 'flex', justifyContent: 'space-between', fontFamily: sans, fontWeight: 600, fontSize: 11, letterSpacing: '.14em', textTransform: 'uppercase', color: '#7d7a73' };
@@ -47,6 +51,7 @@ function RailStep({ k, label }: { k: number; label: string }) {
 }
 
 export default function Home() {
+  usePageMeta('/');
   const [withLoader] = useState(() => !loaderPlayed);
   const navLogoRef = useRef<HTMLAnchorElement>(null);
   const heroTextRef = useRef<HTMLDivElement>(null);

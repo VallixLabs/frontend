@@ -3,8 +3,61 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <title>Vallix Labs</title>
+    <!-- Per-page values below are rewritten by usePageMeta (in the app) and scripts/seo-pages.mjs (at build). -->
+    <title>Vallix Labs | Tabular foundation models built for your data</title>
+    <meta name="description" content="Vallix Labs builds task-specific, scale-adaptive tabular foundation models. Valli builds a model for your problem from your table; Tvarit serves tabular foundation models with fast inference." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://www.vallixlabs.com/" />
+    <meta name="theme-color" content="#f6f5f2" />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Vallix Labs" />
+    <meta property="og:url" content="https://www.vallixlabs.com/" />
+    <meta property="og:title" content="Vallix Labs | Tabular foundation models built for your data" />
+    <meta property="og:description" content="Vallix Labs builds task-specific, scale-adaptive tabular foundation models. Valli builds a model for your problem from your table; Tvarit serves tabular foundation models with fast inference." />
+    <meta property="og:image" content="https://www.vallixlabs.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Vallix Labs: Tabular Models. For your problem. From your data. At our speed." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@VallixLabs" />
+    <meta name="twitter:title" content="Vallix Labs | Tabular foundation models built for your data" />
+    <meta name="twitter:description" content="Vallix Labs builds task-specific, scale-adaptive tabular foundation models. Valli builds a model for your problem from your table; Tvarit serves tabular foundation models with fast inference." />
+    <meta name="twitter:image" content="https://www.vallixlabs.com/og-image.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.vallixlabs.com/#organization",
+            "name": "Vallix Labs",
+            "url": "https://www.vallixlabs.com/",
+            "logo": "https://www.vallixlabs.com/icon-512.png",
+            "email": "contact@vallixlabs.com",
+            "sameAs": [
+              "https://www.linkedin.com/company/vallix-labs/",
+              "https://github.com/VallixLabs",
+              "https://x.com/VallixLabs"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.vallixlabs.com/#website",
+            "name": "Vallix Labs",
+            "url": "https://www.vallixlabs.com/",
+            "publisher": { "@id": "https://www.vallixlabs.com/#organization" }
+          }
+        ]
+      }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
     <link
@@ -14,6 +67,11 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>Vallix Labs</h1>
+      <p>Task-specific, scale-adaptive tabular foundation models that build themselves. Get your own tabular foundation model from your data.</p>
+      <p><a href="/who-we-are">Who we are</a> · <a href="/research">Research &amp; Benchmarks</a> · <a href="/playground">Playground</a> · <a href="mailto:contact@vallixlabs.com">contact@vallixlabs.com</a></p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

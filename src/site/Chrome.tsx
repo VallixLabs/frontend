@@ -21,6 +21,12 @@ export function Arrow() {
   );
 }
 
+const SOCIAL: [string, string][] = [
+  ['X', 'https://x.com/VallixLabs'],
+  ['LinkedIn', 'https://www.linkedin.com/company/vallix-labs/'],
+  ['GitHub', 'https://github.com/VallixLabs'],
+];
+
 type Page = 'home' | 'who' | 'playground' | 'research';
 
 export function SiteHeader({ page, logoRef }: { page: Page; logoRef?: Ref<HTMLAnchorElement> }) {
@@ -78,7 +84,7 @@ export function SiteFooter({ page, footerRef }: { page: Page; footerRef?: Ref<HT
         </div>
         <div style={footCol}>
           <div style={footHead}>Social</div>
-          <ToSection hash="top" home={home}>X</ToSection><ToSection hash="top" home={home}>LinkedIn</ToSection><ToSection hash="top" home={home}>GitHub</ToSection>
+          {SOCIAL.map(([label, href]) => <a key={label} href={href} target="_blank" rel="noopener">{label}</a>)}
         </div>
       </div>
       <div style={{ maxWidth: 1200, margin: '64px auto 0', paddingTop: 22, borderTop: '1px solid #e3e1dc', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, fontSize: 13, color: '#8f8b84' }}>

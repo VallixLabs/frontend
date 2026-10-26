@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type FocusEvent, type MouseEvent } from 'react';
 
 import { SiteFooter, SiteHeader } from './Chrome';
+import { usePageMeta } from './seo';
 import type { Milestone } from './fx/timeline-vine.js';
 
 /**
@@ -129,6 +130,7 @@ const h2: CSSProperties = { margin: 0, fontSize: 'clamp(30px, 3.4vw, 46px)', lin
 const cardGrid: CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: 'clamp(48px, 6vw, 80px)', maxWidth: 920, margin: '0 auto' };
 
 export default function WhoWeAre() {
+  usePageMeta('/who-we-are');
   const [wide, setWide] = useState(() => innerWidth >= 760);
   const [hover, setHover] = useState<{ i: number; x: number; y: number } | null>(null);
   const trackRef = useRef<HTMLElement>(null);
