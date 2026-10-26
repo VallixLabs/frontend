@@ -2,8 +2,6 @@
 // (its setup / leaf / curl / tendril methods). The SVG paths, labels and links are rendered by React;
 // this builds the vine artwork into the SVG and drives growth, nodes and labels from the scroll position.
 const INK = '#141414', PAPER = '#f6f5f2', VINE = '#2e5c36', STEM = '#eef1e8', LEAF = '#e3ead9';
-// Where each photo card settles in the stack (px offset, degrees), one per milestone, cycling.
-const PH = [[-4, 2, -2.5], [5, -3, 2], [-2, 4, -1.2], [4, 1, 2.8], [-5, -2, -1.8], [3, 3, 1.4], [-3, -4, -3], [5, 2, 1.8], [-6, 1, -0.8], [2, -3, 2.4], [-2, 3, -2], [0, 0, 0.6]].map(([x, y, r]) => ({ x, y, r }));
 
 export function mountTimeline({ svg, stage, track, now, hint, photos, milestones, onNodeOff }) {
   let raf = 0;
@@ -117,10 +115,8 @@ export function mountTimeline({ svg, stage, track, now, hint, photos, milestones
     nd.g = g; nd.ring = ring; nd.dot = dot; nd.on = false;
     nd.label = stage.querySelector('[data-label="' + i + '"]');
     nd.link = stage.querySelector('[data-link="' + i + '"]');
-    nd.photo = photos ? photos.querySelector('[data-photo="' + i + '"]') : null;
   });
-  let pT = 0, pC = 0, last = -1, lastPh;
-  const phOff = i => PH[i % PH.length];
+  let pT = 0, pC = 0, last = -1, latestI = 0;
   const frame = () => {
     raf = requestAnimationFrame(frame);
     const r = track.getBoundingClientRect(), span = Math.max(1, r.height - innerHeight);
@@ -140,20 +136,43 @@ export function mountTimeline({ svg, stage, track, now, hint, photos, milestones
       if (on !== nd.on) {
         nd.on = on;
         nd.g.style.transform = on ? 'scale(1)' : 'scale(0)';
-        if (nd.photo) { const P = phOff(nd.i); nd.photo.style.opacity = on ? 1 : 0; nd.photo.style.transform = on ? 'translate(' + P.x + 'px,' + P.y + 'px) rotate(' + P.r + 'deg)' : 'translate(' + (P.x + 70) + 'px,' + (P.y - 90) + 'px) rotate(' + (P.r + 18) + 'deg) scale(1.12)'; }
         if (nd.label) { nd.label.style.opacity = on ? 1 : 0; nd.label.style.filter = on ? 'blur(0)' : 'blur(4px)'; nd.label.style.transform = on ? 'none' : 'translateY(6px)'; }
         if (nd.link) nd.link.style.pointerEvents = on ? 'auto' : 'none';
         if (!on && onNodeOff) onNodeOff(nd.i);
       }
     });
-    // older cards in the stack dim slightly
-    if (latest !== lastPh) { lastPh = latest; nodes.forEach(nd => { if (nd.photo) nd.photo.style.filter = nd.on && latest && nd.i < latest.i - 1 ? 'brightness(.94) saturate(.85)' : 'none'; }); }
+    latestI = latest ? latest.i : 0;
     nodes.forEach(nd => { const c = nd === latest; nd.dot.setAttribute('fill', c ? VINE : PAPER); nd.ring.setAttribute('stroke', c ? VINE : INK); nd.ring.style.opacity = c ? 1 : 0; });
     if (now) now.textContent = latest ? latest.date : milestones[0].date;
     if (hint) hint.style.opacity = pC > 0.03 ? 0 : 1;
   };
   raf = requestAnimationFrame(frame);
-  return () => { cancelAnimationFrame(raf); gfx.innerHTML = ''; gN.innerHTML = ''; };
+
+  // The milestone cards ride a curved carousel: the latest one sits in front, earlier and later ones arc away.
+  let carRaf = 0, carPos = 0, carW = -1, carDone = false;
+  const cards = photos ? [...photos.querySelectorAll('[data-photo]')] : [];
+  const car = () => {
+    carRaf = requestAnimationFrame(car);
+    if (!cards.length) return;
+    const tgt = latestI, prev = carPos;
+    carPos += (tgt - carPos) * 0.09; if (Math.abs(tgt - carPos) < 1e-3) carPos = tgt;
+    const H = photos.clientHeight, cw = photos.clientWidth - 64, ch = cw * 1.12;
+    if (carW === cw && Math.abs(prev - carPos) < 1e-5 && carDone) return;
+    carW = cw; carDone = Math.abs(prev - carPos) < 1e-5;
+    const Rr = 0.86 * H, step = 0.62, x0 = 8, yc = H / 2;
+    cards.forEach((el, k) => {
+      const d = k - carPos, th = d * step, ad = Math.abs(d);
+      el.style.width = cw + 'px'; el.style.height = ch + 'px';
+      if (ad > 2.4) { el.style.opacity = 0; return; }
+      const x = x0 + Rr * (1 - Math.cos(th)), y = yc + Rr * Math.sin(th) - ch / 2;
+      el.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,' + (-ad * 160).toFixed(0) + 'px) rotateZ(' + (th * 57.3 * 0.55).toFixed(2) + 'deg) rotateY(' + (-d * 18).toFixed(2) + 'deg) rotateX(' + (d * 10).toFixed(2) + 'deg) scale(' + (1 - Math.min(ad, 2) * 0.1).toFixed(3) + ')';
+      el.style.opacity = Math.max(0, 1 - Math.max(0, ad - 0.6) * 0.45).toFixed(3);
+      el.style.zIndex = String(100 - Math.round(ad * 10));
+      el.style.filter = ad > 0.5 ? 'saturate(.8) brightness(.97)' : 'none';
+    });
+  };
+  carRaf = requestAnimationFrame(car);
+  return () => { cancelAnimationFrame(raf); cancelAnimationFrame(carRaf); gfx.innerHTML = ''; gN.innerHTML = ''; };
 }
 
 function leaf(mk, parent, s, side, size, rnd, key, l) {

@@ -551,16 +551,25 @@ export function mountTree({ section, canvas, overlay }) {
   const roots = near(TOUR.roots.filter(r => r.r > 0.2).map(r => ({ q: L(r.p) })), r => ang(r.q), AZR).slice(0, 3)
     .sort((a, b) => dA(ang(b.q), AZR) - dA(ang(a.q), AZR));
   const rc = roots.reduce((s, r) => s.add(r.q), V(0, 0, 0)).multiplyScalar(1 / roots.length).lerp(V(0, 0, CZ), 0.35); rc.y = lift + 0.2;
+  // Skandha: lower trunk, just above the flare (the base everything else sits on)
+  const trR = y => { const t = (y + 0.35) / 4.25, b = 0.5 + 0.42 * Math.exp(-Math.max(y, 0) / 3.9 * 5.5) - 0.08 * t + 0.1 * Math.exp(-Math.max(y, 0) / 0.5), k = (t * 3.9 - 2.9); return k > 0 ? b * Math.max(0.02, 1 - 0.75 * k * k) : b; };
+  const SKA = ang(node.q) + 0.25, SKY = 3.1, SKR = trR(SKY);
+  const skDir = V(Math.sin(SKA) * 0.82 + Math.cos(SKA) * 0.57, 0, Math.cos(SKA) * 0.82 - Math.sin(SKA) * 0.57).normalize();
+  const skP = V(0, lift + SKY, CZ).addScaledVector(skDir, SKR * 1.02);
+  const skRings = [0, 1, 2].map(k => {
+    const m = new THREE.Mesh(new THREE.TorusGeometry(1, k ? 0.006 : 0.011, 8, 160), new THREE.MeshBasicMaterial({ color: 0x2e5c36, transparent: true, opacity: 0, depthWrite: false }));
+    m.rotation.x = Math.PI / 2; m.renderOrder = 5; m.visible = false; scene.add(m); return m;
+  });
   const S = [
     { t: V(0, 4.5 + lift * 0.5, CZ), az: AZ0, el: 0.12, d: 37, fov: 30, sx: 0.2, sy: 0 },
     { t: vine.m.clone(), az: ang(vine.m) + 0.25, el: 0.1, d: 6.5, fov: 34, sx: 0.17, sy: 0 },
-    { t: node.q.clone(), az: ang(node.q) + 0.25, el: 0.02, d: 7.5, fov: 34, sx: 0.17, sy: 0 },
+    { t: V(0, lift + SKY - 0.35, CZ), az: SKA, el: 0.06, d: 9, fov: 34, sx: 0.17, sy: 0 },
     { t: rc, az: AZR, el: 0.5, d: 12.5, fov: 34, sx: 0.2, sy: 0.04 },
     { t: V(0, 3.9 + lift * 0.5, CZ), az: AZ0 + 1.15, el: 0.24, d: 35, fov: 30, sx: 0.17, sy: 0 },
   ];
   const MK = [
     { s: [4], p: vine.m, label: 'Valli', dx: 40, dy: -34 },
-    { s: [4], p: node.q, label: 'Tana', dx: 40, dy: -34 },
+    { s: [4], p: skP, label: 'Skandha', dx: 40, dy: -34 },
     { s: [4], p: roots[0].q, label: 'PriorFM', dx: 0, dy: 46, rank: true },
     { s: [4], p: roots[1].q, label: 'Grammar', dx: 0, dy: 46, rank: true },
     { s: [4], p: roots[2].q, label: 'PriorSignal', dx: 0, dy: 46, rank: true },
@@ -571,7 +580,7 @@ export function mountTree({ section, canvas, overlay }) {
   const rowEl = i => { const b = boxEl(3); const rows = b ? b.querySelectorAll(':scope > div:last-child > div') : []; return rows[i] || b; };
   const LD = [
     { k: 1, p: vine.m, tg: () => boxEl(1) },
-    { k: 2, p: node.q, tg: () => boxEl(2) },
+    { k: 2, p: skP, tg: () => boxEl(2) },
     { k: 3, p: roots[0].q, row: true }, { k: 3, p: roots[1].q, row: true }, { k: 3, p: roots[2].q, row: true },
     { k: 4, p: tvP, tg: () => boxEl(4) },
   ];
@@ -639,6 +648,16 @@ export function mountTree({ section, canvas, overlay }) {
     if (Math.abs(prev - uC) > 1e-6) dirty = true;
     const gT = 1 - sstep(0.14, 0.3, Math.abs(uC - 4));
     if (gT > 0.001 || ghost > 0.001 || grow > G0) dirty = true;
+    const wS = 1 - sstep(0.14, 0.3, Math.abs(uC - 2));
+    if (wS > 0.001 || skRings[0].visible) {
+      dirty = true; const tt = now / 1000;
+      skRings.forEach((m, k) => {
+        m.visible = wS > 0.001;
+        if (!k) { const y = SKY; m.position.set(0, lift + y, CZ); const r = trR(y) * 1.06; m.scale.setScalar(r * (0.9 + 0.1 * wS)); m.material.opacity = 0.9 * wS; return; }
+        const ph = (tt * 0.45 + k * 0.5) % 1, y = SKY - 1.1 + ph * 1.1, r = trR(y) * 1.07;
+        m.position.set(0, lift + y, CZ); m.scale.setScalar(r); m.material.opacity = wS * 0.7 * Math.sin(Math.PI * ph);
+      });
+    }
     if (!dirty) return; dirty = false;
     { const ng = ghost + (gT - ghost) * (1 - Math.exp(-dt * 9)); const g2 = Math.abs(ng - gT) < 1e-3 ? gT : ng; if (Math.abs(g2 - ghost) > 1e-4 || (g2 === 0) !== (ghost === 0)) setGhost(g2); ghost = g2;
       grow = gT > 0.6 ? Math.min(G1, grow + dt * (G1 - G0) / 2.6) : Math.max(G0, grow - dt * (G1 - G0) / 1.2);

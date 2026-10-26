@@ -76,7 +76,7 @@ export function SiteFooter({ page, footerRef }: { page: Page; footerRef?: Ref<HT
         </div>
         <div style={footCol}>
           <div style={footHead}>Products</div>
-          <ToSection hash="ecosystem" home={home}>Valli</ToSection><ToSection hash="ecosystem" home={home}>Tana</ToSection><ToSection hash="ecosystem" home={home}>Tvarit</ToSection>
+          <ToSection hash="ecosystem" home={home}>Valli</ToSection><ToSection hash="ecosystem" home={home}>Skandha</ToSection><ToSection hash="ecosystem" home={home}>Tvarit</ToSection>
         </div>
         <div style={footCol}>
           <div style={footHead}>Company</div>

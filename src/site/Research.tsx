@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { SiteFooter, SiteHeader } from './Chrome';
 import { usePageMeta } from './seo';
@@ -10,27 +10,23 @@ import { usePageMeta } from './seo';
 
 const pad = 'clamp(16px, 4vw, 56px)';
 
-type PaperType = 'Conference' | 'Journal' | 'Workshop' | 'Preprint';
 type Paper = {
-  year: number; type: PaperType; title: string; authors: string; venue: string;
-  pdf?: string;
-  /** Figure shown beside the entry (the design's image slot); an empty panel until one is supplied. */
-  img?: string;
-  /** Placeholder copy from the design, not a real publication: labelled as such and not citable. */
-  placeholder?: boolean;
+  year: number; title: string; authors: string; venue: string; href: string;
+  /** The paper's architecture / method figure, cropped from the arXiv PDF (public/papers/<id>.png). */
+  fig: string; figAlt: string;
 };
 
-// The design's placeholder papers, kept at the user's request until the real list replaces them. None of
-// these exist; each is shown with a "Placeholder" tag.
+// From the design's Research.dc.html; titles, authors and IDs checked against the arXiv API (27 Oct 2026).
 const PAPERS: Paper[] = [
-  { year: 2026, type: 'Conference', title: 'PriorFM: A Tabular Foundation Model Pretrained on Synthetic Structural Priors', authors: 'Vallix Labs Research', venue: 'International Conference on Learning Representations (ICLR), 2026', placeholder: true },
-  { year: 2026, type: 'Preprint', title: 'Scale-Adaptive Inference for Tabular Foundation Models', authors: 'Vallix Labs Research', venue: 'arXiv preprint, 2026', placeholder: true },
-  { year: 2026, type: 'Workshop', title: 'Grammar: Learning a Shared Language of Table Schemas', authors: 'Vallix Labs Research · P² Lab, IIT Roorkee', venue: 'NeurIPS Workshop on Table Representation Learning, 2026', placeholder: true },
-  { year: 2025, type: 'Journal', title: 'PriorSignal: Foundation Models for Irregular Time and Event Data', authors: 'Vallix Labs Research · P² Lab, IIT Roorkee', venue: 'Transactions on Machine Learning Research (TMLR), 2025', placeholder: true },
-  { year: 2025, type: 'Conference', title: 'Self-Building Task Models from a Handful of Labelled Rows', authors: 'Vallix Labs Research', venue: 'International Conference on Machine Learning (ICML), 2025', placeholder: true },
-  { year: 2025, type: 'Preprint', title: 'A Benchmark Suite for Tabular Prediction at Industrial Scale', authors: 'Vallix Labs Research', venue: 'arXiv preprint, 2025', placeholder: true },
+  { year: 2026, title: 'Gradient-Free Topology Adaptation for Power Flow Surrogates via In-Context Whitening', authors: 'Ayushi Jolotia, Parikshit Pareek', venue: 'arXiv preprint arXiv:2607.12241, 2026', href: 'https://arxiv.org/abs/2607.12241',
+    fig: '/papers/2607.12241.png', figAlt: 'Fig. 2 of arXiv:2607.12241: In-Context Whitening, training once on the base topology and gradient-free inference on a new topology' },
+  { year: 2026, title: 'Structural Disentanglement in Bilinear MLPs via Architectural Inductive Bias', authors: 'Ojasva Nema, Kaustubh Sharma, Aditya Chauhan, Parikshit Pareek', venue: 'arXiv preprint arXiv:2602.05635, 2026', href: 'https://arxiv.org/abs/2602.05635',
+    fig: '/papers/2602.05635.png', figAlt: 'Fig. 1 of arXiv:2602.05635: unlearning dynamics for multiplicative (Bilinear, SwiGLU, GeGLU) and pointwise (ReLU, Tanh, Sigmoid) architectures' },
+  { year: 2026, title: 'Mechanistic Evidence for Spectral Structures in Prior-Data Fitted Networks', authors: 'Kaustubh Sharma, Srijan Tiwari, Ojasva Nema, Parikshit Pareek', venue: 'arXiv preprint arXiv:2601.21731, 2026', href: 'https://arxiv.org/abs/2601.21731',
+    fig: '/papers/2601.21731.png', figAlt: 'Fig. 2 of arXiv:2601.21731: the Filter Bank Decoder reading a frozen PFN to recover an explicit kernel' },
+  { year: 2025, title: 'Decoupled-Value Attention for Prior-Data Fitted Networks: GP Inference for Physical Equations', authors: 'Kaustubh Sharma, Simardeep Singh, Parikshit Pareek', venue: 'arXiv preprint arXiv:2509.20950, 2025', href: 'https://arxiv.org/abs/2509.20950',
+    fig: '/papers/2509.20950.png', figAlt: 'Table 1 of arXiv:2509.20950: vanilla, kernel-based and decoupled-value attention compared by query, key and value' },
 ];
-const warn: CSSProperties = { fontFamily: "'Source Sans 3', system-ui, sans-serif", fontWeight: 600, fontSize: 10.5, letterSpacing: '.12em', textTransform: 'uppercase', color: '#f6f5f2', background: '#a2553f', padding: '4px 8px' };
 
 export default function Research() {
   usePageMeta('/research');
@@ -51,7 +47,6 @@ export default function Research() {
   }, []);
 
   const papers = [...PAPERS].sort((a, b) => b.year - a.year);
-  const anyPlaceholder = PAPERS.some((p) => p.placeholder);
 
   return (
     <div style={{ fontFamily: "'Source Sans 3', system-ui, sans-serif", color: '#141414', background: '#f6f5f2', minHeight: '100vh' }}>
@@ -76,22 +71,15 @@ export default function Research() {
             <h2 style={{ margin: 0, fontSize: 'clamp(30px, 3.4vw, 46px)', lineHeight: 1.05, fontWeight: 500, letterSpacing: '-0.03em' }}>Papers</h2>
           </div>
 
-          {anyPlaceholder && (
-            <div role="note" style={{ display: 'flex', gap: 12, alignItems: 'baseline', flexWrap: 'wrap', marginTop: 24, padding: '14px 18px', border: '1px solid #a2553f', background: 'rgba(162,85,63,.07)', fontSize: 15, lineHeight: 1.5 }}>
-              <span style={warn}>Placeholder</span>
-              <span>Entries marked placeholder are design copy, not real publications. They have not been published or accepted anywhere and cannot be cited.</span>
-            </div>
-          )}
-
           <ol style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column' }}>
             {papers.map((p) => (
-              <li key={p.title} className="vx-paper-row" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 220px) minmax(0, 1fr)', gap: 28, alignItems: 'center', padding: '28px 0', borderBottom: '1px solid #e0ded8' }}>
-                <div style={{ position: 'relative', width: '100%', aspectRatio: '4 / 3', background: '#efeee9', border: '1px solid #dfddd7', overflow: 'hidden' }}>
-                  {p.img && <img src={p.img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />}
-                </div>
+              <li key={p.href} className="vx-paper-row" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 220px) minmax(0, 1fr)', gap: 28, alignItems: 'center', padding: '28px 0', borderBottom: '1px solid #e0ded8' }}>
+                {/* The whole figure, fitted (not cropped) so a wide architecture diagram stays readable. */}
+                <a href={p.fig} target="_blank" rel="noopener" title="Open the full figure" style={{ position: 'relative', display: 'block', width: '100%', aspectRatio: '4 / 3', background: '#fff', border: '1px solid #dfddd7', overflow: 'hidden' }}>
+                  <img src={p.fig} alt={p.figAlt} loading="lazy" decoding="async" style={{ position: 'absolute', inset: 8, width: 'calc(100% - 16px)', height: 'calc(100% - 16px)', objectFit: 'contain' }} />
+                </a>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
-                  {p.placeholder && <span style={{ ...warn, alignSelf: 'flex-start', marginBottom: 4 }}>Placeholder</span>}
-                  <a href={p.pdf ?? '#papers'} className="vx-paper-title" style={{ fontSize: 20, lineHeight: 1.35, fontWeight: 600, letterSpacing: '-0.01em', textWrap: 'pretty' }}>{p.title}</a>
+                  <a href={p.href} target="_blank" rel="noopener" className="vx-paper-title" style={{ fontSize: 20, lineHeight: 1.35, fontWeight: 600, letterSpacing: '-0.01em', textWrap: 'pretty' }}>{p.title}</a>
                   <div style={{ fontSize: 15, lineHeight: 1.5, color: '#4c4a45' }}>{p.authors}</div>
                   <div style={{ fontSize: 15, lineHeight: 1.5, color: '#6c6963', fontStyle: 'italic' }}>{p.venue}</div>
                 </div>

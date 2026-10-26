@@ -26,10 +26,9 @@ const DUR = 6500; // ms each industry stays selected
 // The intro loader plays on the first visit to the landing page only, not when coming back to it.
 let loaderPlayed = false;
 
-// "Schedule a meet": the Google Calendar appointment-schedule booking page of contact@vallixlabs.com (open slots,
-// 12:00-17:00, are set there) from VITE_BOOKING_URL; without it, a pre-filled "new event" invite as before.
-const CALENDAR_URL = (import.meta.env.VITE_BOOKING_URL as string | undefined)
-  || 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Vallix%20Labs%20%C3%97%20Founders&details=Intro%20call%20with%20the%20Vallix%20Labs%20founders&add=contact%40vallixlabs.com';
+// "Schedule a meet": the Google Calendar appointment-schedule booking page of contact@vallixlabs.com, which only
+// offers its open slots (12:00-17:00, set in Google Calendar). VITE_BOOKING_URL overrides it without a code change.
+const CALENDAR_URL = (import.meta.env.VITE_BOOKING_URL as string | undefined) || 'https://calendar.app.google/2PpLf3YNSvDMHYST9';
 const MAIL_URL = 'mailto:contact@vallixlabs.com?subject=Vallix%20Labs%20%E2%80%94%20getting%20started';
 
 const eyebrow: CSSProperties = { display: 'flex', justifyContent: 'space-between', fontFamily: sans, fontWeight: 600, fontSize: 11, letterSpacing: '.14em', textTransform: 'uppercase', color: '#7d7a73' };
@@ -292,11 +291,11 @@ export default function Home() {
 
           <div data-stop="2" style={stopStyle}>
             <div data-box="2" style={boxStyle}>
-              <div style={eyebrow}><span>The branches</span></div>
-              <h3 style={h3Style}>Tana</h3>
-              <p style={bodyP}>Every tabular foundation model conditions on your rows at prediction time. Tana also conditions on the prior, on what kind of data this is, so it starts from the right place instead of a general one.</p>
+              <div style={eyebrow}><span>The trunk</span></div>
+              <h3 style={h3Style}>Skandha</h3>
+              <p style={bodyP}>Every tabular foundation model conditions on your rows at prediction time. Skandha also conditions on the prior, on what kind of data this is, so it starts from the right place instead of a general one.</p>
               <p style={{ ...bodyP, color: '#5d5a54', paddingTop: 14, borderTop: '1px solid #dfddd7' }}>
-                <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 10.5, letterSpacing: '.12em', textTransform: 'uppercase', color: '#141414', marginRight: 8 }}>Tana 0.1</span>
+                <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 10.5, letterSpacing: '.12em', textTransform: 'uppercase', color: '#141414', marginRight: 8 }}>Skandha 0.1</span>
                 In development. It becomes the base model inside Valli, which is adapted to give you the final model.
               </p>
             </div>
@@ -305,7 +304,7 @@ export default function Home() {
           <div data-stop="3" style={stopStyle}>
             <div data-box="3" style={{ ...boxStyle, padding: '28px 28px 10px' }}>
               <div style={eyebrow}><span>The roots</span></div>
-              <h3 style={h3Style}>The roots</h3>
+              <h3 style={h3Style}>Mool</h3>
               <div style={{ marginTop: 10, fontSize: 17, fontWeight: 500, letterSpacing: '-0.01em' }}>Where every task specific model begins.</div>
               <div style={{ display: 'flex', flexDirection: 'column', marginTop: 18 }}>
                 {[
@@ -339,8 +338,8 @@ export default function Home() {
             <div data-rail-fill="" style={{ position: 'absolute', left: 53, top: 17, height: 1.5, width: 0, background: '#141414' }} />
             <div style={{ position: 'relative', display: 'flex' }}>
               <RailStep k={1} label="Valli" />
-              <RailStep k={2} label="Tana" />
-              <RailStep k={3} label="Roots" />
+              <RailStep k={2} label="Skandha" />
+              <RailStep k={3} label="Mool" />
               <RailStep k={4} label="Tvarit" />
             </div>
           </div>

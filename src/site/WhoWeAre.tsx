@@ -17,18 +17,18 @@ const pad = 'clamp(16px, 4vw, 56px)';
 // Milestones as the design lays them out: which vine path, the node's point on it (viewBox units), and where
 // the date (d) and text (t) labels sit with their anchoring (c/l/r). `href: '#'` = no link yet in the design.
 const MILESTONES: Milestone[] = [
-  { p: 'main', x: 205, y: 82, date: 'Sept 2024', text: 'Joined', kind: 'Lab', host: 'psquare-lab.github.io', href: 'https://psquare-lab.github.io/', img: '', d: [169, 37, 'c'], t: [128, 64, 'r'], w: 12 },
-  { p: 'main', x: 340, y: 149, date: 'Dec 2024', text: 'Developed decoupled value attention for PFNs', kind: 'Paper', host: 'arxiv.org', href: '#', img: '', d: [340, 126, 'c'], t: [340, 162, 'c'], w: 12 },
-  { p: 'main', x: 510, y: 170, date: 'Mar 2025', text: 'Scaled PFNs for power flow', kind: 'Paper', host: 'arxiv.org', href: '#', img: '', d: [512, 147, 'c'], t: [512, 184, 'c'], w: 10 },
-  { p: 'main', x: 572, y: 283, date: 'Oct 2025', text: 'Mechanistic interpretability of PFNs', kind: 'Paper', host: 'arxiv.org', href: '#', img: '', d: [592, 306, 'l'], t: [592, 324, 'l'], w: 10 },
-  { p: 'main', x: 385, y: 297, date: 'Jan 2026', text: 'Tabular foundation model for scientific research', kind: 'Paper', host: 'arxiv.org', href: '#', img: '', d: [394, 276, 'l'], t: [398, 314, 'l'], w: 9 },
-  { p: 'tvarit', x: 470, y: 431, date: 'Mar 2026', text: 'Started work on Tvarit, with GEMM optimization in PTX', kind: 'Blog', host: 'vallixlabs.com/blog', href: '#', img: '', d: [446, 444, 'l'], t: [446, 462, 'l'], w: 15 },
-  { p: 'main', x: 200, y: 350, date: 'Mar 2026', text: 'Identified low-data issues for scientific data', kind: 'Blog', host: 'vallixlabs.com/blog', href: '#', img: '', d: [184, 326, 'r'], t: [216, 354, 'l'], w: 9 },
-  { p: 'left', x: 122, y: 422, date: 'Apr 2026', text: 'Slow inference issues at scale', kind: 'Blog', host: 'vallixlabs.com/blog', href: '#', img: '', d: [112, 392, 'r'], t: [108, 412, 'r'], w: 7 },
-  { p: 'left', x: 40, y: 526, date: 'Jun 2026', text: 'Developed Tvarit TabICL', kind: 'Release', host: 'github.com/vallixlabs', href: '#', img: '', d: [30, 542, 'l'], t: [30, 560, 'l'], w: 10 },
-  { p: 'main', x: 265, y: 468, date: 'Jul 2026', text: 'Developed PriorFM', kind: 'Paper', host: 'arxiv.org', href: '#', img: '', d: [252, 484, 'r'], t: [252, 502, 'r'], w: 10 },
-  { p: 'main', x: 405, y: 515, date: 'Sept 2026', text: 'Developed Valli', kind: 'Release', host: 'vallixlabs.com/valli', href: '#', img: '', d: [405, 536, 'c'], t: [405, 554, 'c'], w: 9 },
-  { p: 'main', x: 518, y: 531, date: 'Today', text: 'TabFMs condition only on rows, not on priors — originated Tana', kind: 'Blog', host: 'vallixlabs.com/blog', href: '#', img: '', d: [560, 514, 'l'], t: [508, 552, 'l'], w: 15 },
+  { p: 'main', x: 205, y: 82, date: 'Sept 2024', text: 'Joined', kind: 'Lab', host: 'psquare-lab.github.io', href: 'https://psquare-lab.github.io/', img: '/timeline/01-gate.webp', d: [169, 37, 'c'], t: [128, 64, 'r'], w: 12 },
+  { p: 'main', x: 340, y: 149, date: 'Dec 2024', text: 'Developed decoupled value attention for PFNs', kind: 'Paper', host: 'arxiv.org', href: 'https://arxiv.org/abs/2509.20950', img: '/timeline/02-scratchpad.webp', d: [340, 126, 'c'], t: [340, 162, 'c'], w: 12 },
+  { p: 'main', x: 510, y: 170, date: 'Mar 2025', text: 'Scaled PFNs for power flow', kind: 'Paper', host: 'arxiv.org', href: 'https://arxiv.org/abs/2607.12241', img: '/timeline/03-pizza.webp', d: [512, 147, 'c'], t: [512, 184, 'c'], w: 10 },
+  { p: 'main', x: 572, y: 283, date: 'Oct 2025', text: 'Mechanistic interpretability of PFNs', kind: 'Paper', host: 'arxiv.org', href: 'https://arxiv.org/abs/2601.21731', img: '/timeline/04-glassboard.webp', d: [592, 306, 'l'], t: [592, 324, 'l'], w: 10 },
+  { p: 'main', x: 385, y: 297, date: 'Jan 2026', text: 'Tabular foundation model for scientific research', kind: 'Paper', host: 'arxiv.org', href: 'https://arxiv.org/abs/2602.05635', img: '/timeline/05-board-four.webp', d: [394, 276, 'l'], t: [398, 314, 'l'], w: 9 },
+  { p: 'tvarit', x: 470, y: 431, date: 'Mar 2026', text: 'Started work on Tvarit, with GEMM optimization in PTX', kind: 'Blog', host: 'swastic-7.github.io', href: 'https://swastic-7.github.io/sw4sy-Bl0gs/my-blogs', img: '/timeline/06-blog.webp', d: [446, 444, 'l'], t: [446, 462, 'l'], w: 15 },
+  { p: 'main', x: 200, y: 350, date: 'Mar 2026', text: 'Identified low-data issues for scientific data', kind: 'Blog', host: 'arxiv.org', href: 'https://arxiv.org/abs/2509.20950', img: '/timeline/07-whiteboard.webp', d: [184, 326, 'r'], t: [216, 354, 'l'], w: 9 },
+  { p: 'left', x: 122, y: 422, date: 'Apr 2026', text: 'Slow inference issues at scale', kind: 'Blog', host: 'vallixlabs.com/blog', href: '#', img: '/timeline/08-graph.webp', d: [112, 392, 'r'], t: [108, 412, 'r'], w: 7 },
+  { p: 'left', x: 40, y: 526, date: 'Jun 2026', text: 'Developed Tvarit for TabICL', kind: 'Release', host: 'vallixlabs.com', href: 'https://www.vallixlabs.com', img: '/timeline/09-posters.webp', d: [30, 542, 'l'], t: [30, 560, 'l'], w: 10 },
+  { p: 'main', x: 265, y: 468, date: 'Jul 2026', text: 'Developed PriorFM', kind: 'Paper', host: 'arxiv.org', href: '#', img: '/timeline/10-meet.webp', d: [252, 484, 'r'], t: [252, 502, 'r'], w: 10 },
+  { p: 'main', x: 405, y: 515, date: 'Sept 2026', text: 'Developed Valli', kind: 'Release', host: 'vallixlabs.com/valli', href: '#', img: '/timeline/11-whatsapp.webp', d: [405, 536, 'c'], t: [405, 554, 'c'], w: 9 },
+  { p: 'main', x: 518, y: 531, date: 'Today', text: 'TabFMs condition only on rows, not on priors, so we originated Skandha', kind: 'Blog', host: 'vallixlabs.com/blog', href: '#', img: '/timeline/12-cards.webp', d: [560, 514, 'l'], t: [508, 552, 'l'], w: 15 },
 ];
 
 /** The 8×8 pixel figure on each milestone's card in the photo stack: a small motif per kind of work, seeded per card. */
@@ -52,31 +52,31 @@ function figCells(i: number): string[] {
 }
 const FIG_CELLS = MILESTONES.map((_, i) => figCells(i));
 
-type Person = { id: string; role: string; name: string; lines: string[]; links: [string, string][] };
+type Person = { id: string; role: string; name: string; lines: string[]; links: [string, string][]; photo?: string };
 
 const FOUNDERS: Person[] = [
   {
-    id: 'founder-kaustubh', role: 'Founder & CSO', name: 'Kaustubh Sharma',
-    lines: ['Undergraduate researcher at P² Lab, IIT Roorkee', 'Intern, Goldman Sachs'],
-    links: [['P² Lab', 'https://psquare-lab.github.io/Team/'], ['LinkedIn', 'https://www.linkedin.com/search/results/people/?keywords=Kaustubh%20Sharma%20IIT%20Roorkee']],
+    id: 'founder-kaustubh', role: 'Founder & CSO', name: 'Kaustubh Sharma', photo: '/people/kaustubh.jpg',
+    lines: ['Undergraduate researcher at P² Lab, IIT Roorkee', 'Quant Intern, Goldman Sachs'],
+    links: [['Scholar', 'https://scholar.google.com/citations?user=zqEKVUUAAAAJ'], ['GitHub', 'https://github.com/kaustubh202'], ['Website', 'https://kaustubh202.github.io/'], ['LinkedIn', 'https://www.linkedin.com/in/kaustubhsharma202/'], ['X', 'https://x.com/Kaustubh102']],
   },
   {
-    id: 'founder-swastic', role: 'Co-founder & CEO', name: 'Swastic Keshari',
-    lines: ['Undergraduate researcher at P² Lab, IIT Roorkee', 'Intern, Elementary (YC F26)'],
-    links: [['P² Lab', 'https://psquare-lab.github.io/Team/'], ['LinkedIn', 'https://www.linkedin.com/search/results/people/?keywords=Swastic%20Keshari%20IIT%20Roorkee']],
+    id: 'founder-swastic', role: 'Co-founder & CEO', name: 'Swastic Keshari', photo: '/people/swastic.jpg',
+    lines: ['Undergraduate researcher at P² Lab, IIT Roorkee', 'Applied AI Intern, Elimentary (YC F26)'],
+    links: [['LinkedIn', 'https://www.linkedin.com/in/swastic-keshari-77418827a'], ['GitHub', 'https://github.com/SWASTIC-7/'], ['Blog', 'https://swastic-7.github.io/sw4sy-Bl0gs/my-blogs'], ['Website', 'https://www.swastic.dev/'], ['X', 'https://x.com/Sw4sy__']],
   },
 ];
 
 const ADVISORS: Person[] = [
   {
-    id: 'advisor-pareek', role: 'Advisor · Founder, P² Lab', name: 'Prof. Parikshit Pareek',
-    lines: ['Assistant Professor, Electrical Engineering, IIT Roorkee', 'Leads P² Lab — prior-data fitted networks, Bayesian ML and power systems'],
-    links: [['P² Lab', 'https://psquare-lab.github.io/'], ['Scholar', 'https://scholar.google.com/citations?user=LIWKqnYAAAAJ'], ['LinkedIn', 'https://www.linkedin.com/in/parikshit-pareek']],
+    id: 'advisor-pareek', role: 'Advisor · Founder, P² Lab', name: 'Prof. Parikshit Pareek', photo: '/people/parikshit.jpg',
+    lines: ['Assistant Professor, Electrical Engineering, IIT Roorkee', 'Leads P² Lab: prior-data fitted networks, Bayesian ML and power systems'],
+    links: [['P² Lab', 'https://psquare-lab.github.io/'], ['Scholar', 'https://scholar.google.com/citations?user=LIWKqnYAAAAJ'], ['LinkedIn', 'https://www.linkedin.com/in/parikshit-pareek/']],
   },
   {
-    id: 'advisor-singla', role: 'Mentor · Founder, Singla Lab', name: 'Prof. Jitin Singla',
-    lines: ['Assistant Professor, Biosciences & Bioengineering, IIT Roorkee', 'Leads Singla Lab — computational biology and AI for healthcare'],
-    links: [['Singla Lab', 'https://www.jitinsingla.in/'], ['Scholar', 'https://scholar.google.com/citations?user=OBXIcNAAAAAJ']],
+    id: 'advisor-singla', role: 'Mentor · Founder, Singla Lab', name: 'Prof. Jitin Singla', photo: '/people/jitin.jpg',
+    lines: ['Assistant Professor, Biosciences & Bioengineering, IIT Roorkee', 'Leads Singla Lab: computational biology and AI for healthcare'],
+    links: [['Singla Lab', 'https://www.jitinsingla.in/'], ['Scholar', 'https://scholar.google.com/citations?user=OBXIcNAAAAAJ'], ['LinkedIn', 'https://www.linkedin.com/in/singlajitin/']],
   },
 ];
 
@@ -87,17 +87,17 @@ const textTf = (a: string) => a === 'c' ? 'translateX(-50%)' : a === 'r' ? 'tran
 const halo = '0 0 3px #f6f5f2, 0 0 3px #f6f5f2, 0 0 6px #f6f5f2';
 
 /**
- * A portrait from public/team/<id>.jpg, in greyscale as the design shows it. The design leaves these as empty
- * drop slots, so until a photo is added the frame shows the person's initials.
+ * A person's portrait (public/people/), in colour as the design now shows it. Without a photo, or if it fails
+ * to load, the frame shows the person's initials.
  */
-function Photo({ id, name }: { id: string; name: string }) {
-  const [missing, setMissing] = useState(false);
+function Photo({ src, name }: { src?: string; name: string }) {
+  const [missing, setMissing] = useState(!src);
   const initials = name.replace(/^Prof\.\s*/, '').split(/\s+/).map((w) => w[0]).join('').slice(0, 2);
   return missing ? (
     <div aria-hidden="true" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: mono, fontSize: 40, letterSpacing: '.08em', color: '#bdb9b2' }}>{initials}</div>
   ) : (
-    <img src={`/team/${id}.jpg`} alt={name} onError={() => setMissing(true)}
-      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) contrast(1.05)' }} />
+    <img src={src} alt={name} onError={() => setMissing(true)}
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
   );
 }
 
@@ -105,14 +105,14 @@ function PersonCard({ p }: { p: Person }) {
   return (
     <article className="vx-card" style={{ position: 'relative', display: 'flex', flexDirection: 'column', background: '#f9f8f5', border: '1px solid #dcdad4' }}>
       <div style={{ position: 'relative', aspectRatio: '4 / 3.4', borderBottom: '1px solid #dcdad4', overflow: 'hidden', background: '#efeee9' }}>
-        <Photo id={p.id} name={p.name} />
+        <Photo src={p.photo} name={p.name} />
       </div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, padding: '22px 24px 24px' }}>
         <div style={{ ...label, fontSize: 11, letterSpacing: '.14em', color: '#6c6963' }}>{p.role}</div>
         <h3 style={{ margin: '4px 0 0', fontSize: 26, lineHeight: 1.1, fontWeight: 600, letterSpacing: '-0.02em' }}>{p.name}</h3>
         <ul style={{ listStyle: 'none', margin: '10px 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 6, fontSize: 15, lineHeight: 1.45, color: '#4c4a45' }}>
           {p.lines.map((l) => (
-            <li key={l} style={{ display: 'flex', gap: 10 }}><span style={{ flex: 'none', width: 10, height: 1, marginTop: '.75em', background: '#141414' }} /><span>{l}</span></li>
+            <li key={l}><span>{l}</span></li>
           ))}
         </ul>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 'auto', paddingTop: 18, ...label, fontSize: 11, letterSpacing: '.08em' }}>
@@ -192,7 +192,7 @@ export default function WhoWeAre() {
       {wide ? (
         <section ref={trackRef} style={{ position: 'relative', height: '560vh', marginTop: -28 }}>
           <div style={{ position: 'sticky', top: 0, height: '100vh', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', overflow: 'hidden', paddingTop: 64, boxSizing: 'border-box' }}>
-            <div ref={stageRef} style={{ position: 'relative', width: 'min(94vw, calc((100vh - 110px) * 1.2))', aspectRatio: '720 / 600', containerType: 'inline-size' }}>
+            <div ref={stageRef} style={{ position: 'relative', width: 'min(94vw, calc((100vh - 110px) * 1.2))', aspectRatio: '720 / 600', containerType: 'inline-size', transform: 'translateX(calc(min(94vw, (100vh - 110px) * 1.2) * -0.16))' }}>
               <svg ref={svgRef} viewBox="0 20 720 600" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible' }}>
                 <g fill="none" strokeLinecap="round" strokeLinejoin="round">
                   <path data-vine="main" d="M205 82C215 105 235 118 270 130C300 140 320 146 340 149C400 158 470 160 510 170C560 182 600 200 612 232C622 262 600 278 572 283C520 292 440 292 385 297C330 302 280 306 250 318C225 328 210 338 200 350C186 368 182 395 192 418C205 445 235 458 265 468C310 482 360 505 405 515C450 525 485 528 518 531C545 533 570 534 592 535" stroke="none" />
@@ -208,11 +208,11 @@ export default function WhoWeAre() {
                   const placeholder = m.href === '#';
                   return (
                     <div key={i} data-label={i} style={{ position: 'absolute', inset: 0, opacity: 0, transition: 'opacity .7s cubic-bezier(.2,.7,.2,1), filter .7s, transform .7s cubic-bezier(.2,.7,.2,1)', filter: 'blur(4px)', transform: 'translateY(6px)' }}>
-                      <div style={{ position: 'absolute', left: `${((m.d[0] - X0) / VW * 100).toFixed(2)}%`, top: `${((m.d[1] - Y0) / VH * 100).toFixed(2)}%`, transform: dateTf(m.d[2]), ...label, fontSize: 'clamp(8px, 1.25cqw, 13px)', letterSpacing: '.1em', color: '#6c6963', whiteSpace: 'nowrap', textShadow: halo }}>{m.date}</div>
+                      <div style={{ position: 'absolute', left: `${((m.d[0] - X0) / VW * 100).toFixed(2)}%`, top: `${((m.d[1] - Y0) / VH * 100).toFixed(2)}%`, transform: dateTf(m.d[2]), ...label, fontSize: 'clamp(9px, 1.45cqw, 15px)', letterSpacing: '.1em', color: '#6c6963', whiteSpace: 'nowrap', textShadow: halo }}>{m.date}</div>
                       <a data-link={i} href={m.href} className="vx-tl-link"
                         {...(placeholder ? { onClick: (e: MouseEvent) => e.preventDefault() } : { target: '_blank', rel: 'noopener' })}
                         onMouseEnter={enter(i)} onMouseLeave={leave} onFocus={enter(i)} onBlur={leave}
-                        style={{ position: 'absolute', left: `${((m.t[0] - X0) / VW * 100).toFixed(2)}%`, top: `${((m.t[1] - Y0) / VH * 100).toFixed(2)}%`, transform: textTf(m.t[2]), width: 'max-content', maxWidth: `${m.w}em`, textAlign: m.t[2] === 'c' ? 'center' : m.t[2] === 'r' ? 'right' : 'left', fontSize: 'clamp(9px, 1.6cqw, 17px)', lineHeight: 1.3, fontWeight: 500, color: '#141414', textWrap: 'balance', pointerEvents: 'none', textDecoration: 'underline', textDecorationThickness: 1, textUnderlineOffset: 3, textShadow: halo }}>
+                        style={{ position: 'absolute', left: `${((m.t[0] - X0) / VW * 100).toFixed(2)}%`, top: `${((m.t[1] - Y0) / VH * 100).toFixed(2)}%`, transform: textTf(m.t[2]), width: 'max-content', maxWidth: `${m.w}em`, textAlign: m.t[2] === 'c' ? 'center' : m.t[2] === 'r' ? 'right' : 'left', fontSize: 'clamp(10px, .95vw, 13px)', lineHeight: 1.25, fontWeight: 600, color: '#141414', textWrap: 'balance', pointerEvents: 'none', textDecoration: 'underline', textDecorationThickness: 1, textUnderlineOffset: 3, textShadow: halo }}>
                         {m.text}<span style={{ fontSize: '.85em', marginLeft: '.25em' }}>↗</span>
                       </a>
                     </div>
@@ -244,23 +244,25 @@ export default function WhoWeAre() {
             </div>
             <div style={{ position: 'absolute', top: 88, right: pad, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, pointerEvents: 'none' }}>
               <span ref={nowRef} style={{ display: 'none', ...label, fontSize: 'clamp(20px, 2.2vw, 30px)', letterSpacing: '.04em', color: green }}>Sept 2024</span>
-              {/* A stack of cards, one per milestone, dealt in as the vine reaches it. */}
-              <div ref={photoRef} style={{ position: 'relative', marginTop: 8, width: 'clamp(140px, calc((100vw - min(94vw, (100vh - 110px) * 1.2)) / 2 - 56px), 300px)', aspectRatio: '1 / 1.12' }}>
-                {MILESTONES.map((m, i) => (
-                  <div key={i} data-photo={i} style={{ position: 'absolute', inset: 0, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '8%', padding: '7%', background: '#fbfaf7', border: '1px solid #d9d6cf', boxShadow: '0 1px 0 rgba(20,20,20,.04), 0 12px 24px -16px rgba(20,20,20,.35)', opacity: 0, transform: 'translate(70px, -90px) rotate(18deg) scale(1.12)', transition: 'transform .8s cubic-bezier(.2,1.25,.35,1), opacity .35s ease, filter .6s ease', zIndex: i + 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', ...label, fontSize: 'clamp(8px, .7vw, 10px)', letterSpacing: '.12em', color: '#8f8b84' }}>
-                      <span>Fig. {String(i + 1).padStart(2, '0')}</span><span style={{ color: green }}>{m.date}</span>
-                    </div>
-                    <div style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gridTemplateRows: 'repeat(8, 1fr)', gap: 2, padding: 2, border: '1px solid #141414', background: '#141414' }}>
+            </div>
+            {/* One card per milestone, on a curved carousel that follows the vine (positioned by timeline-vine.js). */}
+            <div ref={photoRef} style={{ position: 'absolute', top: 0, bottom: 0, right: 0, width: 'calc(clamp(140px, calc((100vw - min(94vw, (100vh - 110px) * 1.2)) / 2 - 56px), 300px) + 64px)', perspective: 1400, perspectiveOrigin: '30% 50%', pointerEvents: 'none' }}>
+              {MILESTONES.map((m, i) => (
+                <div key={i} data-photo={i} style={{ position: 'absolute', left: 0, top: 0, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '8%', padding: '7%', background: '#fbfaf7', border: '1px solid #d9d6cf', boxShadow: '0 1px 0 rgba(20,20,20,.04), 0 12px 24px -16px rgba(20,20,20,.35)', opacity: 0, transformOrigin: '50% 50%', willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'baseline', ...label, fontSize: 'clamp(8px, .7vw, 10px)', letterSpacing: '.12em', color: green }}>
+                    <span>{m.date}</span>
+                  </div>
+                  <div style={{ position: 'relative', flex: 1, minHeight: 0, display: 'flex' }}>
+                    <div style={{ flex: 1, minHeight: 0, width: '100%', display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gridTemplateRows: 'repeat(8, 1fr)', gap: 2, padding: 2, border: '1px solid #141414', background: '#141414' }}>
                       {FIG_CELLS[i].map((c, k) => <div key={k} style={{ background: c }} />)}
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minHeight: 0 }}>
-                      <span style={{ ...label, fontSize: 'clamp(7px, .62vw, 9px)', letterSpacing: '.14em', color: '#8f8b84' }}>{m.kind || 'Note'}</span>
-                      <span style={{ fontSize: 'clamp(10px, .95vw, 13px)', lineHeight: 1.25, fontWeight: 600, color: '#141414', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{m.text}</span>
-                    </div>
+                    {m.img && <img src={m.img} alt="" decoding="async" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', border: '1px solid #141414', boxSizing: 'border-box', background: '#ecebe6' }} />}
                   </div>
-                ))}
-              </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minHeight: 0 }}>
+                    <span style={{ fontSize: 'clamp(10px, .95vw, 13px)', lineHeight: 1.25, fontWeight: 600, color: '#141414', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{m.text}</span>
+                  </div>
+                </div>
+              ))}
             </div>
             <div ref={hintRef} style={{ position: 'absolute', bottom: 28, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, ...label, fontSize: 11, letterSpacing: '.16em', color: '#6c6963', pointerEvents: 'none', transition: 'opacity .5s' }}>
               <span>Scroll to grow</span>
