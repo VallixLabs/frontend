@@ -244,8 +244,8 @@ export default function Home() {
       <section id="top" style={{ position: 'relative', height: '100svh', minHeight: 560, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', padding: `84px ${pad} 20px`, background: 'radial-gradient(130% 62% at 50% 0%, #d9d8d3 0%, #e8e7e2 40%, #f6f5f2 78%)', textAlign: 'center' }}>
         <div ref={heroTextRef} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <h1 style={{ margin: 0, fontSize: 'clamp(28px, min(4.4vw, 6.2vh), 60px)', lineHeight: 1.08, fontWeight: 500, letterSpacing: '-0.035em' }}><span style={{ color: green }}>Tabular Models.</span> For your problem.<br />From your data. At <span style={{ color: green }}>our speed.</span></h1>
-          <p className="vx-hero-p" style={{ margin: '14px 0 0', fontSize: 18, lineHeight: 1.5, color: '#3e3c38' }}>A lab for task-specific, scale-adaptive, fast-inference{' '}<br />Tabular foundation models that build themselves.</p>
-          <p className="vx-hero-p" style={{ margin: '8px 0 0', fontSize: 16, lineHeight: 1.55, color: '#6c6963' }}>Get your own tabular foundation model in a few clicks, and{' '}<br />predict without limits.</p>
+          <p style={{ margin: '14px 0 0', fontSize: 18, lineHeight: 1.5, color: '#3e3c38' }}>A lab for task-specific, scale-adaptive, fast-inference<br />Tabular foundation models that build themselves.</p>
+          <p style={{ margin: '8px 0 0', fontSize: 16, lineHeight: 1.55, color: '#6c6963' }}>Get your own tabular foundation model in a few clicks, and<br />predict without limits.</p>
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
             <a href="#access" className="vx-btn-dark" style={{ display: 'flex', alignItems: 'center', gap: 22, padding: '10px 12px 10px 18px', borderRadius: 999, fontSize: 14.5, fontWeight: 500 }}>
               <span>Get access</span>
@@ -254,7 +254,6 @@ export default function Home() {
           </div>
         </div>
         <div ref={heroRef} style={{ position: 'relative', flex: '1 1 0', minHeight: 220, width: '100%', maxWidth: 1400, margin: '14px auto 0' }} />
-        <p style={{ margin: '10px auto 0', maxWidth: 1080, fontSize: 12, lineHeight: 1.45, color: '#6c6963', textWrap: 'balance' }}>Solid points: authors' published figures, GPU type as stated. Hollow points: our estimates from published parameter counts, data volume and step counts, assuming ~30% hardware utilization. Ranges show uncertainty. Pretraining is a one-time cost; valli's cost is per table.</p>
       </section>
 
       <section id="ecosystem" ref={treeRef} style={{ position: 'relative', height: '640vh', background: '#f6f5f2', marginTop: 120 }}>
