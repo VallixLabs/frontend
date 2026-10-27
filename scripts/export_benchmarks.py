@@ -37,10 +37,17 @@ HERO_N = 15     # Valli and the best released models by that accuracy (our own a
 # (GPU-hours, label, source). Models absent here have none published and sit in the chart's separate band.
 COMPUTE = {
     OURS: (0.25, "~15 min per table", "measured Valli builds: 14.5–18 min end to end on one GPU, on top of released Kumo-small"),
-    "tabpfn_v2": (2688, "~2 weeks on 8 RTX 2080 Ti", "Hollmann et al., Nature 2025, Methods: “around 2 weeks on one node with eight Nvidia RTX 2080 Ti GPUs”"),
-    "tabicl_v2": (588, "24.5 H100-days", "Qu et al., arXiv:2602.11139, §4.1: “totaling 24.5 GPU-days per model” (H100)"),
-    "tabicl_v1_1": (1440, "20 days on 3 A100", "Qu et al., ICML 2025, §4.2: “20 days on three A100 GPUs”"),
-    "mitra_v1": (480, "~60 h on 8 A100", "Zhang et al., arXiv:2510.21204, App. B.3.2: “approximately 60 hours on 8 GPUs (Nvidia A100s)”"),
+    "tabpfn_v2": (2688, "8× RTX 2080 Ti, ~2 weeks", "Hollmann et al., Nature 2025, Methods: “around 2 weeks on one node with eight Nvidia RTX 2080 Ti GPUs”"),
+    "tabicl_v2": (588, "H100, 24.5 GPU-days", "Qu et al., arXiv:2602.11139, §4.1: “totaling 24.5 GPU-days per model” (H100)"),
+    "tabicl_v1_1": (1440, "A100, 20 days on 3 GPUs", "Qu et al., ICML 2025, §4.2: “20 days on three A100 GPUs”"),
+    "mitra_v1": (480, "8× A100, ~60 h", "Zhang et al., arXiv:2510.21204, App. B.3.2: “approximately 60 hours on 8 GPUs (Nvidia A100s)”"),
+}
+# Pretraining compute estimated by Vallix (27 October 2026) where the authors give none: GPU-days, low, high.
+# Basis as stated by Vallix: published parameter counts, data volume and step counts at ~30% hardware
+# utilization. These are estimates, drawn hollow with their range; the derivation is not in this repository.
+ESTIMATE = {
+    "tabdpt": (25, 10, 60), "kumo_tabular_small": (25, 10, 60), "mitra_v2": (80, 30, 300),
+    "tabpfn_v3": (100, 10, 1000), "kumo_tabular_medium": (110, 40, 300), "kumo_tabular": (750, 250, 2000),
 }
 NOT_PUBLISHED = {
     "tabpfn_v2_5": "Prior Labs, arXiv:2511.08667: no training compute stated",
@@ -171,9 +178,19 @@ def main():
     models = []
     for mid in sorted(scores, key=lambda i: -scores[i])[:HERO_N]:
         h, hl, src = COMPUTE.get(mid) or (None, "not published", NOT_PUBLISHED.get(mid, "no training compute found in published material"))
-        models.append({"n": out["models"][mid]["n"], "ours": mid == OURS, "acc": round(scores[mid], 4), "h": h, "hl": hl, "src": src, "rps": RPS.get(mid)})
+        m = {"n": out["models"][mid]["n"], "ours": mid == OURS, "acc": round(scores[mid], 4), "h": h, "hl": hl, "src": src, "rps": RPS.get(mid)}
+        if h is None and mid in ESTIMATE:
+            d, lo, hi = ESTIMATE[mid]
+            m.update(h=d * 24, lo=lo * 24, hi=hi * 24, est=True, hl=f"~{d} GPU-days (our estimate, range {lo:,}–{hi:,})",
+                     src=f"Vallix estimate; authors publish none ({src})")
+        models.append(m)
     assert any(m["ours"] for m in models), "Valli is not among the top models"
-    hero = {"source": out["source"], "cells": [f"{t} m={m}" for t, m in HERO_CELLS], "models": models}
+    # Valli's cost for the whole evaluation behind its accuracy: one build per table, scenario, m and repetition
+    rec = pd.read_parquet(BENCH / "records" / f"{dict((k, key) for k, _, key in EVALS)['sci']}.parquet")
+    ours = rec[(rec.role == "ours") & rec.apply(lambda r: (r.task, r.m) in HERO_CELLS, axis=1)]
+    builds = int(ours.groupby(["task", "dataset", "scenario", "m", "rep"]).ngroups)
+    run = {"builds": builds, "h": builds * COMPUTE[OURS][0]}
+    hero = {"source": out["source"], "cells": [f"{t} m={m}" for t, m in HERO_CELLS], "models": models, "run": run}
     HERO = OUT.parent / "hero.json"
     HERO.write_text(json.dumps(hero, separators=(",", ":"), ensure_ascii=False))
     print(f"wrote {HERO} ({HERO.stat().st_size / 1024:.1f} KiB)")

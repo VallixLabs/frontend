@@ -52,3 +52,8 @@ input::placeholder { color: #8f8b84; }
 .vx-paper-title { color: #141414; transition: color .2s; }
 .vx-paper-title:hover { color: #2e5c36; text-decoration: underline; text-underline-offset: 4px; }
 @media (max-width: 600px) { .vx-paper-row { grid-template-columns: minmax(0, 1fr) !important; gap: 16px !important; } }
+
+/* short, wide screens (e.g. 1366×768): hero paragraphs on one line each, so the chart below gets the height */
+@media (max-height: 800px) and (min-width: 900px) {
+  .vx-hero-p br { display: none; }
+}
