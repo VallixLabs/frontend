@@ -55,7 +55,7 @@ export default function Research() {
       <section style={{ padding: `84px ${pad} 28px`, background: 'radial-gradient(120% 70% at 50% 0%, #dedcd7 0%, #ebeae5 45%, #f6f5f2 85%)' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
           <h1 style={{ margin: 0, fontSize: 'clamp(36px, 5vw, 68px)', lineHeight: 1.04, fontWeight: 500, letterSpacing: '-0.035em' }}>Measured in <span style={{ color: '#2e5c36' }}>the open.</span></h1>
-          <p style={{ margin: '14px 0 0', maxWidth: '56ch', fontSize: 18, lineHeight: 1.5, color: '#3e3c38', textWrap: 'balance' }}>This is where we stand</p>
+          <p style={{ margin: '14px 0 0', maxWidth: '56ch', fontSize: 'clamp(16px, 4.2vw, 18px)', lineHeight: 1.5, color: '#3e3c38', textWrap: 'balance' }}>This is where we stand</p>
         </div>
       </section>
 
@@ -75,7 +75,7 @@ export default function Research() {
             {papers.map((p) => (
               <li key={p.href} className="vx-paper-row" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 220px) minmax(0, 1fr)', gap: 28, alignItems: 'center', padding: '28px 0', borderBottom: '1px solid #e0ded8' }}>
                 {/* The whole figure, fitted (not cropped) so a wide architecture diagram stays readable. */}
-                <a href={p.fig} target="_blank" rel="noopener" title="Open the full figure" style={{ position: 'relative', display: 'block', width: '100%', aspectRatio: '4 / 3', background: '#fff', border: '1px solid #dfddd7', overflow: 'hidden' }}>
+                <a href={p.fig} target="_blank" rel="noopener" title="Open the full figure" className="vx-paper-fig" style={{ position: 'relative', display: 'block', width: '100%', aspectRatio: '4 / 3', background: '#fff', border: '1px solid #dfddd7', overflow: 'hidden' }}>
                   <img src={p.fig} alt={p.figAlt} loading="lazy" decoding="async" style={{ position: 'absolute', inset: 8, width: 'calc(100% - 16px)', height: 'calc(100% - 16px)', objectFit: 'contain' }} />
                 </a>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>

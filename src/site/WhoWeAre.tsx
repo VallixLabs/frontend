@@ -6,7 +6,7 @@ import type { Milestone } from './fx/timeline-vine.js';
 
 /**
  * "Who we are", ported from the Claude Design file `WhoWeAre.dc.html`: a vine timeline that grows with the
- * scroll (a plain list below 760px), then the founders and the advisors.
+ * scroll (a plain list on phones and portrait tablets), then the founders and the advisors.
  */
 
 const mono = "'Geist Mono', ui-monospace, monospace";
@@ -131,7 +131,10 @@ const cardGrid: CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(
 
 export default function WhoWeAre() {
   usePageMeta('/who-we-are');
-  const [wide, setWide] = useState(() => innerWidth >= 760);
+  // The vine stage is shifted left of centre to leave room for the photo carousel; below 760px, or where that
+  // shift would push the leftmost labels off screen (portrait tablets), the timeline is a plain list instead.
+  const fitsVine = () => { const s = Math.min(innerWidth * 0.94, (innerHeight - 110) * 1.2); return innerWidth >= 760 && (innerWidth - s) / 2 - 0.16 * s >= -40; };
+  const [wide, setWide] = useState(fitsVine);
   const [hover, setHover] = useState<{ i: number; x: number; y: number } | null>(null);
   const trackRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -146,7 +149,7 @@ export default function WhoWeAre() {
     scrollTo(0, 0);
     let alive = true;
     const kills: (() => void)[] = [];
-    const onResize = () => setWide(innerWidth >= 760);
+    const onResize = () => setWide(fitsVine());
     addEventListener('resize', onResize);
     import('./fx/vine-art.js').then((V) => { if (alive && footerRef.current) kills.push(V.footerVines(footerRef.current)); }).catch((e) => console.error(e));
     return () => { alive = false; removeEventListener('resize', onResize); kills.forEach((k) => k()); };
@@ -271,15 +274,30 @@ export default function WhoWeAre() {
           </div>
         </section>
       ) : (
-        <section style={{ padding: '24px 20px 96px' }}>
-          <ol style={{ listStyle: 'none', margin: '0 auto', padding: '0 0 0 28px', maxWidth: 560, position: 'relative', borderLeft: '3px solid #141414' }}>
-            {MILESTONES.map((m, i) => (
-              <li key={i} style={{ position: 'relative', padding: '0 0 34px 18px' }}>
-                <span style={{ position: 'absolute', left: -38, top: 4, width: 14, height: 14, borderRadius: '50%', background: '#f6f5f2', border: '2px solid #141414', boxSizing: 'border-box' }} />
-                <div style={{ ...label, fontSize: 11, letterSpacing: '.12em', color: '#6c6963' }}>{m.date}</div>
-                <div style={{ marginTop: 6, fontSize: 18, lineHeight: 1.35, fontWeight: 500 }}>{m.text}</div>
-              </li>
-            ))}
+        <section style={{ padding: '32px 20px 88px' }}>
+          {/* Phones: the vine as a plain green line, each milestone with its photo and (where there is one) its link. */}
+          <ol style={{ listStyle: 'none', margin: '0 auto', padding: '0 0 0 22px', maxWidth: 560, position: 'relative', borderLeft: `3px solid ${green}` }}>
+            {MILESTONES.map((m, i) => {
+              const latest = i === MILESTONES.length - 1, link = m.href !== '#';
+              const body = (
+                <>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ ...label, fontSize: 11, letterSpacing: '.12em', color: latest ? green : '#6c6963' }}>{m.date}</div>
+                    <div style={{ marginTop: 5, fontSize: 17, lineHeight: 1.35, fontWeight: 500, color: '#141414', textWrap: 'pretty' }}>
+                      {m.text}{link && <span style={{ fontSize: '.85em', marginLeft: '.3em', color: '#6c6963' }}>↗</span>}
+                    </div>
+                  </div>
+                  {m.img && <img src={m.img} alt="" loading="lazy" decoding="async" width={68} height={68} style={{ width: 68, height: 68, objectFit: 'cover', border: '1px solid #141414', background: '#ecebe6', flex: 'none' }} />}
+                </>
+              );
+              const row: CSSProperties = { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14 };
+              return (
+                <li key={i} style={{ position: 'relative', padding: `0 0 ${latest ? 0 : 28}px 16px` }}>
+                  <span style={{ position: 'absolute', left: -30.5, top: 2, width: 14, height: 14, borderRadius: '50%', background: latest ? green : '#f6f5f2', border: `2px solid ${green}`, boxSizing: 'border-box', boxShadow: latest ? '0 0 0 5px rgba(46,92,54,.16)' : undefined }} />
+                  {link ? <a href={m.href} target="_blank" rel="noopener" style={row}>{body}</a> : <div style={row}>{body}</div>}
+                </li>
+              );
+            })}
           </ol>
         </section>
       )}

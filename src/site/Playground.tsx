@@ -75,14 +75,17 @@ export default function Playground() {
   const [stale, setStale] = useState(false);
   const [tick, setTick] = useState(0);
   const [drafts, setDrafts] = useState<Record<string, string>>({}); // cell text being typed, keyed "i-j" or "L<i>"
+  const [vw, setVw] = useState(() => innerWidth); // phones (< 640px): compact cells, sticky prediction column
   const iv = useRef(0);
   const footerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     scrollTo(0, 0);
     let alive = true, kill: (() => void) | undefined;
+    const onResize = () => setVw(innerWidth);
+    addEventListener('resize', onResize);
     import('./fx/vine-art.js').then((V) => { if (alive && footerRef.current) kill = V.footerVines(footerRef.current); }).catch((e) => console.error(e));
-    return () => { alive = false; kill?.(); clearInterval(iv.current); };
+    return () => { alive = false; removeEventListener('resize', onResize); kill?.(); clearInterval(iv.current); };
   }, []);
 
   const n = grid.length, m = grid[0].length;
@@ -135,7 +138,13 @@ export default function Playground() {
     setGrid(INIT.map((r) => r.slice())); setLabels(INIT_LABELS); setPrev(null); setShown(null); setRunning(false); setStale(false); setDrafts({});
   };
 
-  const gridCols = `48px repeat(${m}, minmax(140px, 1fr)) minmax(200px, 1.2fr)`;
+  // Column widths: phones fit three features and the prediction on screen; more columns scroll sideways under
+  // the prediction column, which stays put (sticky) so the result is always visible.
+  const narrow = vw < 640, tiny = vw < 380;
+  const RW = narrow ? 40 : 48, FW = tiny ? 54 : narrow ? 62 : 140, PW = tiny ? 108 : narrow ? 118 : 200;
+  const gridCols = `${RW}px repeat(${m}, minmax(${FW}px, 1fr)) minmax(${PW}px, 1.2fr)`;
+  const cellSize = narrow ? 19 : 24;
+  const stick: CSSProperties = { position: 'sticky', right: 0, zIndex: 1 };
   const predictLabel = running ? 'Predicting…' : stale ? 'Predict again' : shown ? 'Predicted' : 'Predict';
 
   return (
@@ -150,7 +159,7 @@ export default function Playground() {
 
       <section style={{ padding: `8px ${pad} clamp(88px, 10vw, 140px)` }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', justifyContent: 'center' }}>
-          <div style={{ width: Math.max(760, 48 + m * 140 + 200), maxWidth: '100%', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ width: Math.max(narrow ? 0 : 760, RW + m * FW + PW), maxWidth: '100%', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '10px 16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, ...label, fontSize: 12, letterSpacing: '.08em', color: '#6c6963' }}>
                 <span>{n} rows × {m} columns</span>
@@ -172,18 +181,18 @@ export default function Playground() {
             </div>
 
             <div style={{ overflowX: 'auto', border: '1.5px solid #141414', background: '#f9f8f5', boxShadow: '0 34px 70px -46px rgba(20,20,20,.45)' }}>
-              <div style={{ minWidth: 48 + m * 140 + 200 }}>
+              <div style={{ minWidth: RW + m * FW + PW }}>
                 <div style={{ display: 'grid', gridTemplateColumns: gridCols, borderBottom: '1.5px solid #141414', background: '#ecebe6' }}>
                   <div style={{ padding: '12px 10px' }} />
                   {NAMES.slice(0, m).map((name, j) => (
-                    <div key={name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, padding: '10px 12px', borderLeft: '1px solid #d6d4ce', ...label, fontSize: 11, letterSpacing: '.1em' }}>
-                      <span>{name}</span>
+                    <div key={name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, padding: narrow ? '10px 6px 10px 9px' : '10px 12px', borderLeft: '1px solid #d6d4ce', ...label, fontSize: 11, letterSpacing: '.1em' }}>
+                      <span>{narrow ? name.replace('Feature ', '') : name}</span>
                       <button type="button" className="vx-pg-x" aria-label="Remove column" title="Remove column"
                         onClick={() => { if (m > 1) update((g) => g.forEach((r) => r.splice(m - 1, 1))); }}
                         style={{ visibility: m > 1 && j === m - 1 ? 'visible' : 'hidden' }}>×</button>
                     </div>
                   ))}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', background: '#141414', color: '#f6f5f2', ...label, fontSize: 11, letterSpacing: '.1em' }}><span>Prediction</span><span style={{ color: '#8f8b84' }}>1–10</span></div>
+                  <div style={{ ...stick, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: narrow ? '10px 12px' : '10px 16px', background: '#141414', color: '#f6f5f2', ...label, fontSize: 11, letterSpacing: '.1em' }}><span>Prediction</span>{!narrow && <span style={{ color: '#8f8b84' }}>1–10</span>}</div>
                 </div>
 
                 {grid.map((r, i) => {
@@ -199,29 +208,29 @@ export default function Playground() {
                   return (
                     <div key={i} className="vx-pg-row" style={{ display: 'grid', gridTemplateColumns: gridCols, borderBottom: i === 1 ? '1.5px solid #141414' : '1px solid #dcdad4' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '6px 4px', fontFamily: mono, fontSize: 11, color: '#8f8b84' }}>
-                        <span>{String(i + 1).padStart(2, '0')}</span><span style={{ fontSize: 8.5, letterSpacing: '.1em', color: '#141414' }}>{context ? 'CONTEXT' : ''}</span>
+                        <span>{String(i + 1).padStart(2, '0')}</span><span style={{ fontSize: narrow ? 7.5 : 8.5, letterSpacing: narrow ? '.04em' : '.1em', color: '#141414' }}>{context ? (narrow ? 'CTX' : 'CONTEXT') : ''}</span>
                         <button type="button" className="vx-pg-x" aria-label="Remove row" title="Remove row"
                           onClick={() => { if (!context && n > 3) update((g) => g.splice(i, 1)); }}
                           style={{ visibility: !context && n > 3 ? 'visible' : 'hidden' }}>×</button>
                       </div>
                       {r.map((v, j) => (
-                        <div key={j} style={{ display: 'flex', alignItems: 'center', padding: '10px 14px', borderLeft: '1px solid #e3e1dc', background: context ? `rgba(20,20,20,${(0.02 + v * 0.008).toFixed(3)})` : `rgba(20,20,20,${(0.012 + v * 0.011).toFixed(3)})`, transition: 'background .2s' }}>
-                          <NumIn value={v} draft={drafts[`${i}-${j}`]} label={`${NAMES[j]}, row ${i + 1}`} size={24}
+                        <div key={j} style={{ display: 'flex', alignItems: 'center', padding: narrow ? '10px 6px' : '10px 14px', borderLeft: '1px solid #e3e1dc', background: context ? `rgba(20,20,20,${(0.02 + v * 0.008).toFixed(3)})` : `rgba(20,20,20,${(0.012 + v * 0.011).toFixed(3)})`, transition: 'background .2s' }}>
+                          <NumIn value={v} draft={drafts[`${i}-${j}`]} label={`${NAMES[j]}, row ${i + 1}`} size={cellSize}
                             onDraft={(t) => draft(`${i}-${j}`, t)} onCommit={() => finish(`${i}-${j}`)} />
                         </div>
                       ))}
                       {context ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4, padding: '10px 16px 7px', borderLeft: '1.5px solid #141414', background: '#f9f8f5' }}>
+                        <div style={{ ...stick, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4, padding: narrow ? '10px 12px 7px' : '10px 16px 7px', borderLeft: '1.5px solid #141414', background: '#f9f8f5' }}>
                           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
                             <span style={{ ...label, fontSize: 9.5, letterSpacing: '.1em', color: '#6c6963' }}>Context label</span>
                           </div>
-                          <NumIn value={p.y} draft={drafts['L' + i]} label={`Context label, row ${i + 1}`} size={22}
+                          <NumIn value={p.y} draft={drafts['L' + i]} label={`Context label, row ${i + 1}`} size={narrow ? 19 : 22}
                             onDraft={(t) => draft('L' + i, t)} onCommit={() => finish('L' + i)} />
                         </div>
                       ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 7, padding: '10px 16px', borderLeft: '1.5px solid #141414', background: '#ecebe6', opacity: stale && !running ? 0.45 : 1, transition: 'opacity .3s' }}>
-                          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
-                            <span style={{ ...big, fontSize: 26 }}>{pred}</span>
+                        <div style={{ ...stick, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 7, padding: narrow ? '10px 12px' : '10px 16px', borderLeft: '1.5px solid #141414', background: stale && !running ? '#f3f2ee' : '#ecebe6', color: stale && !running ? 'rgba(20,20,20,.45)' : undefined, transition: 'background .3s, color .3s' }}>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between', gap: '2px 8px' }}>
+                            <span style={{ ...big, fontSize: narrow ? 22 : 26 }}>{pred}</span>
                             <span style={{ ...label, fontSize: 10, letterSpacing: '.08em', color: '#6c6963' }}>{delta}</span>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, ...label, fontSize: 10, letterSpacing: '.08em', color: '#6c6963' }}>

@@ -15,11 +15,26 @@ input::placeholder { color: #8f8b84; }
 .vx-link { color: #141414; transition: color .2s; }
 .vx-link:hover { color: #2e5c36; }
 
-/* Phone widths: the three-column header would overflow, so keep logo + "Get access" only. */
-@media (max-width: 760px) {
+/* Up to 960px the three-column header would wrap, so keep logo + "Get access" + a menu button. */
+.vx-menu-btn { all: unset; box-sizing: border-box; display: none; width: 40px; height: 40px; place-items: center; border-radius: 50%; color: #141414; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .2s; }
+.vx-menu-btn:hover, .vx-menu-btn[aria-expanded="true"] { background: #e7e6e1; }
+.vx-menu-btn:focus-visible { outline: 2px solid #2e5c36; outline-offset: 2px; }
+.vx-menu { position: fixed; top: 64px; left: 0; right: 0; z-index: 49; padding: 8px clamp(16px, 4vw, 56px) 26px; background: #f6f5f2; border-bottom: 1px solid #e3e1dc; box-shadow: 0 24px 40px -28px rgba(20,20,20,.35); animation: vxMenuIn .22s cubic-bezier(.2,.7,.2,1) both; }
+.vx-menu-link { display: block; padding: 14px 0; font-size: 22px; font-weight: 500; letter-spacing: -0.015em; color: #141414; border-bottom: 1px solid #e3e1dc; transition: color .2s; }
+.vx-menu-link:hover, .vx-menu-link[aria-current="page"] { color: #2e5c36; }
+.vx-menu-scrim { position: fixed; inset: 64px 0 0; z-index: 48; background: rgba(20,20,20,.18); animation: vxFade .22s both; }
+@keyframes vxMenuIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes vxFade { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 960px) {
   .vx-nav, .vx-nav-extra { display: none !important; }
   .vx-header { grid-template-columns: minmax(0,1fr) auto !important; }
+  .vx-menu-btn { display: grid; }
 }
+@media (max-width: 360px) { .vx-header-cta { padding: 7px 12px !important; } .vx-header-cta svg { display: none; } }
+@media (min-width: 961px) { .vx-menu, .vx-menu-scrim { display: none; } }
+
+/* Line breaks the wide layout wants but phones should reflow. */
+@media (max-width: 640px) { .vx-br { display: none; } }
 
 /* "Who we are": person cards, their link chips, timeline labels and the link preview card. */
 .vx-card { transition: transform .5s cubic-bezier(.2,.7,.2,1), box-shadow .5s; }
@@ -32,6 +47,7 @@ input::placeholder { color: #8f8b84; }
 
 /* Playground: toolbar buttons, remove (×) buttons, row hover and the typed 1–10 cells. */
 .vx-pg-btn { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 500; }
+@media (max-width: 640px) { .vx-pg-btn { padding: 7px 11px; font-size: 13.5px; gap: 6px; } }
 .vx-pg-btn:focus-visible { outline: 2px solid #2e5c36; outline-offset: 2px; }
 .vx-pg-predict { background: #141414; color: #f6f5f2; transition: background .2s, box-shadow .3s, transform .15s; }
 .vx-pg-predict:hover { background: #2e5c36; }
@@ -51,4 +67,19 @@ input::placeholder { color: #8f8b84; }
 /* Research: paper titles; the figure stacks above the text on phones. */
 .vx-paper-title { color: #141414; transition: color .2s; }
 .vx-paper-title:hover { color: #2e5c36; text-decoration: underline; text-underline-offset: 4px; }
-@media (max-width: 600px) { .vx-paper-row { grid-template-columns: minmax(0, 1fr) !important; gap: 16px !important; } }
+@media (max-width: 600px) {
+  .vx-paper-row { grid-template-columns: minmax(0, 1fr) !important; gap: 16px !important; }
+  /* wide figures at full width and their own height instead of letterboxed in a 4:3 frame */
+  .vx-paper-fig { aspect-ratio: auto !important; padding: 12px; box-sizing: border-box; }
+  .vx-paper-fig img { position: static !important; display: block; width: 100% !important; height: auto !important; max-height: 320px; }
+}
+
+/* Landing tree on phones and portrait tablets: the heading sits at the top and the explanation boxes at the
+   bottom (above the rail), leaving the tree in between (tree-scene.js, phoneLayout, shifts the camera to match). */
+@media (max-width: 760px), (max-width: 1024px) and (orientation: portrait) {
+  .vx-tree-intro { align-items: flex-start !important; padding-top: 104px !important; }
+  .vx-stop { align-items: flex-end !important; padding: 76px 16px calc(clamp(20px, 4vh, 40px) + 70px) !important; }
+  .vx-stop-box { padding: 20px 20px 18px !important; }
+  .vx-stop-box-list { padding-bottom: 6px !important; }
+  .vx-stop-box h3 { margin-top: 12px !important; font-size: 36px !important; }
+}

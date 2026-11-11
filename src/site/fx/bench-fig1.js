@@ -51,9 +51,11 @@ function build(){
   const g=S('g',{},svg);
   // x: time ticks, kept apart so labels never collide
   const TT=[[.25,'15 min'],[1,'1 hour'],[24,'1 day'],[168,'1 week'],[720,'1 month'],[4320,'6 months'],[8760,'1 year']].filter(([h])=>Math.log10(h)>=LH0&&Math.log10(h)<=LH1);
-  let lastX=-1e9;
+  // (widths are measured: a label is dropped if it would touch the previous one or run into the band)
+  let lastR=-1e9;const xEnd=band.length?BX0-4:W;
   TT.forEach(([h,l])=>{const x=xs(h);S('line',{x1:x,y1:Y0,x2:x,y2:Y1,stroke:RULE,'stroke-width':1},g);
-    if(x-lastX>(narrow?46:64)){T(g,x,Y1+(narrow?15:20),l,{'text-anchor':'middle','font-size':fs,'font-weight':600,fill:TICK});lastX=x;}});
+    const t=T(g,x,Y1+(narrow?15:20),l,{'text-anchor':'middle','font-size':fs,'font-weight':600,fill:TICK}),w=t.getComputedTextLength();
+    if(x-w/2<lastR+10||x+w/2>xEnd)t.remove();else lastR=x+w/2;});
   // y: accuracy ticks every STEP, thinned if the plot is short
   const nT=Math.round((A1-A0)/STEP),every=(Y1-Y0)/nT<22?2:1;
   for(let k=0;k<=nT;k++){const a=A0+k*STEP,y=ys(a);S('line',{x1:X0,y1:y,x2:BX1,y2:y,stroke:RULE,'stroke-width':1},g);
@@ -69,7 +71,8 @@ function build(){
   if(band.length){
     S('rect',{x:BX0,y:Y0,width:BX1-BX0,height:Y1-Y0,fill:INK,'fill-opacity':.035},g);
     S('line',{x1:BX0,y1:Y0,x2:BX0,y2:Y1,stroke:MID,'stroke-width':1,'stroke-dasharray':'2 3'},g);
-    T(g,(BX0+BX1)/2,Y1+(narrow?15:20),'not published',{'text-anchor':'middle','font-size':fs,'font-weight':600,fill:TICK});
+    const np=T(g,(BX0+BX1)/2,Y1+(narrow?15:20),'not published',{'text-anchor':'middle','font-size':fs,'font-weight':600,fill:TICK});
+    if(np.getComputedTextLength()>BX1-BX0){np.setAttribute('x',BX0+2);np.setAttribute('text-anchor','start');}   // narrow band: run on under the label column
     T(g,BX0+8,Y0+(narrow?12:15),narrow?'COMPUTE NOT PUBLISHED':'TRAINING COMPUTE NOT PUBLISHED',{'font-family':SANS,'font-weight':700,'font-size':narrow?8.5:10,'letter-spacing':1.1,fill:MID});
     const pad=R+6,step=(BX1-BX0-2*pad)/Math.max(1,band.length-1);
     band.forEach((m,k)=>{m.bx=band.length===1?(BX0+BX1)/2:BX0+pad+k*step;});

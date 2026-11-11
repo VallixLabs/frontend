@@ -243,9 +243,9 @@ export default function Home() {
 
       <section id="top" style={{ position: 'relative', height: '100svh', minHeight: 560, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', padding: `84px ${pad} 20px`, background: 'radial-gradient(130% 62% at 50% 0%, #d9d8d3 0%, #e8e7e2 40%, #f6f5f2 78%)', textAlign: 'center' }}>
         <div ref={heroTextRef} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <h1 style={{ margin: 0, fontSize: 'clamp(28px, min(4.4vw, 6.2vh), 60px)', lineHeight: 1.08, fontWeight: 500, letterSpacing: '-0.035em' }}><span style={{ color: green }}>Tabular Models.</span> For your problem.<br />From your data. At <span style={{ color: green }}>our speed.</span></h1>
-          <p style={{ margin: '14px 0 0', fontSize: 18, lineHeight: 1.5, color: '#3e3c38' }}>A lab for task-specific, scale-adaptive, fast-inference<br />Tabular foundation models that build themselves.</p>
-          <p style={{ margin: '8px 0 0', fontSize: 16, lineHeight: 1.55, color: '#6c6963' }}>Get your own tabular foundation model in a few clicks, and<br />predict without limits.</p>
+          <h1 style={{ margin: 0, fontSize: 'clamp(28px, min(4.4vw, 6.2vh), 60px)', lineHeight: 1.08, fontWeight: 500, letterSpacing: '-0.035em' }}><span style={{ color: green }}>Tabular Models.</span> For your problem.<br className="vx-br" /> From your data. At <span style={{ color: green }}>our speed.</span></h1>
+          <p style={{ margin: '14px 0 0', maxWidth: '34em', fontSize: 'clamp(16px, 4.2vw, 18px)', lineHeight: 1.5, color: '#3e3c38', textWrap: 'balance' }}>A lab for task-specific, scale-adaptive, fast-inference<br className="vx-br" /> Tabular foundation models that build themselves.</p>
+          <p style={{ margin: '8px 0 0', maxWidth: '34em', fontSize: 'clamp(14.5px, 3.8vw, 16px)', lineHeight: 1.55, color: '#6c6963', textWrap: 'balance' }}>Get your own tabular foundation model in a few clicks, and<br className="vx-br" /> predict without limits.</p>
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
             <a href="#access" className="vx-btn-dark" style={{ display: 'flex', alignItems: 'center', gap: 22, padding: '10px 12px 10px 18px', borderRadius: 999, fontSize: 14.5, fontWeight: 500 }}>
               <span>Get access</span>
@@ -261,7 +261,7 @@ export default function Home() {
           <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block' }} />
           <div ref={overlayRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />
 
-          <div data-stop="0" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 clamp(16px, 5vw, 80px)', pointerEvents: 'none' }}>
+          <div data-stop="0" className="vx-tree-intro" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 clamp(16px, 5vw, 80px)', pointerEvents: 'none' }}>
             <h2 style={{ margin: 0, maxWidth: '11ch', fontSize: 'clamp(34px, 4vw, 58px)', lineHeight: 1.04, fontWeight: 500, letterSpacing: '-0.035em', textWrap: 'balance' }}>Our <span style={{ color: green }}>roots</span> grow down to meet <span style={{ color: green }}>your data.</span></h2>
           </div>
           <div data-stop="0" style={{ position: 'absolute', bottom: 34, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, fontFamily: sans, fontWeight: 600, fontSize: 11, letterSpacing: '.16em', textTransform: 'uppercase', color: '#6c6963', pointerEvents: 'none' }}>
@@ -269,8 +269,8 @@ export default function Home() {
             <span style={{ width: 1, height: 36, background: '#141414' }} />
           </div>
 
-          <div data-stop="1" style={stopStyle}>
-            <div data-box="1" style={boxStyle}>
+          <div data-stop="1" className="vx-stop" style={stopStyle}>
+            <div data-box="1" className="vx-stop-box" style={boxStyle}>
               <div style={eyebrow}><span>The vines</span></div>
               <h3 style={h3Style}>Valli</h3>
               <p style={bodyP}>Valli reads your table, works out what kind of process could have produced it, generates a matching prior, and builds a model for that problem.</p>
@@ -289,8 +289,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div data-stop="2" style={stopStyle}>
-            <div data-box="2" style={boxStyle}>
+          <div data-stop="2" className="vx-stop" style={stopStyle}>
+            <div data-box="2" className="vx-stop-box" style={boxStyle}>
               <div style={eyebrow}><span>The trunk</span></div>
               <h3 style={h3Style}>Skandha</h3>
               <p style={bodyP}>Every tabular foundation model conditions on your rows at prediction time. Skandha also conditions on the prior, on what kind of data this is, so it starts from the right place instead of a general one.</p>
@@ -301,8 +301,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div data-stop="3" style={stopStyle}>
-            <div data-box="3" style={{ ...boxStyle, padding: '28px 28px 10px' }}>
+          <div data-stop="3" className="vx-stop" style={stopStyle}>
+            <div data-box="3" className="vx-stop-box vx-stop-box-list" style={{ ...boxStyle, padding: '28px 28px 10px' }}>
               <div style={eyebrow}><span>The roots</span></div>
               <h3 style={h3Style}>Mool</h3>
               <div style={{ marginTop: 10, fontSize: 17, fontWeight: 500, letterSpacing: '-0.01em' }}>Where every task specific model begins.</div>
@@ -321,8 +321,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div data-stop="4" style={stopStyle}>
-            <div data-box="4" style={boxStyle}>
+          <div data-stop="4" className="vx-stop" style={stopStyle}>
+            <div data-box="4" className="vx-stop-box" style={boxStyle}>
               <div style={eyebrow}><span>The ecosystem</span></div>
               <h3 style={h3Style}>Tvarit</h3>
               <p style={bodyP}>Tvarit serves any tabular foundation model, TabPFN, TabICL, Kumo and Valli, at up to 20× the throughput of their reference implementations.</p>

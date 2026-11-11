@@ -139,6 +139,27 @@ const CSS_MORE = `
 .vxb .quad.q3{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:900px){.vxb .quad.q3{grid-template-columns:1fr}.vxb .quad.q3 > div{border-right:0;border-bottom:1px solid var(--rule)}}
 .vxb table.t td.na{color:var(--faint)}
+/* phones: the tables scroll sideways under a fixed rank + model column; a hint says so when they overflow */
+.vxb .swipe{display:none;font-family:'Source Sans 3',system-ui,sans-serif;font-weight:600;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mid);padding:9px 14px;border-top:1px solid var(--rule)}
+.vxb .tw.ovf + .swipe{display:block}
+@media(max-width:900px){.vxb table.t{min-width:0}}   /* tablets: let the columns size to their content first */
+@media(max-width:760px){
+.vxb .cb{padding:14px 10px 6px}
+.vxb .chd,.vxb .cft,.vxb .tfoot{padding-left:14px;padding-right:14px}
+.vxb .sh h2{font-size:26px}
+.vxb table.t{min-width:100%;width:max-content}
+.vxb table.t th{padding:10px 9px}
+.vxb table.t td{padding:0 9px}
+.vxb table.t td.rk,.vxb table.t th.l:first-child,.vxb table.t th.grp:first-child,.vxb table.t td.nm:first-child{position:sticky;left:0;z-index:1;background:var(--panel)}
+.vxb table.t th.grp:not(:first-child){text-align:left}
+.vxb table.t td.rk{width:34px;min-width:34px;max-width:34px;padding:0 0 0 10px}
+.vxb table.t td.rk + td.nm,.vxb table.t th.l:first-child + th.l{position:sticky;left:34px;z-index:1;background:var(--panel);box-shadow:1px 0 0 var(--rule)}
+.vxb table.t td.nm:first-child{box-shadow:1px 0 0 var(--rule)}
+.vxb table.t td.nm{white-space:normal;min-width:112px;max-width:148px;line-height:1.25;padding-top:7px;padding-bottom:7px;font-size:14px}
+.vxb table.t td.nm small{display:block;margin:2px 0 0}
+.vxb table.t tr.ours td.rk,.vxb table.t tr.ours td.nm{background:#eceee9}
+.vxb table.t tr.ours td.nm::before{margin-right:6px}
+}
 `;
 
 const HTML = `<div class="bp">
@@ -149,7 +170,7 @@ const HTML = `<div class="bp">
       <div class="sh"><h2>Leaderboard</h2><p>Place among all ranked models at each number of labelled rows.</p></div>
       <div class="ctrls"><div class="seg" id="lbB"><span class="lab">Benchmark</span></div><div class="seg" id="lbT"><span class="lab">Task</span></div></div>
       <div class="card">
-        <div class="tw"><table class="t" id="lb"></table></div>
+        <div class="tw"><table class="t" id="lb"></table></div><div class="swipe">Swipe the table for more columns →</div>
         <div class="tfoot"><div class="lkey"><span>PLACE</span><i style="background:rgba(20,20,20,.82)"></i>1<i style="background:rgba(20,20,20,.42)"></i>≤3<i style="background:rgba(20,20,20,.22)"></i>≤5<i style="background:rgba(20,20,20,.1)"></i>≤10<i style="background:rgba(20,20,20,.04)"></i>≤20</div>
           <ul class="stars"><li>Place: lower is better. Mean = mean place over the columns the model is ranked in.</li><li>— = not ranked in that column (completed fewer than 95% of its tasks).</li><li id="t1ctx"></li><li>Run on NVIDIA A6000 GPUs.</li><li>Click any column heading to sort.</li></ul></div>
       </div>
@@ -168,12 +189,12 @@ const HTML = `<div class="bp">
       </div>
       <div class="card">
         <div class="chd"><span class="desc">Mean error per model at each number of labelled rows, with a 95% interval.</span><span class="mono" id="t2ctx"></span></div>
-        <div class="tw"><table class="t" id="acc"></table></div>
+        <div class="tw"><table class="t" id="acc"></table></div><div class="swipe">Swipe the table for more columns →</div>
         <div class="tfoot"><ul class="stars"><li>Mean over tables and repetitions; ± is half the 95% bootstrap interval over tables (dataset × scenario).</li><li>Dark cell = lowest error at that number of rows.</li><li>Run on NVIDIA A6000 GPUs.</li></ul><button class="btn" id="accAll"></button></div>
       </div>
       <div class="card">
         <div class="chd"><div class="ctrls"><div class="seg" id="dM"><span class="lab">Labelled rows</span></div></div><span class="desc" id="t3ctx"></span></div>
-        <div class="tw"><table class="t" id="ds"></table></div>
+        <div class="tw"><table class="t" id="ds"></table></div><div class="swipe">Swipe the table for more columns →</div>
         <div class="tfoot"><ul class="stars"><li id="dsnote"></li><li>Dark cell = lowest error on that dataset.</li><li>Run on NVIDIA A6000 GPUs.</li></ul></div>
       </div>
     </section>
@@ -188,7 +209,7 @@ const HTML = `<div class="bp">
       </div>
       <div class="card">
         <div class="chd"><span class="desc">Calibration score per model at each number of labelled rows.</span><span class="mono" id="t4ctx"></span></div>
-        <div class="tw"><table class="t" id="cal"></table></div>
+        <div class="tw"><table class="t" id="cal"></table></div><div class="swipe">Swipe the table for more columns →</div>
         <div class="tfoot"><ul class="stars"><li id="calnote"></li><li>Run on NVIDIA A6000 GPUs.</li></ul><button class="btn" id="calAll"></button></div>
       </div>
     </section>
@@ -221,6 +242,7 @@ function tipFor(id){const w=document.getElementById(id),t=w.querySelector('.tip'
 function seg(id,opts,cur,cb){const el=document.getElementById(id);el.querySelectorAll('button').forEach(b=>b.remove());opts.forEach(([v,l])=>{const b=document.createElement('button');b.textContent=l;b.setAttribute('aria-pressed',v===cur?'true':'false');
   b.onclick=()=>{el.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');cb(v);};el.appendChild(b);});}
 function lazy(id,build){let seen=false;build(false);onView(document.getElementById(id),()=>{seen=true;build(true);});return()=>build(seen);}
+function markOverflow(){host.querySelectorAll('.tw').forEach(w=>w.classList.toggle('ovf',w.scrollWidth>w.clientWidth+2));}
 function fadeRows(tb){[...tb.querySelectorAll('tbody tr')].forEach((r,i)=>{r.style.opacity=0;setTimeout(()=>r.style.opacity=1,12*i);});}
 
 /* ================= data access ================= */
@@ -254,27 +276,33 @@ function lb(anim){const ms=msOf(lbB),cells=ms.map(m=>cell(lbB,lbT,m)),tb=documen
     ms.map((m,j)=>th(j,`${m.toLocaleString()} rows <span style="color:var(--faint)">/ ${cells[j].n_ranked}</span>`)).join('')+th('mean','Mean')+'</tr></thead><tbody>';
   const cellH=(v,ours)=>{if(v==null||isNaN(v))return'<td class="h c na">—</td>';const a=tintR(v);return`<td class="h c"><span style="background:rgba(${ours?'46,92,54':'20,20,20'},${a});color:${a>.4?'#f4f2ee':'#141414'}">${Number.isInteger(v)?v:v.toFixed(1)}</span></td>`;};
   rows.forEach((x,k)=>{h+=`<tr class="${x.id===OURS?'ours':''}"><td class="rk">${k+1}</td><td class="nm l">${name(x.id)}${sub(x.id)}</td>`+x.p.map(v=>cellH(v,x.id===OURS)).join('')+cellH(x.mean,x.id===OURS)+'</tr>';});
-  tb.innerHTML=h+'</tbody>';tb.querySelectorAll('th[data-j]').forEach(t=>t.onclick=()=>{const j=t.dataset.j;lbS=j==='mean'?'mean':+j;lb(true);});if(anim)fadeRows(tb);}
+  tb.innerHTML=h+'</tbody>';markOverflow();tb.querySelectorAll('th[data-j]').forEach(t=>t.onclick=()=>{const j=t.dataset.j;lbS=j==='mean'?'mean':+j;lb(true);});if(anim)fadeRows(tb);}
 seg('lbB',benchOpts,lbB,v=>{lbB=v;lb(true);});
 seg('lbT',taskOpts,lbT,v=>{lbT=v;lb(true);});
 lb(false);
 
 /* ================= accuracy ================= */
-let aB='tab',aT='classification',accAll=false;
+let aB='tab',aT='classification',accAll=false,lastCW=0;
 const sciMs=msOf('sci');let dM=sciMs.includes(50)?50:sciMs[0];
 const r2=lazy('s2',anim=>{const svg=document.getElementById('s2');svg.innerHTML='';svg.classList.remove('go');
   const ms=msOf(aB),cells=ms.map(m=>cell(aB,aT,m));
   document.getElementById('f2ctx').textContent=`Showing ${BL(aB)}, ${aT}, ${metricName(aT)}.`;
-  const W=1000,H=430,X0=80,X1=800,Y0=20,Y1=370;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  // below 900px the chart is drawn at the card's own width (1 unit = 1px) so the text keeps its size (phones,
+  // under 600px, also get a taller plot and a horizontal title); wider: the design's 1000×430, scaled
+  const cw=svg.parentNode.clientWidth||1000,px=cw<900,nar=cw<600;lastCW=cw;
+  const W=px?Math.round(cw):1000,H=nar?Math.round(Math.max(300,cw*.95)):px?Math.round(Math.max(340,cw*.5)):430;
+  const X0=nar?42:80,X1=nar?W-94:px?W-170:800,Y0=nar?34:20,Y1=nar?H-46:H-60;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
   const best=cells.map(c=>Math.min(...rankedRows(c).map(r=>r.err))),lo=.98,hi=1.36;
   const rel=(id,j)=>{const r=row(cells[j],id);return r&&r.place!=null?r.err/best[j]:null;};
   const xs=logX(ms,X0,X1),ys=v=>Y1-(v-lo)/(hi-lo)*(Y1-Y0);
   const cp=S('clipPath',{id:'cp2'},S('defs',{},svg));S('rect',{x:X0,y:Y0-2,width:X1-X0+2,height:Y1-Y0+4},cp);
-  ms.forEach(m=>{const x=xs(m);S('line',{x1:x,y1:Y0,x2:x,y2:Y1,stroke:RULE},svg);T(svg,x,Y1+22,m.toLocaleString(),{'text-anchor':'middle'});});
-  [1,1.05,1.1,1.15,1.2,1.25,1.3,1.35].forEach(v=>{const y=ys(v);S('line',{x1:X0,y1:y,x2:X1,y2:y,stroke:v===1?INK:RULE,'stroke-width':v===1?1.2:.8},svg);T(svg,X0-10,y+4,v===1?'best':`+${Math.round((v-1)*100)}%`,{'text-anchor':'end',fill:v===1?INK:MID});});
+  const tf=nar?{'font-size':10.5}:{};
+  ms.forEach(m=>{const x=xs(m);S('line',{x1:x,y1:Y0,x2:x,y2:Y1,stroke:RULE},svg);T(svg,x,Y1+(nar?17:22),m.toLocaleString(),{'text-anchor':'middle',...tf});});
+  [1,1.05,1.1,1.15,1.2,1.25,1.3,1.35].forEach(v=>{const y=ys(v);S('line',{x1:X0,y1:y,x2:X1,y2:y,stroke:v===1?INK:RULE,'stroke-width':v===1?1.2:.8},svg);T(svg,X0-(nar?6:10),y+4,v===1?'best':`+${Math.round((v-1)*100)}%`,{'text-anchor':'end',fill:v===1?INK:MID,...tf});});
   S('path',{d:`M${X0} ${Y0} V${Y1} H${X1}`,stroke:MID,fill:'none'},svg);
-  T(svg,(X0+X1)/2,Y1+50,'LABELLED ROWS · log scale',{'text-anchor':'middle','font-size':10.5,'letter-spacing':1.2,fill:INK});
-  T(svg,0,0,`${metricName(aT).toUpperCase()} vs the best model at each size`,{'text-anchor':'middle','font-size':10.5,'letter-spacing':1.2,fill:INK,transform:`translate(${X0-60} ${(Y0+Y1)/2}) rotate(-90)`});
+  T(svg,(X0+X1)/2,Y1+(nar?38:50),'LABELLED ROWS · log scale',{'text-anchor':'middle','font-size':nar?9.5:10.5,'letter-spacing':1.2,fill:INK});
+  if(nar)T(svg,0,14,`${metricName(aT).toUpperCase()} vs the best at each size`,{'text-anchor':'start','font-size':9.5,'letter-spacing':1.1,fill:INK});   // no room for a rotated title
+  else T(svg,0,0,`${metricName(aT).toUpperCase()} vs the best model at each size`,{'text-anchor':'middle','font-size':10.5,'letter-spacing':1.2,fill:INK,transform:`translate(${X0-60} ${(Y0+Y1)/2}) rotate(-90)`});
   const all=[...new Set(cells.flatMap(c=>rankedRows(c).map(r=>r.id)))];
   const avg=all.map(id=>({id,m:mean(ms.map((_,j)=>rel(id,j)).filter(v=>v!=null))})).sort((a,b)=>a.m-b.m),top=avg.filter(x=>x.id!==OURS).slice(0,4).map(x=>x.id);
   const tip=tipFor('w2'),P=id=>ms.map((m,j)=>{const v=rel(id,j);return v==null?null:[xs(m),ys(v)];}),lines=S('g',{'clip-path':'url(#cp2)'},svg);
@@ -284,8 +312,9 @@ const r2=lazy('s2',anim=>{const svg=document.getElementById('s2');svg.innerHTML=
     ms.forEach((m,j)=>{const v=rel(id,j);if(v==null||v>hi)return;const r=row(cells[j],id);const c=D(S('circle',{cx:xs(m),cy:ys(v),r:ours?4.5:3,fill:ours?GR:PANEL,stroke:ours?GR:MID,'stroke-width':1.2,class:'pop'},svg),1+j*.06);
       tip.on(c,`${name(id)} · ${m.toLocaleString()} rows<br>${metricName(aT)} ${r.err.toFixed(3)} (${v===1?'best':'+'+((v-1)*100).toFixed(1)+'%'}) · ${ord(r.place)} of ${cells[j].n_ranked}`);});
     const lastJ=ms.map((_,j)=>rel(id,j)).map((v,j)=>v==null?-1:j).filter(j=>j>=0).pop();if(lastJ!=null)ends.push({id,y:ys(Math.min(rel(id,lastJ),hi)),ours});});
-  ends.sort((a,b)=>a.y-b.y);for(let k=1;k<ends.length;k++)if(ends[k].y-ends[k-1].y<16)ends[k].y=ends[k-1].y+16;
-  ends.forEach(e=>D(T(svg,X1+14,e.y+4,name(e.id),{'font-family':SANS,'font-size':e.ours?16:13.5,'font-weight':e.ours?600:400,fill:e.ours?GR:MID,class:'fade'}),1.4));
+  const gap=nar?14:16;ends.sort((a,b)=>a.y-b.y);for(let k=1;k<ends.length;k++)if(ends[k].y-ends[k-1].y<gap)ends[k].y=ends[k-1].y+gap;
+  if(ends.length){const over=ends[ends.length-1].y-(Y1-2);if(over>0)ends.forEach(e=>e.y-=Math.min(over,Math.max(0,ends[0].y-Y0)));}   // a stack pushed below the axis moves up
+  ends.forEach(e=>D(T(svg,X1+(nar?8:14),e.y+4,name(e.id),{'font-family':SANS,'font-size':nar?(e.ours?14:12):(e.ours?16:13.5),'font-weight':e.ours?600:400,fill:e.ours?GR:MID,class:'fade'}),1.4));
   if(anim)go(svg);});
 function accTable(anim){const ms=msOf(aB),cells=ms.map(m=>cell(aB,aT,m)),tb=document.getElementById('acc');
   document.getElementById('t2ctx').textContent=`${BL(aB)} · ${aT} · ${metricName(aT)}`;
@@ -296,7 +325,7 @@ function accTable(anim){const ms=msOf(aB),cells=ms.map(m=>cell(aB,aT,m)),tb=docu
   let h=`<thead><tr><th class="l"></th><th class="l">Model</th>${ms.map(m=>`<th>${m.toLocaleString()} rows</th>`).join('')}<th>Mean</th></tr></thead><tbody>`;
   show.forEach((x,k)=>{h+=`<tr class="${x.id===OURS?'ours':''}"><td class="rk">${k+1}</td><td class="nm l">${name(x.id)}${sub(x.id)}</td>`+
     x.rs.map((r,j)=>{if(!r)return'<td class="na">—</td>';const b=r.err===best[j],ci=r.lo!=null&&r.hi!=null?`<span class="ci">±${((r.hi-r.lo)/2).toFixed(3)}</span>`:'';return`<td>${b?`<span class="best">${r.err.toFixed(3)}</span>`:r.err.toFixed(3)}${ci}</td>`;}).join('')+`<td>${x.m.toFixed(3)}</td></tr>`;});
-  tb.innerHTML=h+'</tbody>';document.getElementById('accAll').textContent=accAll?'show top 15':`show all ${rows.length} models`;if(anim)fadeRows(tb);}
+  tb.innerHTML=h+'</tbody>';markOverflow();document.getElementById('accAll').textContent=accAll?'show top 15':`show all ${rows.length} models`;if(anim)fadeRows(tb);}
 function dsTable(anim){const tb=document.getElementById('ds'),list=data.datasets[`${aT}|${dM}`]||[],c=cell('sci',aT,dM);
   const ranked=rankedRows(c).map(r=>r.id).filter(id=>list.every(d=>d.err[id]!=null));
   const avg=ranked.map(id=>({id,m:mean(list.map(d=>d.err[id]))})).sort((a,b)=>a.m-b.m),cols=[OURS].concat(avg.filter(x=>x.id!==OURS).slice(0,5).map(x=>x.id));
@@ -304,7 +333,7 @@ function dsTable(anim){const tb=document.getElementById('ds'),list=data.datasets
   list.forEach(d=>{const vals=cols.map(id=>d.err[id]),mn=Math.min(...vals.filter(v=>v!=null));
     h+=`<tr><td class="nm l">${DS_NAMES[d.ds]||d.ds}</td>`+vals.map((v,ci)=>v==null?'<td class="na">—</td>':`<td${ci===0?' style="color:#2e5c36"':''}>${v===mn?`<span class="best"${ci===0?' style="background:#2e5c36;color:#f6f5f2"':''}>${v.toFixed(3)}</span>`:v.toFixed(3)}</td>`).join('')+'</tr>';});
   h+=`<tr><td class="nm l" style="color:var(--mid)">Lowest error on</td>${cols.map((id,ci)=>{const w=list.filter(d=>{const vals=cols.map(c2=>d.err[c2]).filter(v=>v!=null);return d.err[id]===Math.min(...vals);}).length;return`<td style="font-weight:${ci===0?600:400};${ci===0?'color:#2e5c36':''}">${w} of ${list.length}</td>`;}).join('')}</tr>`;
-  tb.innerHTML=h+'</tbody>';
+  tb.innerHTML=h+'</tbody>';markOverflow();
   document.getElementById('t3ctx').textContent=`Error on each of the ${list.length} real scientific datasets (${aT}, ${metricName(aT)}), for Valli and the five closest models.`;
   document.getElementById('dsnote').textContent=`Mean over each dataset's scenarios and repetitions; the five ranked models with the lowest mean error.${aT==='classification'?' Scientific classification is a single dataset, so read it as weak evidence.':''}`;
   if(anim)fadeRows(tb);}
@@ -313,6 +342,7 @@ seg('aT',[['classification','Classification · log loss'],['regression','Regress
 seg('dM',sciMs.map(m=>[m,m.toLocaleString()]),dM,v=>{dM=v;dsTable(true);});
 document.getElementById('accAll').onclick=()=>{accAll=!accAll;accTable(true);};
 accTable(false);dsTable(false);
+const ro=new ResizeObserver(()=>{markOverflow();const cw=document.getElementById('w2').clientWidth;if((cw<900||lastCW<900)&&Math.abs(cw-lastCW)>24)r2();});ro.observe(host);
 
 /* ================= calibration ================= */
 let kT='classification',kM=COMMON_MS.includes(200)?200:COMMON_MS[0],calAll=false;
@@ -347,11 +377,11 @@ function calTable(anim){const tb=document.getElementById('cal'),cls=kT==='classi
   show.forEach((x,k)=>{h+=`<tr class="${x.id===OURS?'ours':''}"><td class="rk">${k+1}</td><td class="nm l">${name(x.id)}${sub(x.id)}</td>`+
     x.v.map((v,j)=>{if(v==null)return'<td class="na">—</td>';const s=cls?v.toFixed(3):`${(v*100).toFixed(1)}%`;return`<td>${score(v)===best[j]?`<span class="best">${s}</span>`:s}</td>`;}).join('')+
     `<td>${cls?x.m.toFixed(3):`±${(x.m*100).toFixed(1)} pts`}</td></tr>`;});
-  tb.innerHTML=h+'</tbody>';document.getElementById('calAll').textContent=calAll?'show top 15':`show all ${rows.length} models`;if(anim)fadeRows(tb);}
+  tb.innerHTML=h+'</tbody>';markOverflow();document.getElementById('calAll').textContent=calAll?'show top 15':`show all ${rows.length} models`;if(anim)fadeRows(tb);}
 seg('kT',[['classification','Classification · reliability'],['regression','Regression · predicted vs actual']],kT,v=>{kT=v;r3();calTable(true);});
 seg('kM',COMMON_MS.map(m=>[m,m.toLocaleString()]),kM,v=>{kM=v;r3();calTable(true);});
 document.getElementById('calAll').onclick=()=>{calAll=!calAll;calTable(true);};
 calTable(false);
 
-  return () => { observers.forEach(o => o.disconnect()); host.innerHTML = ''; host.classList.remove('vxb'); delete host.dataset.mounted; };
+  return () => { ro.disconnect(); observers.forEach(o => o.disconnect()); host.innerHTML = ''; host.classList.remove('vxb'); delete host.dataset.mounted; };
 }

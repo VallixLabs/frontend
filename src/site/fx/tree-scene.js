@@ -561,11 +561,13 @@ export function mountTree({ section, canvas, overlay }) {
     m.rotation.x = Math.PI / 2; m.renderOrder = 5; m.visible = false; scene.add(m); return m;
   });
   const S = [
-    { t: V(0, 4.5 + lift * 0.5, CZ), az: AZ0, el: 0.12, d: 37, fov: 30, sx: 0.2, sy: 0 },
-    { t: vine.m.clone(), az: ang(vine.m) + 0.25, el: 0.1, d: 6.5, fov: 34, sx: 0.17, sy: 0 },
-    { t: V(0, lift + SKY - 0.35, CZ), az: SKA, el: 0.06, d: 9, fov: 34, sx: 0.17, sy: 0 },
-    { t: rc, az: AZR, el: 0.5, d: 12.5, fov: 34, sx: 0.2, sy: 0.04 },
-    { t: V(0, 3.9 + lift * 0.5, CZ), az: AZ0 + 1.15, el: 0.24, d: 35, fov: 30, sx: 0.17, sy: 0 },
+    // ny: vertical offset on phones and portrait tablets (no sideways offset there), clearing the heading at the top (stop 0)
+    // and the explanation boxes, which sit at the bottom of the screen
+    { t: V(0, 4.5 + lift * 0.5, CZ), az: AZ0, el: 0.12, d: 37, fov: 30, sx: 0.2, sy: 0, ny: -0.1 },
+    { t: vine.m.clone(), az: ang(vine.m) + 0.25, el: 0.1, d: 6.5, fov: 34, sx: 0.17, sy: 0, ny: 0.2 },
+    { t: V(0, lift + SKY - 0.35, CZ), az: SKA, el: 0.06, d: 9, fov: 34, sx: 0.17, sy: 0, ny: 0.2 },
+    { t: rc, az: AZR, el: 0.5, d: 12.5, fov: 34, sx: 0.2, sy: 0.04, ny: 0.24 },
+    { t: V(0, 3.9 + lift * 0.5, CZ), az: AZ0 + 1.15, el: 0.24, d: 35, fov: 30, sx: 0.17, sy: 0, ny: 0.17 },
   ];
   const MK = [
     { s: [4], p: vine.m, label: 'Valli', dx: 40, dy: -34 },
@@ -623,7 +625,7 @@ export function mountTree({ section, canvas, overlay }) {
   let this_perm = null, frozen = false, W = 1, H = 1, uT = 0, uC = -1, inView = true, dirty = true, last = performance.now(), raf = 0, lastActive = -1;
   const resize = () => { const r = canvas.getBoundingClientRect(); W = Math.max(1, r.width); H = Math.max(1, r.height); renderer.setSize(W, H, false); dirty = true; };
   const readScroll = () => { const r = section.getBoundingClientRect(); const span = Math.max(1, r.height - innerHeight); uT = clamp01(-r.top / span / HOLD) * 4; inView = r.bottom > -50 && r.top < innerHeight + 50; };
-  const pos = V(0, 0, 0), tgt = V(0, 0, 0), proj = V(0, 0, 0); let offX = 0, offY = 0;
+  const pos = V(0, 0, 0), tgt = V(0, 0, 0), proj = V(0, 0, 0); let offX = 0, offY = 0, offYn = 0;
   function pose(u) {
     let i = Math.min(3, Math.floor(u)), f = u - i;
     const e = u >= 4 ? 1 : ease(clamp01((f - 0.2) / 0.6));
@@ -636,7 +638,7 @@ export function mountTree({ section, canvas, overlay }) {
     const d = Math.exp(Math.log(dd(i)) + (Math.log(dd(i + 1)) - Math.log(dd(i))) * e) * (1 + bump * 0.4);
     pos.set(Math.cos(el) * Math.sin(az) * d, Math.sin(el) * d, Math.cos(el) * Math.cos(az) * d).add(tgt);
     camera.fov = A.fov + (B.fov - A.fov) * e;
-    offX = A.sx + (B.sx - A.sx) * e; offY = A.sy + (B.sy - A.sy) * e;
+    offX = A.sx + (B.sx - A.sx) * e; offY = A.sy + (B.sy - A.sy) * e; offYn = A.ny + (B.ny - A.ny) * e;
   }
   function frame(now) {
     raf = requestAnimationFrame(frame);
@@ -664,7 +666,8 @@ export function mountTree({ section, canvas, overlay }) {
       veinMat.uniforms.uMix.value = Math.min(1, ghost * 1.15); veinMat.uniforms.uGrow.value = grow; veinMat.uniforms.uT.value = now / 1000; }
     pose(uC);
     camera.aspect = W / H;
-    const ox = W > 760 ? W * offX : 0, oy = H * offY;
+    const phoneLayout = W <= 760 || (W <= 1024 && H > W);   // matches the CSS media query for .vx-stop
+    const ox = phoneLayout ? 0 : W * offX, oy = H * (phoneLayout ? offYn : offY);
     if (Math.abs(ox) + Math.abs(oy) > 0.5) camera.setViewOffset(W, H, -ox, oy, W, H); else camera.clearViewOffset();
     camera.updateProjectionMatrix();
     camera.position.copy(pos); camera.lookAt(tgt);
@@ -711,7 +714,9 @@ export function mountTree({ section, canvas, overlay }) {
     for (const m of MK) { proj.copy(m.p).project(camera); m.sx = (proj.x * 0.5 + 0.5) * W; m.sy = (-proj.y * 0.5 + 0.5) * H; m.front = proj.z < 1; }
     const ranked = MK.filter(m => m.rank).sort((a, b) => a.sy - b.sy);
     if (ranked.length) {
-      const colX = Math.max(...ranked.map(m => m.sx)) + 90;
+      // a column of labels right of the roots, or left of them when that would run off screen (phones)
+      const right = Math.max(...ranked.map(m => m.sx)) + 90 + 120 <= W - 8;
+      const colX = right ? Math.max(...ranked.map(m => m.sx)) + 90 : Math.max(130, Math.min(...ranked.map(m => m.sx)) - 60);
       const midY = ranked.reduce((s, m) => s + m.sy, 0) / ranked.length;
       ranked.forEach((m, i) => place(m, Math.round(colX - m.sx), Math.round(midY + (i - (ranked.length - 1) / 2) * 38 - m.sy)));
     }
