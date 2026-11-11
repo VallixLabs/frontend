@@ -143,6 +143,8 @@ export default function WhoWeAre() {
   const hintRef = useRef<HTMLDivElement>(null);
   const photoRef = useRef<HTMLDivElement>(null);
   const footerRef = useRef<HTMLElement>(null);
+  const listRef = useRef<HTMLOListElement>(null);
+  const listSvgRef = useRef<SVGSVGElement>(null);
 
   // Page-wide effects: start at the top (arriving by client-side navigation), footer vines.
   useEffect(() => {
@@ -165,6 +167,16 @@ export default function WhoWeAre() {
         svg: svgRef.current, stage: stageRef.current, track: trackRef.current, now: nowRef.current, hint: hintRef.current, photos: photoRef.current,
         milestones: MILESTONES, onNodeOff: (i) => setHover((h) => (h && h.i === i ? null : h)),
       });
+    }).catch((e) => console.error(e));
+    return () => { alive = false; kill?.(); };
+  }, [wide]);
+
+  // Phones: the straight vine down the list, grown with the scroll.
+  useEffect(() => {
+    if (wide) return;
+    let kill: (() => void) | undefined, alive = true;
+    import('./fx/timeline-vine.js').then((m) => {
+      if (alive && listRef.current && listSvgRef.current) kill = m.mountVineList({ list: listRef.current, svg: listSvgRef.current });
     }).catch((e) => console.error(e));
     return () => { alive = false; kill?.(); };
   }, [wide]);
@@ -275,30 +287,34 @@ export default function WhoWeAre() {
         </section>
       ) : (
         <section style={{ padding: '32px 20px 88px' }}>
-          {/* Phones: the vine as a plain green line, each milestone with its photo and (where there is one) its link. */}
-          <ol style={{ listStyle: 'none', margin: '0 auto', padding: '0 0 0 22px', maxWidth: 560, position: 'relative', borderLeft: `3px solid ${green}` }}>
-            {MILESTONES.map((m, i) => {
-              const latest = i === MILESTONES.length - 1, link = m.href !== '#';
-              const body = (
-                <>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ ...label, fontSize: 11, letterSpacing: '.12em', color: latest ? green : '#6c6963' }}>{m.date}</div>
-                    <div style={{ marginTop: 5, fontSize: 17, lineHeight: 1.35, fontWeight: 500, color: '#141414', textWrap: 'pretty' }}>
-                      {m.text}{link && <span style={{ fontSize: '.85em', marginLeft: '.3em', color: '#6c6963' }}>↗</span>}
+          {/* Phones: each milestone with its photo and (where there is one) its link, along a straight vine that
+              timeline-vine.js draws into the svg and grows with the scroll (the green border and dots until then). */}
+          <div style={{ position: 'relative', maxWidth: 560, margin: '0 auto' }}>
+            <svg ref={listSvgRef} aria-hidden="true" style={{ position: 'absolute', left: 0, top: 0, width: 40, overflow: 'visible', pointerEvents: 'none' }} />
+            <ol ref={listRef} style={{ listStyle: 'none', margin: 0, padding: '0 0 0 36px', position: 'relative', borderLeft: `3px solid ${green}` }}>
+              {MILESTONES.map((m, i) => {
+                const latest = i === MILESTONES.length - 1, link = m.href !== '#';
+                const body = (
+                  <>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ ...label, fontSize: 11, letterSpacing: '.12em', color: latest ? green : '#6c6963' }}>{m.date}</div>
+                      <div style={{ marginTop: 5, fontSize: 17, lineHeight: 1.35, fontWeight: 500, color: '#141414', textWrap: 'pretty' }}>
+                        {m.text}{link && <span style={{ fontSize: '.85em', marginLeft: '.3em', color: '#6c6963' }}>↗</span>}
+                      </div>
                     </div>
-                  </div>
-                  {m.img && <img src={m.img} alt="" loading="lazy" decoding="async" width={68} height={68} style={{ width: 68, height: 68, objectFit: 'cover', border: '1px solid #141414', background: '#ecebe6', flex: 'none' }} />}
-                </>
-              );
-              const row: CSSProperties = { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14 };
-              return (
-                <li key={i} style={{ position: 'relative', padding: `0 0 ${latest ? 0 : 28}px 16px` }}>
-                  <span style={{ position: 'absolute', left: -30.5, top: 2, width: 14, height: 14, borderRadius: '50%', background: latest ? green : '#f6f5f2', border: `2px solid ${green}`, boxSizing: 'border-box', boxShadow: latest ? '0 0 0 5px rgba(46,92,54,.16)' : undefined }} />
-                  {link ? <a href={m.href} target="_blank" rel="noopener" style={row}>{body}</a> : <div style={row}>{body}</div>}
-                </li>
-              );
-            })}
-          </ol>
+                    {m.img && <img src={m.img} alt="" loading="lazy" decoding="async" width={68} height={68} style={{ width: 68, height: 68, objectFit: 'cover', border: '1px solid #141414', background: '#ecebe6', flex: 'none' }} />}
+                  </>
+                );
+                const row: CSSProperties = { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14 };
+                return (
+                  <li key={i} style={{ position: 'relative', padding: `0 0 ${latest ? 0 : 28}px 16px` }}>
+                    <span data-dot="" style={{ position: 'absolute', left: -44.5, top: 2, width: 14, height: 14, borderRadius: '50%', background: latest ? green : '#f6f5f2', border: `2px solid ${green}`, boxSizing: 'border-box', boxShadow: latest ? '0 0 0 5px rgba(46,92,54,.16)' : undefined }} />
+                    {link ? <a href={m.href} target="_blank" rel="noopener" style={row}>{body}</a> : <div style={row}>{body}</div>}
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
         </section>
       )}
 

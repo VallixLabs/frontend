@@ -7,3 +7,4 @@ export function mountTimeline(o: {
   svg: SVGSVGElement; stage: HTMLElement; track: HTMLElement; now: HTMLElement | null; hint: HTMLElement | null; photos?: HTMLElement | null;
   milestones: Milestone[]; onNodeOff?: (i: number) => void;
 }): () => void;
+export function mountVineList(o: { list: HTMLElement; svg: SVGSVGElement }): () => void;

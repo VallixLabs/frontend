@@ -30,59 +30,11 @@ export function mountTimeline({ svg, stage, track, now, hint, photos, milestones
   const gfx = svg.querySelector('[data-vinegfx]'); gfx.innerHTML = '';
   const defs = mk('defs', {}, gfx);
   const gShadow = mk('g', { fill: '#dedbd4' }, gfx), gBackLeaves = mk('g', {}, gfx), gStem = mk('g', {}, gfx), gLeaves = mk('g', {}, gfx), gTendril = mk('g', { fill: 'none', stroke: VINE, 'stroke-width': 0.9, 'stroke-linecap': 'round' }, gfx);
-  const LIGHT = [-0.6, -0.8];
   const leaves = [], tendrils = [];
   const W = { main: [5.6, 2.7], tvarit: [3.7, 1.6], left: [3.8, 1.6] };
   for (const key in paths) {
-    const P = paths[key], step = 1.6, N = Math.ceil(P.L / step);
-    const S = [];
-    for (let i = 0; i <= N; i++) {
-      const l = Math.min(P.L, i * step), q = P.el.getPointAtLength(l), q2 = P.el.getPointAtLength(Math.min(P.L, l + 1)), q0 = P.el.getPointAtLength(Math.max(0, l - 1));
-      let tx = q2.x - q0.x, ty = q2.y - q0.y; const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl;
-      const u = l / P.L;
-      const w = (W[key][0] + (W[key][1] - W[key][0]) * Math.pow(u, 0.8)) * (1 + 0.1 * Math.sin(l * 0.11) + 0.06 * Math.sin(l * 0.37 + 1.3)) * (key !== 'main' ? Math.min(1, 0.55 + l / 40) : 1);
-      S.push({ x: q.x, y: q.y, tx, ty, nx: -ty, ny: tx, w, l });
-    }
-    P.S = S;
-    const Lf = S.map(s => [s.x + s.nx * s.w / 2, s.y + s.ny * s.w / 2]), Rt = S.map(s => [s.x - s.nx * s.w / 2, s.y - s.ny * s.w / 2]);
-    const poly = 'M' + Lf.map(p => f(p[0]) + ' ' + f(p[1])).join('L') + 'L' + Rt.reverse().map(p => f(p[0]) + ' ' + f(p[1])).join('L') + 'Z';
-    Rt.reverse();
-    // growth mask
-    const mid = 'vgrow-' + key, m = mk('mask', { id: mid, maskUnits: 'userSpaceOnUse', x: -40, y: -20, width: 820, height: 700 }, defs);
-    const mp = mk('path', { d: P.el.getAttribute('d'), fill: 'none', stroke: '#fff', 'stroke-width': 26, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, m);
-    mp.style.strokeDasharray = P.L + ' ' + (P.L + 40); mp.style.strokeDashoffset = P.L; P.mask = mp;
-    mk('path', { d: poly, transform: 'translate(2.2 3.2)', mask: 'url(#' + mid + ')' }, gShadow);
-    const g = mk('g', { mask: 'url(#' + mid + ')' }, gStem);
-    mk('path', { d: poly, fill: STEM }, g);
-    // bark: fine longitudinal grooves
-    [-0.22, 0.18].forEach((k, j) => {
-      let d = '', on = false;
-      S.forEach((s) => { const vis = Math.sin(s.l * 0.06 + j * 2.1 + k * 7) > -0.35; const p = [s.x + s.nx * s.w * k, s.y + s.ny * s.w * k]; if (vis) { d += (on ? 'L' : 'M') + f(p[0]) + ' ' + f(p[1]); on = true; } else on = false; });
-      mk('path', { d, fill: 'none', stroke: VINE, 'stroke-width': 0.45, opacity: 0.55 }, g);
-    });
-    // hatching on the shadow side
-    let hd = '';
-    S.forEach((s, i) => {
-      if (i % 2) return;
-      const sg = (s.nx * LIGHT[0] + s.ny * LIGHT[1]) < 0 ? 1 : -1;
-      const E = sg > 0 ? Lf[i] : Rt[i], k = s.w * rr(0.28, 0.5);
-      hd += 'M' + f(E[0]) + ' ' + f(E[1]) + 'L' + f(E[0] - s.nx * sg * k + s.tx * k * 0.5) + ' ' + f(E[1] - s.ny * sg * k + s.ty * k * 0.5);
-    });
-    mk('path', { d: hd, fill: 'none', stroke: VINE, 'stroke-width': 0.55, 'stroke-linecap': 'round', opacity: 0.85 }, g);
-    // outline edges
-    mk('path', { d: 'M' + Lf.map(p => f(p[0]) + ' ' + f(p[1])).join('L'), fill: 'none', stroke: VINE, 'stroke-width': 1.25, 'stroke-linejoin': 'round' }, g);
-    mk('path', { d: 'M' + Rt.map(p => f(p[0]) + ' ' + f(p[1])).join('L'), fill: 'none', stroke: VINE, 'stroke-width': 1.25, 'stroke-linejoin': 'round' }, g);
-    // twining secondary stem: over/under
-    const per = key === 'main' ? 26 : 20;
-    let tf = '', on2 = false;
-    S.forEach(s => {
-      const ph = s.l / per * Math.PI * 2, front = Math.cos(ph) > 0;
-      const off = Math.sin(ph) * s.w * 0.62;
-      const p = [s.x + s.nx * off, s.y + s.ny * off];
-      if (front) { tf += (on2 ? 'L' : 'M') + f(p[0]) + ' ' + f(p[1]); on2 = true; } else on2 = false;
-    });
-    mk('path', { d: tf, fill: 'none', stroke: STEM, 'stroke-width': 2.6, 'stroke-linecap': 'round' }, g);
-    mk('path', { d: tf, fill: 'none', stroke: VINE, 'stroke-width': 0.95, 'stroke-linecap': 'round' }, g);
+    const P = paths[key], step = 1.6;
+    const S = stem(mk, P, key, W[key], { defs, gShadow, gStem }, rr, { x: -40, y: -20, width: 820, height: 700 });
     // leaves
     let l = rr(14, 22), side = 1;
     const nodeLs = nodes.filter(nd => nd.p === key).map(nd => nd.len);
@@ -173,6 +125,145 @@ export function mountTimeline({ svg, stage, track, now, hint, photos, milestones
   };
   carRaf = requestAnimationFrame(car);
   return () => { cancelAnimationFrame(raf); cancelAnimationFrame(carRaf); gfx.innerHTML = ''; gN.innerHTML = ''; };
+}
+
+// Phones: the timeline is a list, and the vine a straight stem down its left edge (same artwork as above:
+// stem, leaves, tendrils, curls). It grows as the page scrolls, its tip ~70% down the screen; each milestone's
+// node pops in and its row fades in as the tip reaches it. svg sits over the list's left gutter, in CSS px.
+export function mountVineList({ list, svg }) {
+  const NS = 'http://www.w3.org/2000/svg', X = 16;
+  const mk = (tag, at, p) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); if (p) p.appendChild(e); return e; };
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const items = [...list.children];
+  list.style.borderLeftColor = 'transparent';
+  items.forEach(li => { const d = li.querySelector('[data-dot]'); if (d) d.style.display = 'none'; li.style.transition = still ? 'none' : 'opacity .6s cubic-bezier(.2,.7,.2,1), transform .6s cubic-bezier(.2,.7,.2,1), filter .6s'; });
+  let raf = 0, cur = 0, yEnd = 1, mask = null, leaves = [], tendrils = [], nodes = [], lastW = -1, lastH = -1, latest = -2, lastCur = -1;
+
+  function build() {
+    lastW = list.offsetWidth; lastH = list.offsetHeight;
+    svg.innerHTML = '';
+    let sd = 29; const rnd = () => { sd |= 0; sd = sd + 0x6D2B79F5 | 0; let t = Math.imul(sd ^ sd >>> 15, 1 | sd); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    const rr = (x, y) => x + (y - x) * rnd();
+    const H = lastH; svg.setAttribute('viewBox', `0 0 40 ${H}`); svg.style.height = H + 'px';
+    const ys = items.map(li => li.offsetTop + 9);
+    yEnd = ys[ys.length - 1] + 4;
+    const P = { el: mk('path', { d: `M${X} 0V${yEnd.toFixed(1)}`, fill: 'none', stroke: 'none' }, svg), L: yEnd };
+    const defs = mk('defs', {}, svg);
+    const gShadow = mk('g', { fill: '#dedbd4' }, svg), gBack = mk('g', {}, svg), gStem = mk('g', {}, svg), gLeaves = mk('g', {}, svg), gTendril = mk('g', { fill: 'none', stroke: VINE, 'stroke-width': 0.9, 'stroke-linecap': 'round' }, svg), gN = mk('g', {}, svg);
+    const S = stem(mk, P, 'list', [4.8, 2.8], { defs, gShadow, gStem }, rr, { x: -40, y: -20, width: 120, height: H + 40 });
+    mask = P.mask;
+    // leaves on both sides (small enough to stay clear of the text); curls only on the left, where there is room
+    leaves = []; tendrils = [];
+    let l = rr(14, 22), side = 1;
+    while (l < P.L - 4) {
+      if (ys.some(y => Math.abs(y - l) < 14)) { l += 6; continue; }
+      const s = S[Math.min(Math.round(l / 1.6), S.length - 1)];
+      side = -side;
+      const size = rr(7, 13);
+      leaves.push(leaf(mk, rnd() < 0.28 ? gBack : gLeaves, s, side, size, rnd, 'list', l));
+      if (rnd() < 0.15) leaves.push(leaf(mk, gLeaves, s, -side, size * 0.62, rnd, 'list', l + 3));
+      tendrils.push(tendril(mk, gTendril, s, -side, rnd, 'list', l + rr(4, 9)));
+      { const lc = l + rr(7, 14), sc = S[Math.min(S.length - 1, Math.round(lc / 1.6))]; if (rnd() < 0.55 && !ys.some(y => Math.abs(y - lc) < 16)) tendrils.push(curl(mk, gTendril, sc, 1, rnd, 'list', lc)); }
+      l += rr(26, 38);
+    }
+    nodes = ys.map((y, i) => {
+      const g = mk('g', {}, gN);
+      const ring = mk('circle', { cx: X, cy: y, r: 9.5, fill: 'none', stroke: VINE, 'stroke-width': 1 }, g);
+      const dot = mk('circle', { cx: X, cy: y, r: 4.4, fill: PAPER, stroke: INK, 'stroke-width': 1.8 }, g);
+      g.style.transformOrigin = X + 'px ' + y + 'px'; g.style.transformBox = 'view-box'; g.style.transform = 'scale(0)';
+      g.style.transition = still ? 'none' : 'transform .55s cubic-bezier(.3,1.6,.5,1)'; ring.style.opacity = 0;
+      return { y, g, ring, dot, li: items[i], on: null };
+    });
+    if (still) { leaves.concat(tendrils).forEach(o => { (o.g || o.el).style.transition = 'none'; if (o.el2) o.el2.style.transition = 'none'; }); }
+    lastCur = -1; latest = -2;
+  }
+
+  const frame = () => {
+    raf = requestAnimationFrame(frame);
+    const r = list.getBoundingClientRect();
+    if (r.bottom < -200 || r.top > innerHeight + 200) return;
+    const tip = still ? yEnd : Math.max(0, Math.min(yEnd, innerHeight * 0.7 - r.top));
+    cur += (tip - cur) * (still ? 1 : 0.12); if (Math.abs(tip - cur) < 0.3) cur = tip;
+    if (Math.abs(cur - lastCur) < 0.05) return; lastCur = cur;
+    mask.style.strokeDashoffset = (yEnd - cur).toFixed(1); mask.style.visibility = cur > 0.5 ? 'visible' : 'hidden';
+    for (const lf of leaves) { const on = cur > lf.l + 5; if (on !== lf.on) { lf.on = on; lf.g.style.transform = on ? 'scale(1) rotate(0deg)' : 'scale(0) rotate(' + (lf.side * -40) + 'deg)'; } }
+    for (const td of tendrils) { const on = cur > td.l + 4; if (on !== td.on) { td.on = on; td.el.style.strokeDashoffset = on ? 0 : td.L; if (td.el2) td.el2.style.strokeDashoffset = on ? 0 : td.L2; if (td.hairs) td.hairs.style.opacity = on ? 0.75 : 0; } }
+    let last = -1;
+    nodes.forEach((nd, i) => {
+      const on = cur >= nd.y - 2; if (on) last = i;
+      if (on !== nd.on) {
+        nd.on = on; nd.g.style.transform = on ? 'scale(1)' : 'scale(0)';
+        nd.li.style.opacity = on ? 1 : 0; nd.li.style.transform = on ? 'none' : 'translateY(10px)'; nd.li.style.filter = on ? 'none' : 'blur(3px)';
+      }
+    });
+    if (last !== latest) { latest = last; nodes.forEach((nd, i) => { const c = i === last; nd.dot.setAttribute('fill', c ? VINE : PAPER); nd.dot.setAttribute('stroke', c ? VINE : INK); nd.ring.style.opacity = c ? 1 : 0; }); }
+  };
+
+  build();
+  const ro = new ResizeObserver(() => { if (list.offsetWidth !== lastW || list.offsetHeight !== lastH) build(); });
+  ro.observe(list);
+  raf = requestAnimationFrame(frame);
+  return () => {
+    cancelAnimationFrame(raf); ro.disconnect(); svg.innerHTML = '';
+    list.style.borderLeftColor = '';
+    items.forEach(li => { li.style.opacity = li.style.transform = li.style.filter = li.style.transition = ''; const d = li.querySelector('[data-dot]'); if (d) d.style.display = ''; });
+  };
+}
+
+// The stem of one vine branch along path P (its el and length L): tapered body with bark grooves, hatching on
+// the shadow side, outlines and a twining secondary stem, all under a growth mask (P.mask) drawn as a dash
+// along the path. Returns the sampled points (position, tangent, normal, width) for placing leaves.
+function stem(mk, P, key, w01, { defs, gShadow, gStem }, rr, box) {
+  const f = n => n.toFixed(1), step = 1.6, N = Math.ceil(P.L / step), LIGHT = [-0.6, -0.8];
+  const S = [];
+  for (let i = 0; i <= N; i++) {
+    const l = Math.min(P.L, i * step), q = P.el.getPointAtLength(l), q2 = P.el.getPointAtLength(Math.min(P.L, l + 1)), q0 = P.el.getPointAtLength(Math.max(0, l - 1));
+    let tx = q2.x - q0.x, ty = q2.y - q0.y; const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl;
+    const u = l / P.L;
+    const w = (w01[0] + (w01[1] - w01[0]) * Math.pow(u, 0.8)) * (1 + 0.1 * Math.sin(l * 0.11) + 0.06 * Math.sin(l * 0.37 + 1.3)) * (key !== 'main' ? Math.min(1, 0.55 + l / 40) : 1);
+    S.push({ x: q.x, y: q.y, tx, ty, nx: -ty, ny: tx, w, l });
+  }
+  P.S = S;
+  const Lf = S.map(s => [s.x + s.nx * s.w / 2, s.y + s.ny * s.w / 2]), Rt = S.map(s => [s.x - s.nx * s.w / 2, s.y - s.ny * s.w / 2]);
+  const poly = 'M' + Lf.map(p => f(p[0]) + ' ' + f(p[1])).join('L') + 'L' + Rt.reverse().map(p => f(p[0]) + ' ' + f(p[1])).join('L') + 'Z';
+  Rt.reverse();
+  // growth mask
+  const mid = 'vgrow-' + key, m = mk('mask', { id: mid, maskUnits: 'userSpaceOnUse', ...box }, defs);
+  const mp = mk('path', { d: P.el.getAttribute('d'), fill: 'none', stroke: '#fff', 'stroke-width': 26, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, m);
+  mp.style.strokeDasharray = P.L + ' ' + (P.L + 40); mp.style.strokeDashoffset = P.L; P.mask = mp;
+  mk('path', { d: poly, transform: 'translate(2.2 3.2)', mask: 'url(#' + mid + ')' }, gShadow);
+  const g = mk('g', { mask: 'url(#' + mid + ')' }, gStem);
+  mk('path', { d: poly, fill: STEM }, g);
+  // bark: fine longitudinal grooves
+  [-0.22, 0.18].forEach((k, j) => {
+    let d = '', on = false;
+    S.forEach((s) => { const vis = Math.sin(s.l * 0.06 + j * 2.1 + k * 7) > -0.35; const p = [s.x + s.nx * s.w * k, s.y + s.ny * s.w * k]; if (vis) { d += (on ? 'L' : 'M') + f(p[0]) + ' ' + f(p[1]); on = true; } else on = false; });
+    mk('path', { d, fill: 'none', stroke: VINE, 'stroke-width': 0.45, opacity: 0.55 }, g);
+  });
+  // hatching on the shadow side
+  let hd = '';
+  S.forEach((s, i) => {
+    if (i % 2) return;
+    const sg = (s.nx * LIGHT[0] + s.ny * LIGHT[1]) < 0 ? 1 : -1;
+    const E = sg > 0 ? Lf[i] : Rt[i], k = s.w * rr(0.28, 0.5);
+    hd += 'M' + f(E[0]) + ' ' + f(E[1]) + 'L' + f(E[0] - s.nx * sg * k + s.tx * k * 0.5) + ' ' + f(E[1] - s.ny * sg * k + s.ty * k * 0.5);
+  });
+  mk('path', { d: hd, fill: 'none', stroke: VINE, 'stroke-width': 0.55, 'stroke-linecap': 'round', opacity: 0.85 }, g);
+  // outline edges
+  mk('path', { d: 'M' + Lf.map(p => f(p[0]) + ' ' + f(p[1])).join('L'), fill: 'none', stroke: VINE, 'stroke-width': 1.25, 'stroke-linejoin': 'round' }, g);
+  mk('path', { d: 'M' + Rt.map(p => f(p[0]) + ' ' + f(p[1])).join('L'), fill: 'none', stroke: VINE, 'stroke-width': 1.25, 'stroke-linejoin': 'round' }, g);
+  // twining secondary stem: over/under
+  const per = key === 'main' ? 26 : 20;
+  let tf = '', on2 = false;
+  S.forEach(s => {
+    const ph = s.l / per * Math.PI * 2, front = Math.cos(ph) > 0;
+    const off = Math.sin(ph) * s.w * 0.62;
+    const p = [s.x + s.nx * off, s.y + s.ny * off];
+    if (front) { tf += (on2 ? 'L' : 'M') + f(p[0]) + ' ' + f(p[1]); on2 = true; } else on2 = false;
+  });
+  mk('path', { d: tf, fill: 'none', stroke: STEM, 'stroke-width': 2.6, 'stroke-linecap': 'round' }, g);
+  mk('path', { d: tf, fill: 'none', stroke: VINE, 'stroke-width': 0.95, 'stroke-linecap': 'round' }, g);
+  return S;
 }
 
 function leaf(mk, parent, s, side, size, rnd, key, l) {

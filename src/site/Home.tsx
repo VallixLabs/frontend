@@ -77,6 +77,14 @@ export default function Home() {
   const [prog, setProg] = useState(0);
   const cycle = useRef({ ind: 0, prog: 0, paused: false, visible: false });
   const [exRefs] = useState(() => [0, 1, 2, 3].map(() => createRef<HTMLDivElement>()));
+  // Phones show only the current industry (its heading, then its examples below); the next one replaces it
+  // when its time is up, or on a tap.
+  const [solo, setSolo] = useState(() => matchMedia('(max-width: 760px)').matches);
+  useEffect(() => {
+    const mq = matchMedia('(max-width: 760px)'), on = () => setSolo(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
 
   const select = (i: number) => {
     cycle.current.ind = i; cycle.current.prog = 0;
@@ -351,23 +359,27 @@ export default function Home() {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
             <h2 style={{ margin: 0, fontSize: 'clamp(32px, 3.6vw, 50px)', lineHeight: 1.05, fontWeight: 500, letterSpacing: '-0.03em' }}>For business</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 'clamp(28px, 5vw, 88px)', marginTop: 'clamp(56px, 7vw, 88px)', alignItems: 'center' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: solo ? 10 : 'clamp(28px, 5vw, 88px)', marginTop: solo ? 36 : 'clamp(56px, 7vw, 88px)', alignItems: solo ? 'stretch' : 'center' }}>
             <div style={{ display: 'flex', flexDirection: 'column' }}
               onMouseEnter={() => { cycle.current.paused = true; }} onMouseLeave={() => { cycle.current.paused = false; }}>
               {INDUSTRIES.map((d, i) => {
                 const on = i === ind;
+                if (solo && !on) return null;
                 return (
-                  <button key={d.name} type="button" onClick={() => select(i)} style={{ all: 'unset', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '14px 0', borderBottom: '1px solid #d6d4ce' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 12, fontFamily: "'Source Sans 3', system-ui, sans-serif", fontSize: 'clamp(22px, 2.2vw, 28px)', fontWeight: 500, letterSpacing: '-0.015em', color: on ? green : '#9a968f', transition: 'color .3s' }}>
+                  <button key={solo ? 'solo' + i : d.name} type="button" onClick={() => select(solo ? (i + 1) % INDUSTRIES.length : i)} className={solo ? 'vx-biz-in' : undefined}
+                    aria-label={solo ? `${d.name}. Show the next industry` : undefined}
+                    style={{ all: 'unset', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '14px 0', borderBottom: '1px solid #d6d4ce' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 12, fontFamily: "'Source Sans 3', system-ui, sans-serif", fontSize: solo ? 30 : 'clamp(22px, 2.2vw, 28px)', fontWeight: 500, letterSpacing: '-0.015em', color: on ? green : '#9a968f', transition: 'color .3s' }}>
                       <span>{d.name}</span>
                     </span>
+                    {solo && <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 11, letterSpacing: '.14em', color: '#8f8b84', fontVariantNumeric: 'tabular-nums' }}>{String(i + 1).padStart(2, '0')} / {String(INDUSTRIES.length).padStart(2, '0')}</span>}
                     <span style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 2, background: green, transformOrigin: '0 50%', transform: `scaleX(${on ? prog.toFixed(4) : 0})` }} />
                   </button>
                 );
               })}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <div key={'ind' + ind} style={{ display: 'flex', flexDirection: 'column' }}>
+              <div key={'ind' + ind} style={{ display: 'flex', flexDirection: 'column', minHeight: solo ? 312 : undefined }}>{/* phones: room for the longest set, so the page below does not jump */}
                 {INDUSTRIES[ind].ex.map((t, k) => (
                   <div key={k} ref={exRefs[k]} style={{ padding: '12px 0' }}>
                     <span style={{ fontFamily: "'Source Sans 3', system-ui, sans-serif", fontSize: 19, lineHeight: 1.4, fontWeight: 500, letterSpacing: '-0.01em', color: '#141414', textWrap: 'pretty' }}>{t}</span>
