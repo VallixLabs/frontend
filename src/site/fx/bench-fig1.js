@@ -133,7 +133,7 @@ function build(){
   // hover targets
   order.forEach(m=>{const hz=S('circle',{cx:m.x,cy:m.y,r:Math.max(m.r,10)+4,fill:'transparent',style:'cursor:pointer'},svg);
     hz.addEventListener('mousemove',()=>{
-      tip.innerHTML=`<b>${m.n}</b><br>accuracy ${m.acc.toFixed(3)}<br>training ${m.hl}${m.h!=null&&m.h>=1?' ≈ '+Math.round(m.h).toLocaleString()+' GPU-hours':''}<br>${m.rps?m.rps.toLocaleString()+' rows/s'+(m.ours?' · tvarit':''):'inference speed not measured'}<br><span style="color:#aaa69e">${m.src}</span>`;
+      tip.innerHTML=`<b>${m.n}</b><br>accuracy ${m.acc.toFixed(3)}<br>training ${m.hl}${m.h!=null&&m.h>=1?' ≈ '+Math.round(m.h).toLocaleString()+' GPU-hours':''}<br>${m.rps?m.rps.toLocaleString()+' rows/s'+(m.ours?' · tvarita':''):'inference speed not measured'}<br><span style="color:#aaa69e">${m.src}</span>`;
       const ctm=svg.getScreenCTM(),hr=host.getBoundingClientRect(),pt=svg.createSVGPoint();pt.x=m.x;pt.y=m.y-m.r;const q=pt.matrixTransform(ctm);
       tip.style.left=(q.x-hr.left)+'px';tip.style.top=(q.y-hr.top)+'px';tip.style.opacity=1;});
     hz.addEventListener('mouseleave',()=>tip.style.opacity=0);});

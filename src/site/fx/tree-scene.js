@@ -478,7 +478,7 @@ export function mountTree({ section, canvas, overlay }) {
   }
   tree.updateMatrixWorld(true);
 
-  // ---- x-ray: the tree turns to glass and its inner veins carry the flow (Tvarit stop) ----
+  // ---- x-ray: the tree turns to glass and its inner veins carry the flow (Tvarita stop) ----
   const ghostMats = []; tree.traverse(m => { if (m.isMesh && !ghostMats.includes(m.material)) ghostMats.push(m.material); });
   ghostMats.forEach(m => { m.transparent = true; m.userData.a0 = m.alphaTest || 0; m.needsUpdate = true; });
   const PAPERC = new THREE.Color(0xf6f5f2), olMats = []; OL.children.forEach(o => { if (!olMats.includes(o.material)) { o.material.userData.c0 = o.material.uniforms.uCol.value.clone(); olMats.push(o.material); } });
@@ -555,7 +555,8 @@ export function mountTree({ section, canvas, overlay }) {
   const trR = y => { const t = (y + 0.35) / 4.25, b = 0.5 + 0.42 * Math.exp(-Math.max(y, 0) / 3.9 * 5.5) - 0.08 * t + 0.1 * Math.exp(-Math.max(y, 0) / 0.5), k = (t * 3.9 - 2.9); return k > 0 ? b * Math.max(0.02, 1 - 0.75 * k * k) : b; };
   const SKA = ang(node.q) + 0.25, SKY = 3.1, SKR = trR(SKY);
   const skDir = V(Math.sin(SKA) * 0.82 + Math.cos(SKA) * 0.57, 0, Math.cos(SKA) * 0.82 - Math.sin(SKA) * 0.57).normalize();
-  const skP = V(0, lift + SKY, CZ).addScaledVector(skDir, SKR * 1.02);
+  const SKPY = 3.35; // Skandha pointer: on the trunk's centre line, at the narrow waist below the branch split
+  const skP = V(0, lift + SKPY, CZ);
   const skRings = [0, 1, 2].map(k => {
     const m = new THREE.Mesh(new THREE.TorusGeometry(1, k ? 0.006 : 0.011, 8, 160), new THREE.MeshBasicMaterial({ color: 0x2e5c36, transparent: true, opacity: 0, depthWrite: false }));
     m.rotation.x = Math.PI / 2; m.renderOrder = 5; m.visible = false; scene.add(m); return m;
@@ -572,9 +573,7 @@ export function mountTree({ section, canvas, overlay }) {
   const MK = [
     { s: [4], p: vine.m, label: 'Valli', dx: 40, dy: -34 },
     { s: [4], p: skP, label: 'Skandha', dx: 40, dy: -34 },
-    { s: [4], p: roots[0].q, label: 'PriorFM', dx: 0, dy: 46, rank: true },
-    { s: [4], p: roots[1].q, label: 'Grammar', dx: 0, dy: 46, rank: true },
-    { s: [4], p: roots[2].q, label: 'PriorSignal', dx: 0, dy: 46, rank: true },
+    { s: [4], p: roots[0].q, label: 'Mulä', dx: 0, dy: 46, rank: true },
   ];
   const tvP = V(0, lift + 3.0, CZ);
   // leader lines: tree point -> explanation box (roots -> their row in the box)
@@ -738,7 +737,7 @@ export function mountTree({ section, canvas, overlay }) {
   const ro = new ResizeObserver(resize); ro.observe(canvas); resize();
   raf = requestAnimationFrame(frame);
 
-  // ---- one gesture = one stop. Tvarit holds until the x-ray transition has finished ----
+  // ---- one gesture = one stop. Tvarita holds until the x-ray transition has finished ----
   let snapRaf = 0, busyUntil = 0, cur = 0, arrivedT4 = 0, lastWheel = 0, lastMag = 0, stepAt = 0;
   const geo = () => { const top = section.getBoundingClientRect().top + scrollY, span = Math.max(1, section.offsetHeight - innerHeight); return { top, span }; };
   const yOf = k => { const g = geo(); return g.top + g.span * HOLD * k / 4; };

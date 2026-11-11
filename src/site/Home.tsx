@@ -312,7 +312,7 @@ export default function Home() {
           <div data-stop="3" className="vx-stop" style={stopStyle}>
             <div data-box="3" className="vx-stop-box vx-stop-box-list" style={{ ...boxStyle, padding: '28px 28px 10px' }}>
               <div style={eyebrow}><span>The roots</span></div>
-              <h3 style={h3Style}>Mool</h3>
+              <h3 style={h3Style}>Mulä</h3>
               <div style={{ marginTop: 10, fontSize: 17, fontWeight: 500, letterSpacing: '-0.01em' }}>Where every task specific model begins.</div>
               <div style={{ display: 'flex', flexDirection: 'column', marginTop: 18 }}>
                 {[
@@ -332,8 +332,8 @@ export default function Home() {
           <div data-stop="4" className="vx-stop" style={stopStyle}>
             <div data-box="4" className="vx-stop-box" style={boxStyle}>
               <div style={eyebrow}><span>The ecosystem</span></div>
-              <h3 style={h3Style}>Tvarit</h3>
-              <p style={bodyP}>Tvarit serves any tabular foundation model, TabPFN, TabICL, Kumo and Valli, at up to 20× the throughput of their reference implementations.</p>
+              <h3 style={h3Style}>Tvarita</h3>
+              <p style={bodyP}>Tvarita serves any tabular foundation model, TabPFN, TabICL, Kumo and Valli, at up to 20× the throughput of their reference implementations.</p>
               <a href="#access" className="vx-btn-dark" style={{ display: 'inline-flex', alignItems: 'center', gap: 18, marginTop: 22, padding: '9px 11px 9px 16px', borderRadius: 999, fontSize: 14, fontWeight: 500 }}>
                 <span>Get access</span>
                 <Arrow />
@@ -347,8 +347,8 @@ export default function Home() {
             <div style={{ position: 'relative', display: 'flex' }}>
               <RailStep k={1} label="Valli" />
               <RailStep k={2} label="Skandha" />
-              <RailStep k={3} label="Mool" />
-              <RailStep k={4} label="Tvarit" />
+              <RailStep k={3} label="Mulä" />
+              <RailStep k={4} label="Tvarita" />
             </div>
           </div>
         </div>

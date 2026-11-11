@@ -3,7 +3,7 @@
   "pages": {
     "/": {
       "title": "Vallix Labs | Tabular foundation models built for your data",
-      "description": "Vallix Labs builds task-specific, scale-adaptive tabular foundation models. Valli builds a model for your problem from your table; Tvarit serves tabular foundation models with fast inference."
+      "description": "Vallix Labs builds task-specific, scale-adaptive tabular foundation models. Valli builds a model for your problem from your table; Tvarita serves tabular foundation models with fast inference."
     },
     "/research": {
       "title": "Research & Benchmarks | Vallix Labs",

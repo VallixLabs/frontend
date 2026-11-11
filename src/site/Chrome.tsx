@@ -63,7 +63,7 @@ export function SiteHeader({ page, logoRef }: { page: Page; logoRef?: Ref<HTMLAn
         )}
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 'clamp(8px, 2vw, 22px)' }}>
           <Link to="/playground" className="vx-nav-extra vx-link" style={{ fontSize: 14, fontWeight: 500, ...(page === 'playground' ? current : {}) }}>Playground</Link>
-          <ToSection hash="access" home={home} className="vx-btn-soft vx-header-cta" style={{ display: 'flex', alignItems: 'center', gap: 18, padding: '7px 9px 7px 15px', borderRadius: 999, fontSize: 14, fontWeight: 500 }}>
+          <ToSection hash="access" home={home} className="vx-btn-dark vx-header-cta" style={{ display: 'flex', alignItems: 'center', gap: 18, padding: '7px 9px 7px 15px', borderRadius: 999, fontSize: 14, fontWeight: 500 }}>
             <span>Get access</span>
             <Arrow />
           </ToSection>
@@ -109,7 +109,7 @@ export function SiteFooter({ page, footerRef }: { page: Page; footerRef?: Ref<HT
         </div>
         <div style={footCol}>
           <div style={footHead}>Products</div>
-          <ToSection hash="ecosystem" home={home}>Valli</ToSection><ToSection hash="ecosystem" home={home}>Skandha</ToSection><ToSection hash="ecosystem" home={home}>Tvarit</ToSection>
+          <ToSection hash="ecosystem" home={home}>Valli</ToSection><ToSection hash="ecosystem" home={home}>Skandha</ToSection><ToSection hash="ecosystem" home={home}>Tvarita</ToSection>
         </div>
         <div style={footCol}>
           <div style={footHead}>Company</div>

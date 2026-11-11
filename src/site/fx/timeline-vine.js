@@ -108,7 +108,7 @@ export function mountTimeline({ svg, stage, track, now, hint, photos, milestones
     if (!cards.length) return;
     const tgt = latestI, prev = carPos;
     carPos += (tgt - carPos) * 0.09; if (Math.abs(tgt - carPos) < 1e-3) carPos = tgt;
-    const H = photos.clientHeight, cw = photos.clientWidth - 64, ch = cw * 1.12;
+    const H = photos.clientHeight, cw = photos.clientWidth - 64, ch = cw * 1.16;
     if (carW === cw && Math.abs(prev - carPos) < 1e-5 && carDone) return;
     carW = cw; carDone = Math.abs(prev - carPos) < 1e-5;
     const Rr = 0.86 * H, step = 0.62, x0 = 8, yc = H / 2;
